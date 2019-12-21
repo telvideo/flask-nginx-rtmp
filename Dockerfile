@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM alpine:3.9
 MAINTAINER David Lockwood
 
 ARG NGINX_VERSION=1.17.3
