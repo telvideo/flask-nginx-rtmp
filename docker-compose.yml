@@ -15,6 +15,7 @@ services:
 #      - OSP_REQUIREVERIFICATION=True
 #      - TZ="ETC/UTC"
 #   volumes:
+#     - "./conf/config.py:/opt/osp/setup/config.py.dist"  # copy your conf/config.py.dist to conf/config.py edit to your needs..
 #     - "./data/www:/var/www"
 #     - "./data/osp/db/database.db:/opt/osp/db/database.db"
 #     - "./data/nginx/conf:/usr/local/nginx/conf"
