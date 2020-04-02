@@ -41,3 +41,14 @@ class globalWebhook(db.Model):
 
     def __repr__(self):
         return '<id %r>' % self.id
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "endpointURL": self.endpointURL,
+            "requestHeader": self.requestHeader,
+            "requestPayload": self.requestPayload,
+            "requestType": self.requestType,
+            "requestTrigger": self.requestTrigger
+        }
