@@ -51,7 +51,11 @@ fi
 if cd /tmp
 then
         sudo wget "http://nginx.org/download/nginx-1.17.3.tar.gz"
-        sudo wget "https://github.com/arut/nginx-rtmp-module/archive/v1.2.1.zip"
+        sudo git clone "https://github.com/sergey-dryabzhinsky/nginx-rtmp-module"
+        #Checkout the current known good commit
+        cd nginx-rtmp-module
+        git checkout 3bf75232676da7eeff85dcd0fc831533a5eafe6b
+        cd ..
         sudo wget "http://www.zlib.net/zlib-1.2.11.tar.gz"
         sudo wget "https://bitbucket.org/nginx-goodies/nginx-sticky-module-ng/get/master.tar.gz"
         sudo tar xvfz nginx-1.17.3.tar.gz
