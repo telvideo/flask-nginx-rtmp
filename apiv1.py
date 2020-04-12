@@ -91,6 +91,15 @@ webhookPost.add_argument('requestType', type=int, required=True)
 webhookPost.add_argument('requestTrigger', type=int, required=True)
 
 
+webhookPut = reqparse.RequestParser()
+webhookPut.add_argument('name', type=str)
+webhookPut.add_argument('endpointURL', type=str)
+webhookPut.add_argument('requestHeader', type=str)
+webhookPut.add_argument('requestPayload', type=str)
+webhookPut.add_argument('requestType', type=int)
+webhookPut.add_argument('requestTrigger', type=int)
+
+
 @api.route('/server')
 class api_1_Server(Resource):
     # Server - Get Basic Server Information
@@ -549,7 +558,7 @@ class api_1_ListGlobalWebhook(Resource):
     @api.doc(responses={200: 'Success', 400: 'Request Error'})
     @api.doc(params={'requestType': '0: POST, 1: GET, 2: PUT, 3: DELETE',
                      'requestTrigger': '0: Stream Start, 1: Stream End, 2: Stream Viewer Join, 4: Stream Name Change, 5: Chat Message, 6: New Video, 7: Video Comment, 9: Video Name Change, 10: Channel Subscription, 20: New User'})
-    @api.expect(webhookPost)
+    @api.expect(webhookPut)
     def put(self, webhookID):
         """
             Update a global webhook
