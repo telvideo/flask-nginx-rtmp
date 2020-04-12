@@ -565,3 +565,20 @@ class api_1_ListGlobalWebhook(Resource):
                     return {'results': {'message': 'Webhook Updated'}}, 200
 
         return {'results': {'message': 'Request Error'}}, 400
+
+    @api.doc(security='apikey')
+    @api.doc(responses={200: 'Success', 400: 'Request Error'})
+    def delete(self, webhookID):
+        """
+            Delete a global webhook
+        """
+        if 'X-API-KEY' in request.headers:
+            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).first()
+            if requestAPIKey.isValid():
+                existingWebhook = webhook.globalWebhook.query.filter_by(id=webhookID).first()
+                if existingWebhook is not None:
+                    db.session.delete(existingWebhook)
+                    db.session.commit()
+                    return {'results': {'message': 'Webhook deleted'}}, 200
+
+        return {'results': {'message': 'Request Error'}}, 400
