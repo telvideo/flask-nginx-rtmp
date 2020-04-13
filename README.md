@@ -137,6 +137,41 @@ An external Redis server is required to handling asynchronous communications bet
     - Default: ```6379```
 - REDIS_PASSWORD: Sets the Redis Instance Password, if needed
 
+**Environment Variables to skip the initial setup**
+
+*To skip initial setup, all variables are required unless they have a default set!*
+- OSP_ADMIN_USER: Sets the administrator username
+- OSP_ADMIN_EMAIL: Sets the administrator emailaddress
+- OSP_ADMIN_PASSWORD: Sets the administrator password
+- OSP_SERVER_NAME: Sets the server name
+- OSP_SERVER_PROTOCOL: Sets the server protocol (https or http)
+    - Default: ```http```
+- OSP_SERVER_ADDRESS: The site hostname, without the protocol e.g. osp.example.com
+- OSP_SMTP_SEND_AS: The "send as" e-mailaddress to send outgoing mails from
+    - Default: ```""```
+- OSP_SMTP_SERVER: The SMTP server to use, without its port
+- OSP_SMTP_PORT: The port of the SMTP server
+    - Default: ```25```
+- OSP_SMTP_USER: The SMTP user
+    - Default: ```""```
+- OSP_SMTP_PASSWORD: The SMTP password
+    - Default: ```""```
+- OSP_SMTP_TLS: Set to 1 if the SMTP uses TLS 
+    - Select either TLS OR SSL, or omit both
+- OSP_SMTP_SSL: Set to 1 if the SMTP uses SSL
+    - Select either TLS OR SSL, or omit both
+- OSP_ALLOW_RECORDING: Set to any value to allow recording, omit to disallow
+    - Default: ```Disallow```
+- OSP_ALLOW_UPLOAD: Set to any value to allow uploading, omit to disallow
+    - Default: ```Disallow```
+- OSP_ADAPTIVE_STREAMING: Set to any value to enable adaptive streaming, omit to disable
+    - Default: ```Disable```
+- OSP_ALLOW_COMMENT: Set to any value to allow commenting, omit to disallow
+    - Default: ```Disallow```
+- OSP_DISPLAY_EMPTY: Set to any value to show empty channels , omit to hide
+    - Default: ```Hide```
+
+
 **Recommended Volumes/Mount Points**
 -  /var/www - Storage of Images, Streams, and Stored Video Files
 -  /opt/osp/db/ - SQLite DB Location (if used)
