@@ -17,6 +17,7 @@ from classes import upvotes
 from classes import apikey
 from classes import views
 from classes import settings
+from classes.Sec import Role
 #from classes import hubConnection
 from classes import webhook
 from classes.shared import db
@@ -504,7 +505,8 @@ class api_1_ListGlobalWebhooks(Resource):
 
         """
         if 'X-API-KEY' in request.headers:
-            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).first()
+            admin_users = Role.query.filter_by(name="Admin").first().users
+            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).filter(apikey.apikey.userID.in_(u.id for u in admin_users)).first()
             if requestAPIKey is not None:
                 if requestAPIKey.isValid():
                     globalWebhookList = webhook.globalWebhook.query.all()
@@ -521,7 +523,8 @@ class api_1_ListGlobalWebhooks(Resource):
             Create a global webhook
         """
         if 'X-API-KEY' in request.headers:
-            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).first()
+            admin_users = Role.query.filter_by(name="Admin").first().users
+            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).filter(apikey.apikey.userID.in_(u.id for u in admin_users)).first()
             if requestAPIKey is not None:
                 if requestAPIKey.isValid():
                     args = webhookPost.parse_args()
@@ -546,7 +549,8 @@ class api_1_ListGlobalWebhook(Resource):
             List global webhook by ID
         """
         if 'X-API-KEY' in request.headers:
-            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).first()
+            admin_users = Role.query.filter_by(name="Admin").first().users
+            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).filter(apikey.apikey.userID.in_(u.id for u in admin_users)).first()
             if requestAPIKey is not None:
                 if requestAPIKey.isValid():
                     webhookById = webhook.globalWebhook.query.filter_by(id=webhookID).first()
@@ -564,7 +568,8 @@ class api_1_ListGlobalWebhook(Resource):
             Update a global webhook
         """
         if 'X-API-KEY' in request.headers:
-            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).first()
+            admin_users = Role.query.filter_by(name="Admin").first().users
+            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).filter(apikey.apikey.userID.in_(u.id for u in admin_users)).first()
             if requestAPIKey.isValid():
                 existingWebhook = webhook.globalWebhook.query.filter_by(id=webhookID).first()
                 if existingWebhook is not None:
@@ -582,7 +587,112 @@ class api_1_ListGlobalWebhook(Resource):
             Delete a global webhook
         """
         if 'X-API-KEY' in request.headers:
-            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).first()
+            admin_users = Role.query.filter_by(name="Admin").first().users
+            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).filter(apikey.apikey.userID.in_(u.id for u in admin_users)).first()
+            if requestAPIKey.isValid():
+                existingWebhook = webhook.globalWebhook.query.filter_by(id=webhookID).first()
+                if existingWebhook is not None:
+                    db.session.delete(existingWebhook)
+                    db.session.commit()
+                    return {'results': {'message': 'Webhook deleted'}}, 200
+
+        return {'results': {'message': 'Request Error'}}, 400
+
+
+@api.route('/global_webhooks/')
+class api_1_ListGlobalWebhooks(Resource):
+    @api.doc(security='apikey')
+    @api.doc(responses={200: 'Success', 400: 'Request Error'})
+    def get(self):
+        """
+            List all global webhooks
+
+        """
+        if 'X-API-KEY' in request.headers:
+            admin_users = Role.query.filter_by(name="Admin").first().users
+            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).filter(apikey.apikey.userID.in_(u.id for u in admin_users)).first()
+            if requestAPIKey is not None:
+                if requestAPIKey.isValid():
+                    globalWebhookList = webhook.globalWebhook.query.all()
+                    return {'results': [ob.serialize() for ob in globalWebhookList]}
+        return {'results': {'message': 'Request Error'}}, 400
+
+    @api.doc(security='apikey')
+    @api.doc(responses={200: 'Success', 400: 'Request Error'})
+    @api.doc(params={'requestType': '0: POST, 1: GET, 2: PUT, 3: DELETE',
+                     'requestTrigger': '0: Stream Start, 1: Stream End, 2: Stream Viewer Join, 4: Stream Name Change, 5: Chat Message, 6: New Video, 7: Video Comment, 9: Video Name Change, 10: Channel Subscription, 20: New User'})
+    @api.expect(webhookPost)
+    def post(self):
+        """
+            Create a global webhook
+        """
+        if 'X-API-KEY' in request.headers:
+            admin_users = Role.query.filter_by(name="Admin").first().users
+            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).filter(apikey.apikey.userID.in_(u.id for u in admin_users)).first()
+            if requestAPIKey is not None:
+                if requestAPIKey.isValid():
+                    args = webhookPost.parse_args()
+                    newWebhook = webhook.globalWebhook(name=args["name"],
+                                               endpointURL=args["endpointURL"],
+                                               requestPayload=args["requestPayload"],
+                                               requestType=args["requestType"],
+                                               requestTrigger=args["requestTrigger"],
+                                               requestHeader=args["requestHeader"])
+                    db.session.add(newWebhook)
+                    db.session.commit()
+                    return {'results': {'message': 'Webhook Created'}}, 200
+        return {'results': {'message': 'Request Error'}}, 400
+
+@api.route('/global_webhooks/<int:webhookID>')
+@api.doc(params={'webhookID': 'ID Number for global Webhook'})
+class api_1_ListGlobalWebhook(Resource):
+    @api.doc(security='apikey')
+    @api.doc(responses={200: 'Success', 400: 'Request Error'})
+    def get(self, webhookID):
+        """
+            List global webhook by ID
+        """
+        if 'X-API-KEY' in request.headers:
+            admin_users = Role.query.filter_by(name="Admin").first().users
+            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).filter(apikey.apikey.userID.in_(u.id for u in admin_users)).first()
+            if requestAPIKey is not None:
+                if requestAPIKey.isValid():
+                    webhookById = webhook.globalWebhook.query.filter_by(id=webhookID).first()
+                    if webhookById is not None:
+                        return {'results': webhookById.serialize()}
+        return {'results': {'message': 'Request Error'}}, 400
+
+    @api.doc(security='apikey')
+    @api.doc(responses={200: 'Success', 400: 'Request Error'})
+    @api.doc(params={'requestType': '0: POST, 1: GET, 2: PUT, 3: DELETE',
+                     'requestTrigger': '0: Stream Start, 1: Stream End, 2: Stream Viewer Join, 4: Stream Name Change, 5: Chat Message, 6: New Video, 7: Video Comment, 9: Video Name Change, 10: Channel Subscription, 20: New User'})
+    @api.expect(webhookPut)
+    def put(self, webhookID):
+        """
+            Update a global webhook
+        """
+        if 'X-API-KEY' in request.headers:
+            admin_users = Role.query.filter_by(name="Admin").first().users
+            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).filter(apikey.apikey.userID.in_(u.id for u in admin_users)).first()
+            if requestAPIKey.isValid():
+                existingWebhook = webhook.globalWebhook.query.filter_by(id=webhookID).first()
+                if existingWebhook is not None:
+                    args = webhookPost.parse_args()
+                    existingWebhook.update(args)
+                    db.session.commit()
+                    return {'results': {'message': 'Webhook Updated'}}, 200
+
+        return {'results': {'message': 'Request Error'}}, 400
+
+    @api.doc(security='apikey')
+    @api.doc(responses={200: 'Success', 400: 'Request Error'})
+    def delete(self, webhookID):
+        """
+            Delete a global webhook
+        """
+        if 'X-API-KEY' in request.headers:
+            admin_users = Role.query.filter_by(name="Admin").first().users
+            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).filter(apikey.apikey.userID.in_(u.id for u in admin_users)).first()
             if requestAPIKey.isValid():
                 existingWebhook = webhook.globalWebhook.query.filter_by(id=webhookID).first()
                 if existingWebhook is not None:
