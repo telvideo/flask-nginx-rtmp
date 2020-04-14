@@ -71,3 +71,31 @@ class settings(db.Model):
             'version': self.version,
             'protectionEnabled': self.protectionEnabled
         }
+
+class edgeStreamer(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    address = db.Column(db.String(1024))
+    port = db.Column(db.Integer)
+    active = db.Column(db.Boolean)
+    status = db.Column(db.Integer)
+    loadPct = db.Column(db.Integer)
+
+    def __init__(self, address, port, loadPct):
+        self.address = address
+        self.active = False
+        self.status = 0
+        self.port = port
+        self.loadPct = loadPct
+
+    def __repr__(self):
+        return '<id %r>' % self.id
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'address': self.address,
+            'customPort': self.customPort,
+            'active': self.active,
+            'status': self.status,
+            'loadPct': self.loadPct
+        }
