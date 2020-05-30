@@ -4,7 +4,7 @@ After=syslog.target network.target remote-fs.target nss-lookup.target
 
 [Service]
 Type=forking
-PIDFile=/run/nginx.pid
+PIDFile=/run/nginx-osp.pid
 ExecStart=/usr/local/nginx/sbin/nginx
 ExecReload=/bin/kill -s HUP $MAINPID
 ExecStop=/usr/local/nginx/sbin/nginx -s stop
