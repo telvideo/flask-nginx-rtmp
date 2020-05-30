@@ -16,7 +16,7 @@ then
   http_user='http'
 else
   arch=false
-  web_root='/var/www'
+  web_root='/var/www/osp'
   http_user='www-data'
 fi
 
