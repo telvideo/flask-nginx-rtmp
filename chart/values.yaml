@@ -1,0 +1,53 @@
+# Default values for osp.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+replicaCount: 1
+
+app:
+  name: osp
+  fullname: osp
+
+image:
+  repository: deamos/openstreamingplatform
+  tag: latest
+  pullPolicy: Always
+
+containerPorts:
+  - containerPort: 80
+    name: osp
+
+service:
+  type: LoadBalancer
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 80
+  # loadBalancerIP:
+
+horizontalScaling:
+  minReplicas: 1
+  maxReplicas: 2
+
+# volumeMounts:
+#   - name: storage
+#     mountPath: /var/www
+
+# volumeMounts:
+#   - name: nginx
+#     mountPath: /usr/local/nginx/conf
+
+# volumes:
+#   - name: nginx
+#     configMap:
+#       name: nginx-conf
+
+############Application Configs######
+
+appsettings:
+  redis:
+    host: "redis.redis.svc.cluster.local"
+    port: "6379"
+
+  db:
+    url: "mysql.mysql.svc.cluster.local"
