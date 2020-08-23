@@ -197,6 +197,10 @@ def unsubscribe_page():
 def static_from_root():
     return send_from_directory(current_app.static_folder, request.path[1:])
 
+@root_bp.route('/sw.js')
+def static_from_root_sw():
+    return send_from_directory(current_app.static_folder, request.path[1:])
+    
 @root_bp.route('/auth', methods=["POST","GET"])
 def auth_check():
     sysSettings = settings.settings.query.with_entities(settings.settings.protectionEnabled).first()

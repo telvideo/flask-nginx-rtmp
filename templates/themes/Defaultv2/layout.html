@@ -581,7 +581,28 @@
 
   </script>
 
+  <script>
+  (async () => {
 
+    if ("serviceWorker" in navigator) {
+
+        // register the service worker
+        const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });   
+
+        // when service worker is updated
+        registration.onupdatefound = () => {
+
+            registration.installing.onstatechange = function () {
+                console.log(`Service worker... ${this.state}`);
+            };
+        };
+
+    }
+
+  })()
+  .catch(e => console.log(`${e}`)); 
+  </script>
+  
 </body>
 
 
