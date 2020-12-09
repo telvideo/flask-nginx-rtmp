@@ -106,6 +106,9 @@ def newLog(logType, message):
     return True
 
 def rebuildOSPEdgeConf():
+    sysSettings = settings.settings.query.first()
+    if sysSettings is None:
+        return False
     f = open("/opt/osp/conf/osp-edge.conf", "w")
     ospEdgeQuery = settings.edgeStreamer.query.filter_by(active=True).all()
     f.write('split_clients "${remote_addr}AAA" $ospedge_node {\n')
@@ -115,8 +118,7 @@ def rebuildOSPEdgeConf():
                 f.write(str(edge.loadPct) + "% " + edge.address + ";\n")
             else:
                 f.write(str(edge.loadPct) + "% " + edge.address + ":" + str(edge.port) +";\n" )
-    else:
-        f.write("100% 127.0.0.1;\n")
+    f.write("* " + sysSettings.siteAddress + ";\n")
     f.write("}")
     f.close()
     return True
