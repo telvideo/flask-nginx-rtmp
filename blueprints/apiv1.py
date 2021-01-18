@@ -89,7 +89,7 @@ channelParserPut.add_argument('channelName', type=str)
 channelParserPut.add_argument('description', type=str)
 channelParserPut.add_argument('topicID', type=int)
 # --- begin ztix changes ---
-channelParserPut.addArgument('inviteCode', type=str, required=True)
+channelParserPut.add_argument('inviteCode', type=str, required=True)
 # --- end ztix changes ---
 
 channelParserPost = reqparse.RequestParser()
