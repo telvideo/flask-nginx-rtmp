@@ -21,6 +21,10 @@ from classes import views
 from classes import settings
 from classes.shared import db
 
+# --- begin ztix changes ---
+from classes import invites
+# --- end ztix changes ---
+
 from functions import rtmpFunc
 from functions import system
 
@@ -84,6 +88,9 @@ channelParserPut = reqparse.RequestParser()
 channelParserPut.add_argument('channelName', type=str)
 channelParserPut.add_argument('description', type=str)
 channelParserPut.add_argument('topicID', type=int)
+# --- begin ztix changes ---
+channelParserPut.addArgument('inviteCode', type=str, required=True)
+# --- end ztix changes ---
 
 channelParserPost = reqparse.RequestParser()
 channelParserPost.add_argument('channelName', type=str, required=True)
@@ -240,6 +247,19 @@ class api_1_ListChannel(Resource):
                                 possibleTopics = topics.topics.query.filter_by(id=int(args['topicID'])).first()
                                 if possibleTopics is not None:
                                     channelQuery.topic = int(args['topicID'])
+                        # --- begin ztix changes ---
+                        if 'inviteCode' in args:
+                            if args['inviteCode'] is not None:
+                                newInviteCode = invites.inviteCode(0, channelEndpointID)
+                                inviteCodeQuery = invites.inviteCode.query.filter_by(code=str(args['inviteCode'])).first()
+                                if inviteCodeQuery is None:
+                                    newInviteCode.code = str(args['inviteCode'])
+                                else:
+                                    db.session.close()
+                                    return {'results': {'message':'Invite Code already exists'}},409
+                                db.session.add(newInviteCode)
+                        # --- end ztix changes ---
+
                         db.session.commit()
                         return {'results': {'message':'Channel Updated'}}, 200
         return {'results': {'message':'Request Error'}},400
