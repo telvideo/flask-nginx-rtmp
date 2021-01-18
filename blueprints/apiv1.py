@@ -89,7 +89,7 @@ channelParserPut.add_argument('channelName', type=str)
 channelParserPut.add_argument('description', type=str)
 channelParserPut.add_argument('topicID', type=int)
 # --- begin ztix changes ---
-channelParserPut.add_argument('inviteCode', type=str, required=True)
+channelParserPut.add_argument('inviteCode', type=str)
 # --- end ztix changes ---
 
 channelParserPost = reqparse.RequestParser()
@@ -250,7 +250,7 @@ class api_1_ListChannel(Resource):
                         # --- begin ztix changes ---
                         if 'inviteCode' in args:
                             if args['inviteCode'] is not None:
-                                newInviteCode = invites.inviteCode(0, channelEndpointID)
+                                newInviteCode = invites.inviteCode(0, channelQuery.id)
                                 inviteCodeQuery = invites.inviteCode.query.filter_by(code=str(args['inviteCode'])).first()
                                 if inviteCodeQuery is None:
                                     newInviteCode.code = str(args['inviteCode'])
