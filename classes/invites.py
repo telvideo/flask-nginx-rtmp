@@ -90,6 +90,6 @@ class inviteCode(db.Model):
             'expiration': self.expiration.strftime('%Y-%m-%d %H:%M:%S') if self.expiration is not None else None,
             'channelID': self.channelID,
             'uses': self.uses,
-            'stream': [obj.id for obj in self.viewers]
+            'viewers': [obj.id for obj in self.viewers]
         }
     # --- end ztix changes ---

@@ -311,7 +311,9 @@ class api_1_ListChannel(Resource):
 @api.route('/channel/<string:channelEndpointID>/invite_code/')
 @api.doc(params={'channelEndpointID': 'Channel Endpoint Descriptor, Expressed in a UUID Value(ex:db0fe456-7823-40e2-b40e-31147882138e)'})
 class api_1_ChannelInvite(Resource):
-    # Get Invite Codes for One Channel
+    """
+        Get Invite Codes for One Channel
+    """
     @api.doc(security='apikey')
     @api.doc(responses={200: 'Success', 400: 'Request Error', 404: 'Resource not found'})
     def get(self, channelEndpointID):
@@ -335,7 +337,7 @@ class api_1_ChannelInvite(Resource):
     @api.doc(responses={200: 'Success', 400: 'Request Error', 409: 'Conflict'})
     def post(self, channelEndpointID):
         """
-            Change a Channel's Name or Topic
+            Create a new Invite Code for the given Channel
         """
         if 'X-API-KEY' in request.headers:
             requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).first()
@@ -362,7 +364,7 @@ class api_1_ChannelInvite(Resource):
 
                                 db.session.add(newInviteCode)
                         db.session.commit()
-                        return {'results': {'message':'Channel Updated'}}, 200
+                        return {'results': {'message':'Invite Code Added'}}, 200
                     else:
                         db.session.close()
                         return {'results': {'message':'Channel not found'}}, 404
@@ -375,7 +377,7 @@ class api_1_ChannelInvite(Resource):
     @api.doc(responses={200: 'Success', 400: 'Request Error'})
     def delete(self,channelEndpointID):
         """
-            Deletes a Channel
+            Deletes all Invite Codes
         """
         if 'X-API-KEY' in request.headers:
             requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).first()
