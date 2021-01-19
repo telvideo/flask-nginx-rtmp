@@ -352,7 +352,7 @@ class api_1_ChannelInvite(Resource):
                                 newInviteCode = invites.inviteCode(0, channelQuery.id)
                                 inviteCodeQuery = invites.inviteCode.query.filter_by(code=str(args['code'])).first()
                                 if inviteCodeQuery is None:
-                                    newInviteCode.code = str(args['inviteCode'])
+                                    newInviteCode.code = str(args['code'])
                                 else:
                                     db.session.close()
                                     return {'results': {'message':'Invite Code already exists'}}, 409
