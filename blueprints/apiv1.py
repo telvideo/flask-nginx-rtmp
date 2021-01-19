@@ -346,7 +346,7 @@ class api_1_ChannelInvite(Resource):
                 if requestAPIKey.isValid():
                     channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
                     if channelQuery is not None:
-                        args = channelParserPut.parse_args()
+                        args = inviteParserPost.parse_args()
                         if 'code' in args:
                             if args['code'] is not None:
                                 newInviteCode = invites.inviteCode(0, channelQuery.id)
