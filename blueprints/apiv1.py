@@ -311,12 +311,13 @@ class api_1_ListChannel(Resource):
 @api.route('/channel/<string:channelEndpointID>/invite_code/')
 @api.doc(params={'channelEndpointID': 'Channel Endpoint Descriptor, Expressed in a UUID Value(ex:db0fe456-7823-40e2-b40e-31147882138e)'})
 class api_1_ChannelInvite(Resource):
-    """
-        Get Invite Codes for One Channel
-    """
+
     @api.doc(security='apikey')
     @api.doc(responses={200: 'Success', 400: 'Request Error', 404: 'Resource not found'})
     def get(self, channelEndpointID):
+        """
+            Gets Invite Codes for One Channel
+        """
         if 'X-API-KEY' in request.headers:
             requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).first()
             if requestAPIKey is not None:
@@ -337,7 +338,7 @@ class api_1_ChannelInvite(Resource):
     @api.doc(responses={200: 'Success', 400: 'Request Error', 409: 'Conflict'})
     def post(self, channelEndpointID):
         """
-            Create a new Invite Code for the given Channel
+            Creates a new Invite Code for One Channel
         """
         if 'X-API-KEY' in request.headers:
             requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).first()
@@ -349,7 +350,7 @@ class api_1_ChannelInvite(Resource):
                         if 'code' in args:
                             if args['code'] is not None:
                                 newInviteCode = invites.inviteCode(0, channelQuery.id)
-                                inviteCodeQuery = invites.inviteCode.query.filter_by(code=str(args['inviteCode'])).first()
+                                inviteCodeQuery = invites.inviteCode.query.filter_by(code=str(args['code'])).first()
                                 if inviteCodeQuery is None:
                                     newInviteCode.code = str(args['inviteCode'])
                                 else:
@@ -377,7 +378,7 @@ class api_1_ChannelInvite(Resource):
     @api.doc(responses={200: 'Success', 400: 'Request Error'})
     def delete(self,channelEndpointID):
         """
-            Deletes all Invite Codes
+            Deletes all Invite Codes for One Channel
         """
         if 'X-API-KEY' in request.headers:
             requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).first()
