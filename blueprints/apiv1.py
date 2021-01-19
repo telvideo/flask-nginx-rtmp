@@ -89,7 +89,10 @@ channelParserPut.add_argument('channelName', type=str)
 channelParserPut.add_argument('description', type=str)
 channelParserPut.add_argument('topicID', type=int)
 # --- begin ztix changes ---
-channelParserPut.add_argument('inviteCode', type=str)
+inviteParserPost = reqparse.RequestParser()
+inviteParserPost.add_argument('code', type=str, required=True)
+inviteParserPost.add_argument('validUntil', type=str)
+inviteParserPost.add_argument('daysToExpire', type=int)
 # --- end ztix changes ---
 
 channelParserPost = reqparse.RequestParser()
@@ -247,18 +250,18 @@ class api_1_ListChannel(Resource):
                                 possibleTopics = topics.topics.query.filter_by(id=int(args['topicID'])).first()
                                 if possibleTopics is not None:
                                     channelQuery.topic = int(args['topicID'])
-                        # --- begin ztix changes ---
-                        if 'inviteCode' in args:
-                            if args['inviteCode'] is not None:
-                                newInviteCode = invites.inviteCode(0, channelQuery.id)
-                                inviteCodeQuery = invites.inviteCode.query.filter_by(code=str(args['inviteCode'])).first()
-                                if inviteCodeQuery is None:
-                                    newInviteCode.code = str(args['inviteCode'])
-                                else:
-                                    db.session.close()
-                                    return {'results': {'message':'Invite Code already exists'}},409
-                                db.session.add(newInviteCode)
-                        # --- end ztix changes ---
+                        # # --- begin ztix changes ---
+                        # if 'inviteCode' in args:
+                        #     if args['inviteCode'] is not None:
+                        #         newInviteCode = invites.inviteCode(0, channelQuery.id)
+                        #         inviteCodeQuery = invites.inviteCode.query.filter_by(code=str(args['inviteCode'])).first()
+                        #         if inviteCodeQuery is None:
+                        #             newInviteCode.code = str(args['inviteCode'])
+                        #         else:
+                        #             db.session.close()
+                        #             return {'results': {'message':'Invite Code already exists'}},409
+                        #         db.session.add(newInviteCode)
+                        # # --- end ztix changes ---
 
                         db.session.commit()
                         return {'results': {'message':'Channel Updated'}}, 200
@@ -303,6 +306,96 @@ class api_1_ListChannel(Resource):
                         db.session.commit()
                         return {'results': {'message': 'Channel Deleted'}}, 200
         return {'results': {'message': 'Request Error'}}, 400
+
+# --- begin ztix changes ---
+@api.route('/channel/<string:channelEndpointID>/invite_code/')
+@api.doc(params={'channelEndpointID': 'Channel Endpoint Descriptor, Expressed in a UUID Value(ex:db0fe456-7823-40e2-b40e-31147882138e)'})
+class api_1_ChannelInvite(Resource):
+    # Get Invite Codes for One Channel
+    @api.doc(security='apikey')
+    @api.doc(responses={200: 'Success', 400: 'Request Error', 404: 'Resource not found'})
+    def get(self, channelEndpointID):
+        if 'X-API-KEY' in request.headers:
+            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).first()
+            if requestAPIKey is not None:
+                if requestAPIKey.isValid():
+                    channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
+                    if channelQuery is not None:
+                        inviteCodeList = invites.inviteCode.query.filter_by(channelID=channelQuery.id).all()
+                        db.session.commit()
+                        return {'results': [inv.serialize() for inv in inviteCodeList]}
+                    else:
+                        return {'results': {'message':'Channel not found'}}, 404
+
+        return {'results': {'message':'Request Error'}},400
+
+    # Create a new Invite Code
+    @api.expect(inviteParserPost)
+    @api.doc(security='apikey')
+    @api.doc(responses={200: 'Success', 400: 'Request Error', 409: 'Conflict'})
+    def post(self, channelEndpointID):
+        """
+            Change a Channel's Name or Topic
+        """
+        if 'X-API-KEY' in request.headers:
+            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).first()
+            if requestAPIKey is not None:
+                if requestAPIKey.isValid():
+                    channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
+                    if channelQuery is not None:
+                        args = channelParserPut.parse_args()
+                        if 'code' in args:
+                            if args['code'] is not None:
+                                newInviteCode = invites.inviteCode(0, channelQuery.id)
+                                inviteCodeQuery = invites.inviteCode.query.filter_by(code=str(args['inviteCode'])).first()
+                                if inviteCodeQuery is None:
+                                    newInviteCode.code = str(args['inviteCode'])
+                                else:
+                                    db.session.close()
+                                    return {'results': {'message':'Invite Code already exists'}}, 409
+
+                                # if validUntil is given, use date; if date is not given, but days are given, use days
+                                if args['validUntil'] is not None:
+                                    newInviteCode.expiration = datetime.datetime.strptime(str(args['validUntil']), '%Y-%m-%d %H:%M:%S')
+                                elif args['daysToExpire'] is not None:
+                                    newInviteCode.expiration = datetime.datetime.now() + datetime.timedelta(days=int(args['daysToExpire']))
+
+                                db.session.add(newInviteCode)
+                        db.session.commit()
+                        return {'results': {'message':'Channel Updated'}}, 200
+                    else:
+                        db.session.close()
+                        return {'results': {'message':'Channel not found'}}, 404
+
+
+
+        return {'results': {'message':'Request Error'}},400
+
+    @api.doc(security='apikey')
+    @api.doc(responses={200: 'Success', 400: 'Request Error'})
+    def delete(self,channelEndpointID):
+        """
+            Deletes a Channel
+        """
+        if 'X-API-KEY' in request.headers:
+            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).first()
+            if requestAPIKey is not None:
+                if requestAPIKey.isValid():
+                    channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
+                    if channelQuery is not None:
+                        inviteCodeList = invites.inviteCode.query.filter_by(channelID=channelQuery.id).all()
+
+                        for inv in inviteCodeList:
+                            invitedViewers = invites.invitedViewer.query.filter_by(inviteCode=inv.code).all()
+
+                            for inv_viewer in invitedViewers:
+                                db.session.delete(inv_viewer)
+
+                            db.session.delete(inv)
+                        db.session.commit()
+                        return {'results': {'message': 'Invite Codes Deleted'}}, 200
+        return {'results': {'message': 'Request Error'}}, 400
+# --- end ztix changes ---
 
 # TODO Add Ability to Add/Delete/Change
 @api.route('/channel/<string:channelEndpointID>/restreams')
