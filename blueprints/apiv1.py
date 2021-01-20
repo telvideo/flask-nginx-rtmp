@@ -517,10 +517,10 @@ class api_1_ChannelSingleInvite(Resource):
         return {'results': {'message':'Request Error'}},400
 
     @api.doc(security='apikey')
-    @api.doc(responses={200: 'Success', 400: 'Request Error'})
-    def delete(self,channelEndpointID):
+    @api.doc(responses={200: 'Success', 400: 'Request Error', 404: 'Resource not found'})
+    def delete(self,channelEndpointID, inviteCode):
         """
-            Deletes all Invite Codes for One Channel
+            Deletes One Invite Code for One Channel
         """
         if 'X-API-KEY' in request.headers:
             requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).first()
@@ -528,17 +528,19 @@ class api_1_ChannelSingleInvite(Resource):
                 if requestAPIKey.isValid():
                     channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
                     if channelQuery is not None:
-                        inviteCodeList = invites.inviteCode.query.filter_by(channelID=channelQuery.id).all()
+                        inviteCodeQuery = invites.inviteCode.query.filter_by(channelID=channelQuery.id, code=inviteCode).first()
+                        invitedViewers = invites.invitedViewer.query.filter_by(inviteCode=inviteCode).all()
 
-                        for inv in inviteCodeList:
-                            invitedViewers = invites.invitedViewer.query.filter_by(inviteCode=inv.code).all()
+                        for inv_viewer in invitedViewers:
+                            db.session.delete(inv_viewer)
 
-                            for inv_viewer in invitedViewers:
-                                db.session.delete(inv_viewer)
-
-                            db.session.delete(inv)
+                        db.session.delete(inviteCodeQuery)
                         db.session.commit()
-                        return {'results': {'message': 'Invite Codes Deleted'}}, 200
+                        return {'results': {'message': 'Invite Code Deleted'}}, 200
+                    else:
+                        db.session.close()
+                        return {'results': {'message': 'Invite Code not found'}}, 404
+
         return {'results': {'message': 'Request Error'}}, 400
 # --- end ztix changes ---
 
