@@ -39,6 +39,18 @@ class invitedViewer(db.Model):
             return True
         else:
             return False
+    # --- begin ztix changes ---
+    def serialize(self):
+        return {
+            'id': self.id,
+            'userID': self.userID,
+            'channelID': self.channelID,
+            'addedDate': self.addedDate.strftime('%Y-%m-%d %H:%M:%S') if self.addedDate is not None else None,
+            'expiration': self.expiration.strftime('%Y-%m-%d %H:%M:%S') if self.expiration is not None else None,
+            'inviteCode': self.inviteCode
+        }
+    # --- end ztix changes ---
+
 
 class inviteCode(db.Model):
     __tablename__ = 'inviteCode'
@@ -70,3 +82,14 @@ class inviteCode(db.Model):
             return True
         else:
             return False
+    # --- begin ztix changes ---
+    def serialize(self):
+        return {
+            'id': self.id,
+            'code': self.code,
+            'expiration': self.expiration.strftime('%Y-%m-%d %H:%M:%S') if self.expiration is not None else None,
+            'channelID': self.channelID,
+            'uses': self.uses,
+            'viewers': [obj.id for obj in self.viewers]
+        }
+    # --- end ztix changes ---
