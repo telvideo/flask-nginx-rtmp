@@ -93,6 +93,10 @@ inviteParserPost = reqparse.RequestParser()
 inviteParserPost.add_argument('code', type=str, required=True)
 inviteParserPost.add_argument('validUntil', type=str)
 inviteParserPost.add_argument('daysToExpire', type=int)
+
+inviteParserPut = reqparse.RequestParser()
+inviteParserPut.add_argument('validUntil', type=str)
+inviteParserPut.add_argument('daysToExpire', type=int)
 # --- end ztix changes ---
 
 channelParserPost = reqparse.RequestParser()
@@ -371,6 +375,144 @@ class api_1_ChannelInvite(Resource):
                         return {'results': {'message':'Channel not found'}}, 404
 
 
+
+        return {'results': {'message':'Request Error'}},400
+
+    # Updates all invite Codes
+    @api.expect(inviteParserPut)
+    @api.doc(security='apikey')
+    @api.doc(responses={200: 'Success', 400: 'Request Error', 409: 'Conflict'})
+    def put(self, channelEndpointID):
+        """
+            Updates all Invite Codes for One Channel
+        """
+        if 'X-API-KEY' in request.headers:
+            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).first()
+            if requestAPIKey is not None:
+                if requestAPIKey.isValid():
+                    channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
+                    if channelQuery is not None:
+                        args = inviteParserPut.parse_args()
+                        if args['validUntil'] is not None or args['daysToExpire'] is not None:
+                            inviteCodeQuery = invites.inviteCode.query.filter_by(channelID=channelQuery.id).all()
+                            if inviteCodeQuery is not None and len(inviteCodeQuery) > 0:
+
+                                # if validUntil is given, use date; if date is not given, but days are given, use days
+                                if args['validUntil'] is not None:
+                                    new_expiration = datetime.datetime.strptime(str(args['validUntil']), '%Y-%m-%d %H:%M:%S')
+                                else:
+                                    new_expiration = datetime.datetime.now() + datetime.timedelta(days=int(args['daysToExpire']))
+
+                                for code in inviteCodeQuery:
+                                    code.expiration = new_expiration
+                            else:
+                                db.session.close()
+                                return {'results': {'message':'No Invite Codes found'}}, 404
+                        else:
+                            db.session.close()
+                            return {'results': {'message':'Request Error'}},400
+
+                        db.session.commit()
+                        return {'results': {'message':'Invite Codes updated'}}, 200
+                    else:
+                        db.session.close()
+                        return {'results': {'message':'Channel not found'}}, 404
+
+
+
+        return {'results': {'message':'Request Error'}},400
+
+    @api.doc(security='apikey')
+    @api.doc(responses={200: 'Success', 400: 'Request Error'})
+    def delete(self,channelEndpointID):
+        """
+            Deletes all Invite Codes for One Channel
+        """
+        if 'X-API-KEY' in request.headers:
+            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).first()
+            if requestAPIKey is not None:
+                if requestAPIKey.isValid():
+                    channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
+                    if channelQuery is not None:
+                        inviteCodeList = invites.inviteCode.query.filter_by(channelID=channelQuery.id).all()
+
+                        for inv in inviteCodeList:
+                            invitedViewers = invites.invitedViewer.query.filter_by(inviteCode=inv.code).all()
+
+                            for inv_viewer in invitedViewers:
+                                db.session.delete(inv_viewer)
+
+                            db.session.delete(inv)
+                        db.session.commit()
+                        return {'results': {'message': 'Invite Codes Deleted'}}, 200
+        return {'results': {'message': 'Request Error'}}, 400
+
+
+@api.route('/channel/<string:channelEndpointID>/invite_code/<string:inviteCode>')
+@api.doc(params={'channelEndpointID': 'Channel Endpoint Descriptor, Expressed in a UUID Value(ex:db0fe456-7823-40e2-b40e-31147882138e)',
+                 'inviteCode': 'Invite Code for the Given Channel'})
+class api_1_ChannelSingleInvite(Resource):
+
+    @api.doc(security='apikey')
+    @api.doc(responses={200: 'Success', 400: 'Request Error', 404: 'Resource not found'})
+    def get(self, channelEndpointID, inviteCode):
+        """
+            Gets One Invite Code for One Channel
+        """
+        if 'X-API-KEY' in request.headers:
+            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).first()
+            if requestAPIKey is not None:
+                if requestAPIKey.isValid():
+                    channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
+                    if channelQuery is not None:
+                        inviteCodeQuery = invites.inviteCode.query.filter_by(channelID=channelQuery.id, code=inviteCode).first()
+                        db.session.commit()
+                        if inviteCodeQuery is not None:
+                            return {'results': inviteCodeQuery.serialize()}
+                        else:
+                            return {'results': {'message':'Invite Code not found'}}, 404
+                    else:
+                        return {'results': {'message':'Channel not found'}}, 404
+
+        return {'results': {'message':'Request Error'}},400
+
+    # Updates one invite Code
+    @api.expect(inviteParserPut)
+    @api.doc(security='apikey')
+    @api.doc(responses={200: 'Success', 400: 'Request Error'})
+    def put(self, channelEndpointID, inviteCode):
+        """
+            Updates One Invite Code for One Channel
+        """
+        if 'X-API-KEY' in request.headers:
+            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).first()
+            if requestAPIKey is not None:
+                if requestAPIKey.isValid():
+                    channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
+                    if channelQuery is not None:
+                        args = inviteParserPut.parse_args()
+                        if args['validUntil'] is not None or args['daysToExpire'] is not None:
+                            inviteCodeQuery = invites.inviteCode.query.filter_by(channelID=channelQuery.id, code=inviteCode).first()
+                            if inviteCodeQuery is not None:
+
+                                # if validUntil is given, use date; if date is not given, but days are given, use days
+                                if args['validUntil'] is not None:
+                                    inviteCodeQuery.expiration = datetime.datetime.strptime(str(args['validUntil']), '%Y-%m-%d %H:%M:%S')
+                                else:
+                                    inviteCodeQuery.expiration = datetime.datetime.now() + datetime.timedelta(days=int(args['daysToExpire']))
+
+                            else:
+                                db.session.close()
+                                return {'results': {'message':'Invite Code not found'}}, 404
+                        else:
+                            db.session.close()
+                            return {'results': {'message':'Request Error'}},400
+
+                        db.session.commit()
+                        return {'results': {'message':'Invite Code updated'}}, 200
+                    else:
+                        db.session.close()
+                        return {'results': {'message':'Channel not found'}}, 404
 
         return {'results': {'message':'Request Error'}},400
 
