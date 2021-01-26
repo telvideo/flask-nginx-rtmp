@@ -570,7 +570,7 @@ class api_1_ChannelMultipleInvite(Resource):
                         args = inviteParserPost.parse_args()
                         if 'multipleCodes' in args:
                             if args['multipleCodes'] is not None:
-                                split_codes = str(args['multipleCodes']).replace("\n", "").split(";")
+                                split_codes = str(args['multipleCodes']).replace("\n", "").replace(" ", "").split(";")
                                 for code in split_codes:
                                     newInviteCode = invites.inviteCode(0, channelQuery.id)
                                     inviteCodeQuery = invites.inviteCode.query.filter_by(code=code).first()
