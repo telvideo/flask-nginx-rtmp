@@ -567,7 +567,7 @@ class api_1_ChannelMultipleInvite(Resource):
                 if requestAPIKey.isValid():
                     channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
                     if channelQuery is not None:
-                        args = inviteParserPost.parse_args()
+                        args = multiInviteParserPost.parse_args()
                         if 'multipleCodes' in args:
                             if args['multipleCodes'] is not None:
                                 split_codes = str(args['multipleCodes']).replace("\n", "").replace(" ", "").split(";")
