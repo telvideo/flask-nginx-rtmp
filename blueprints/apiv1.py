@@ -99,7 +99,7 @@ inviteParserPut.add_argument('validUntil', type=str)
 inviteParserPut.add_argument('daysToExpire', type=int)
 
 multiInviteParserPost = reqparse.RequestParser()
-multiInviteParserPost.add_argument('multipleCodes', type=str)
+multiInviteParserPost.add_argument('multipleCodes', type=str, required=True)
 multiInviteParserPost.add_argument('validUntil', type=str)
 multiInviteParserPost.add_argument('daysToExpire', type=int)
 # --- end ztix changes ---
