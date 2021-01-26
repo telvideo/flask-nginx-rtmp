@@ -97,6 +97,11 @@ inviteParserPost.add_argument('daysToExpire', type=int)
 inviteParserPut = reqparse.RequestParser()
 inviteParserPut.add_argument('validUntil', type=str)
 inviteParserPut.add_argument('daysToExpire', type=int)
+
+multiInviteParserPost = reqparse.RequestParser()
+multiInviteParserPost.add_argument('multipleCodes', type=str)
+multiInviteParserPost.add_argument('validUntil', type=str)
+multiInviteParserPost.add_argument('daysToExpire', type=int)
 # --- end ztix changes ---
 
 channelParserPost = reqparse.RequestParser()
@@ -542,6 +547,49 @@ class api_1_ChannelSingleInvite(Resource):
                         return {'results': {'message': 'Invite Code not found'}}, 404
 
         return {'results': {'message': 'Request Error'}}, 400
+
+
+@api.route('/channel/<string:channelEndpointID>/multi_invite_code/')
+@api.doc(params={'channelEndpointID': 'Channel Endpoint Descriptor, Expressed in a UUID Value(ex:db0fe456-7823-40e2-b40e-31147882138e)'})
+class api_1_ChannelMultipleInvite(Resource):
+
+    # Create a new Invite Code
+    @api.expect(multiInviteParserPost)
+    @api.doc(security='apikey')
+    @api.doc(responses={200: 'Success', 400: 'Request Error', 409: 'Conflict'})
+    def post(self, channelEndpointID):
+        """
+            Creates a new Invite Code for One Channel
+        """
+        if 'X-API-KEY' in request.headers:
+            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers['X-API-KEY']).first()
+            if requestAPIKey is not None:
+                if requestAPIKey.isValid():
+                    channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
+                    if channelQuery is not None:
+                        args = inviteParserPost.parse_args()
+                        if 'multipleCodes' in args:
+                            if args['multipleCodes'] is not None:
+                                split_codes = str(args['multipleCodes']).replace("\n", "").split(";")
+                                for code in split_codes:
+                                    newInviteCode = invites.inviteCode(0, channelQuery.id)
+                                    inviteCodeQuery = invites.inviteCode.query.filter_by(code=code).first()
+                                    if inviteCodeQuery is None:
+                                        newInviteCode.code = code
+                                    else:
+                                        continue
+                                    # if validUntil is given, use date; if date is not given, but days are given, use days
+                                    if args['validUntil'] is not None:
+                                        newInviteCode.expiration = datetime.datetime.strptime(str(args['validUntil']), '%Y-%m-%d %H:%M:%S')
+                                    elif args['daysToExpire'] is not None:
+                                        newInviteCode.expiration = datetime.datetime.now() + datetime.timedelta(days=int(args['daysToExpire']))
+
+                                    db.session.add(newInviteCode)
+                        db.session.commit()
+                        return {'results': {'message':'Invite Codes Added'}}, 200
+                    else:
+                        db.session.close()
+                        return {'results': {'message':'Channel not found'}}, 404
 # --- end ztix changes ---
 
 # TODO Add Ability to Add/Delete/Change
