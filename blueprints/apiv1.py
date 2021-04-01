@@ -332,6 +332,11 @@ class api_1_ChannelInvite(Resource):
             if requestAPIKey is not None:
                 if requestAPIKey.isValid():
                     channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
+                    # Admin Check
+                    if channelQuery is None:
+                        userRoles = Sec.User.query.filter_by(id=requestAPIKey.userID).all()
+                        if "admin" in list(map(lambda r: r.name.lower(), userRoles)):
+                            channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID).first()
                     if channelQuery is not None:
                         inviteCodeList = invites.inviteCode.query.filter_by(channelID=channelQuery.id).all()
                         db.session.commit()
@@ -354,6 +359,11 @@ class api_1_ChannelInvite(Resource):
             if requestAPIKey is not None:
                 if requestAPIKey.isValid():
                     channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
+                    # Admin Check
+                    if channelQuery is None:
+                        userRoles = Sec.User.query.filter_by(id=requestAPIKey.userID).all()
+                        if "admin" in list(map(lambda r: r.name.lower(), userRoles)):
+                            channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID).first()
                     if channelQuery is not None:
                         args = inviteParserPost.parse_args()
                         if 'code' in args:
@@ -396,6 +406,11 @@ class api_1_ChannelInvite(Resource):
             if requestAPIKey is not None:
                 if requestAPIKey.isValid():
                     channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
+                    # Admin Check
+                    if channelQuery is None:
+                        userRoles = Sec.User.query.filter_by(id=requestAPIKey.userID).all()
+                        if "admin" in list(map(lambda r: r.name.lower(), userRoles)):
+                            channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID).first()
                     if channelQuery is not None:
                         args = inviteParserPut.parse_args()
                         if args['validUntil'] is not None or args['daysToExpire'] is not None:
@@ -438,6 +453,11 @@ class api_1_ChannelInvite(Resource):
             if requestAPIKey is not None:
                 if requestAPIKey.isValid():
                     channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
+                    # Admin Check
+                    if channelQuery is None:
+                        userRoles = Sec.User.query.filter_by(id=requestAPIKey.userID).all()
+                        if "admin" in list(map(lambda r: r.name.lower(), userRoles)):
+                            channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID).first()
                     if channelQuery is not None:
                         inviteCodeList = invites.inviteCode.query.filter_by(channelID=channelQuery.id).all()
 
@@ -469,6 +489,11 @@ class api_1_ChannelSingleInvite(Resource):
             if requestAPIKey is not None:
                 if requestAPIKey.isValid():
                     channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
+                    # Admin Check
+                    if channelQuery is None:
+                        userRoles = Sec.User.query.filter_by(id=requestAPIKey.userID).all()
+                        if "admin" in list(map(lambda r: r.name.lower(), userRoles)):
+                            channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID).first()
                     if channelQuery is not None:
                         inviteCodeQuery = invites.inviteCode.query.filter_by(channelID=channelQuery.id, code=inviteCode).first()
                         db.session.commit()
@@ -494,6 +519,11 @@ class api_1_ChannelSingleInvite(Resource):
             if requestAPIKey is not None:
                 if requestAPIKey.isValid():
                     channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
+                    # Admin Check
+                    if channelQuery is None:
+                        userRoles = Sec.User.query.filter_by(id=requestAPIKey.userID).all()
+                        if "admin" in list(map(lambda r: r.name.lower(), userRoles)):
+                            channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID).first()
                     if channelQuery is not None:
                         args = inviteParserPut.parse_args()
                         if args['validUntil'] is not None or args['daysToExpire'] is not None:
@@ -532,6 +562,11 @@ class api_1_ChannelSingleInvite(Resource):
             if requestAPIKey is not None:
                 if requestAPIKey.isValid():
                     channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
+                    # Admin Check
+                    if channelQuery is None:
+                        userRoles = Sec.User.query.filter_by(id=requestAPIKey.userID).all()
+                        if "admin" in list(map(lambda r: r.name.lower(), userRoles)):
+                            channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID).first()
                     if channelQuery is not None:
                         inviteCodeQuery = invites.inviteCode.query.filter_by(channelID=channelQuery.id, code=inviteCode).first()
                         invitedViewers = invites.invitedViewer.query.filter_by(inviteCode=inviteCode).all()
@@ -566,6 +601,11 @@ class api_1_ChannelMultipleInvite(Resource):
             if requestAPIKey is not None:
                 if requestAPIKey.isValid():
                     channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
+                    # Admin Check
+                    if channelQuery is None:
+                        userRoles = Sec.User.query.filter_by(id=requestAPIKey.userID).all()
+                        if "admin" in list(map(lambda r: r.name.lower(), userRoles)):
+                            channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID).first()
                     if channelQuery is not None:
                         args = multiInviteParserPost.parse_args()
                         if 'multipleCodes' in args:
