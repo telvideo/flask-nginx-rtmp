@@ -334,7 +334,7 @@ class api_1_ChannelInvite(Resource):
                     channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
                     # Admin Check
                     if channelQuery is None:
-                        userRoles = Sec.User.query.filter_by(id=requestAPIKey.userID).all()
+                        userRoles = Sec.User.query.filter_by(id=requestAPIKey.userID).first().roles
                         if "admin" in list(map(lambda r: r.name.lower(), userRoles)):
                             channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID).first()
                     if channelQuery is not None:
@@ -361,7 +361,7 @@ class api_1_ChannelInvite(Resource):
                     channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
                     # Admin Check
                     if channelQuery is None:
-                        userRoles = Sec.User.query.filter_by(id=requestAPIKey.userID).all()
+                        userRoles = Sec.User.query.filter_by(id=requestAPIKey.userID).first().roles
                         if "admin" in list(map(lambda r: r.name.lower(), userRoles)):
                             channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID).first()
                     if channelQuery is not None:
@@ -408,7 +408,7 @@ class api_1_ChannelInvite(Resource):
                     channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
                     # Admin Check
                     if channelQuery is None:
-                        userRoles = Sec.User.query.filter_by(id=requestAPIKey.userID).all()
+                        userRoles = Sec.User.query.filter_by(id=requestAPIKey.userID).first().roles
                         if "admin" in list(map(lambda r: r.name.lower(), userRoles)):
                             channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID).first()
                     if channelQuery is not None:
@@ -455,7 +455,7 @@ class api_1_ChannelInvite(Resource):
                     channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
                     # Admin Check
                     if channelQuery is None:
-                        userRoles = Sec.User.query.filter_by(id=requestAPIKey.userID).all()
+                        userRoles = Sec.User.query.filter_by(id=requestAPIKey.userID).first().roles
                         if "admin" in list(map(lambda r: r.name.lower(), userRoles)):
                             channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID).first()
                     if channelQuery is not None:
@@ -491,7 +491,7 @@ class api_1_ChannelSingleInvite(Resource):
                     channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
                     # Admin Check
                     if channelQuery is None:
-                        userRoles = Sec.User.query.filter_by(id=requestAPIKey.userID).all()
+                        userRoles = Sec.User.query.filter_by(id=requestAPIKey.userID).first().roles
                         if "admin" in list(map(lambda r: r.name.lower(), userRoles)):
                             channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID).first()
                     if channelQuery is not None:
@@ -521,7 +521,7 @@ class api_1_ChannelSingleInvite(Resource):
                     channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
                     # Admin Check
                     if channelQuery is None:
-                        userRoles = Sec.User.query.filter_by(id=requestAPIKey.userID).all()
+                        userRoles = Sec.User.query.filter_by(id=requestAPIKey.userID).first().roles
                         if "admin" in list(map(lambda r: r.name.lower(), userRoles)):
                             channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID).first()
                     if channelQuery is not None:
@@ -564,7 +564,7 @@ class api_1_ChannelSingleInvite(Resource):
                     channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
                     # Admin Check
                     if channelQuery is None:
-                        userRoles = Sec.User.query.filter_by(id=requestAPIKey.userID).all()
+                        userRoles = Sec.User.query.filter_by(id=requestAPIKey.userID).first().roles
                         if "admin" in list(map(lambda r: r.name.lower(), userRoles)):
                             channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID).first()
                     if channelQuery is not None:
@@ -603,7 +603,7 @@ class api_1_ChannelMultipleInvite(Resource):
                     channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID, owningUser=requestAPIKey.userID).first()
                     # Admin Check
                     if channelQuery is None:
-                        userRoles = Sec.User.query.filter_by(id=requestAPIKey.userID).all()
+                        userRoles = Sec.User.query.filter_by(id=requestAPIKey.userID).first().roles
                         if "admin" in list(map(lambda r: r.name.lower(), userRoles)):
                             channelQuery = Channel.Channel.query.filter_by(channelLoc=channelEndpointID).first()
                     if channelQuery is not None:
