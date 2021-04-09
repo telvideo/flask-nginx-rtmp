@@ -39,6 +39,7 @@ from classes import stickers
 
 from functions import system
 from functions import themes
+from functions import videoFunc
 
 from globals import globalvars
 
@@ -191,7 +192,13 @@ def admin_page():
             setting = request.args.get("setting")
 
             if action == "delete":
-                if setting == "topics":
+                if setting == "video":
+                    videoID = int(request.args.get("videoID"))
+                    videoFunc.deleteVideo(videoID)
+    
+                    return redirect(url_for('.admin_page', page="vids"))
+
+                elif setting == "topics":
                     topicID = int(request.args.get("topicID"))
 
                     topicQuery = topics.topics.query.filter_by(id=topicID).first()
@@ -413,7 +420,17 @@ def admin_page():
                 themeList.append(theme)
 
         logsList = logs.logs.query.order_by(logs.logs.timestamp.desc()).limit(250)
+        vidList  =  RecordedVideo.RecordedVideo.query.order_by(RecordedVideo.RecordedVideo.videoDate.desc()).limit(250)
+         
+        missingSet = set()
+        theVideos = RecordedVideo.RecordedVideo.query.all()
 
+        videos_root = globalvars.videoRoot + 'videos/'
+        for recordedVid in theVideos:
+            filePath = videos_root + recordedVid.videoLocation
+            if os.path.exists(filePath) == False:
+                missingSet.add(recordedVid.id)
+        
         oAuthProvidersList = settings.oAuthProvider.query.all()
 
         from app import ejabberd
@@ -439,7 +456,7 @@ def admin_page():
                                remoteSHA=remoteSHA, themeList=themeList, statsViewsDay=statsViewsDay,
                                viewersTotal=viewersTotal, currentViewers=currentViewers, nginxStatData=nginxStatData,
                                globalHooks=globalWebhookQuery, defaultRoleDict=defaultRoles,
-                               logsList=logsList, edgeNodes=edgeNodes, rtmpServers=rtmpServers, oAuthProvidersList=oAuthProvidersList,
+                               logsList=logsList, vidList = vidList, missingSet = missingSet, edgeNodes=edgeNodes, rtmpServers=rtmpServers, oAuthProvidersList=oAuthProvidersList,
                                ejabberdStatus=ejabberd, bannedWords=bannedWordString, globalStickers=globalStickers, page=page)
     elif request.method == 'POST':
 
