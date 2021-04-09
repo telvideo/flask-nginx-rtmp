@@ -1,0 +1,13 @@
+[Unit]
+Description=Run once at start of OSP to do things like remove active streams from database
+After=network.target
+PartOf=osp.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/osp
+ExecStart=python3 startrun.py
+
+[Install]
+WantedBy=multi-user.target
