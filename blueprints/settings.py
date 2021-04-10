@@ -427,7 +427,8 @@ def admin_page():
 
         videos_root = globalvars.videoRoot + 'videos/'
         for recordedVid in theVideos:
-            filePath = videos_root + recordedVid.videoLocation
+            filePath = "{}{}".format(videos_root, recordedVid.videoLocation)
+
             if os.path.exists(filePath) == False:
                 missingSet.add(recordedVid.id)
         

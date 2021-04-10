@@ -62,16 +62,16 @@ for theChan in theChannels:
 #print("Clips")
 theClips = RecordedVideo.Clips.query.all()
 for aClip in theClips:
-    fileNameSet.add(videos_root + aClip.videoLocation)
-    fileNameSet.add(videos_root + aClip.thumbnailLocation)
-    fileNameSet.add(videos_root + aClip.gifLocation)
+    fileNameSet.add("{}{}".format(videos_root,  aClip.videoLocation))
+    fileNameSet.add("{}{}".format(videos_root,  aClip.thumbnailLocation))
+    fileNameSet.add("{}{}".format(videos_root,  aClip.gifLocation))
 
 #print("RecordedVideo")
 theVideos = RecordedVideo.RecordedVideo.query.all()
 for recordedVid in theVideos:
-    fileNameSet.add(videos_root + recordedVid.videoLocation)
-    fileNameSet.add(videos_root + recordedVid.thumbnailLocation)
-    fileNameSet.add(videos_root + recordedVid.gifLocation)
+    fileNameSet.add("{}{}".format(videos_root,  recordedVid.videoLocation))
+    fileNameSet.add("{}{}".format(videos_root,  recordedVid.thumbnailLocation))
+    fileNameSet.add("{}{}".format(videos_root,  recordedVid.gifLocation))
 
 #print("Stickers")
 theStickers = stickers.stickers.query.all()
@@ -114,12 +114,12 @@ print("-------------------------------------------------------------------------
 print(notfoundFiles , "Files do not have links in OSP database.")
 print(foundFiles , "Files have links in OSP database.")
 
-missingFiles = 0 
-for fFile in fileNameSet:
-    if fFile not in fileList:
-        missingFiles +=1
+#missingFiles = 0 
+#for fFile in fileNameSet:
+#    if fFile not in fileList:
+#        missingFiles +=1
 
-print(str(missingFiles) + " Database links are missing files on hard drive ")   
+#print(str(missingFiles) + " Database links are missing files on hard drive ")   
 print("--------------------------------------------------------------------------")
 
 question = input("Type: BOGGS and press enter if you really do want to delete the files from hard drive which do not have links in the OSP database? ")
