@@ -27,7 +27,6 @@ import glob
 from classes import Channel
 from classes.Sec import User
 
-
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = config.dbLocation
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -36,10 +35,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 db.app = app
 
-#system.newLog(0, "Testing Stuff")
-#theUpvotes = upvotes.streamUpvotes.query.all()
-#for upvote in theUpvotes:
-#    db.session.delete(upvote) 
+system.newLog(0, "RUNNING OSP UNUSED FILE TRIMMER")
 
 print("--------------------------------------------------------------------------")
 print("OSP UNUSED FILE TRIMMER")
@@ -138,9 +134,3 @@ else:
     print("You did not type BOGGS. No files were deleted (Chicken).")
 
 print("Bye!")
-
-
-#x=globalvars.videoRoot
-#for r,d,f in os.walk(x):
-#    for i in f:
-#        print(os.path.join(r,i))
