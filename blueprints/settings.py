@@ -420,13 +420,13 @@ def admin_page():
                 themeList.append(theme)
 
         logsList = logs.logs.query.order_by(logs.logs.timestamp.desc()).limit(250)
-        vidList  =  RecordedVideo.RecordedVideo.query.order_by(RecordedVideo.RecordedVideo.videoDate.desc()).limit(250)
+        vidList  =  RecordedVideo.RecordedVideo.query.order_by(RecordedVideo.RecordedVideo.videoDate.asc()).limit(250)
          
         missingSet = set()
-        theVideos = RecordedVideo.RecordedVideo.query.all()
+#        theVideos = RecordedVideo.RecordedVideo.query.all()
 
         videos_root = globalvars.videoRoot + 'videos/'
-        for recordedVid in theVideos:
+        for recordedVid in vidList:
             filePath = "{}{}".format(videos_root, recordedVid.videoLocation)
 
             if os.path.exists(filePath) == False:

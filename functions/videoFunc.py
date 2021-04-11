@@ -29,20 +29,21 @@ def getVidLength(input_video):
 def deleteVideo(videoID):
     recordedVid = RecordedVideo.RecordedVideo.query.filter_by(id=videoID).first()
 
-    if (current_user.id == recordedVid.owningUser or current_user.has_role('Admin') is True) and recordedVid.videoLocation is not None:
+    if (current_user.id == recordedVid.owningUser or current_user.has_role('Admin') is True):
         videos_root = globalvars.videoRoot + 'videos/'
-        filePath = videos_root + recordedVid.videoLocation
-        thumbnailPath = videos_root + recordedVid.videoLocation[:-4] + ".png"
-        gifPath = videos_root + recordedVid.videoLocation[:-4] + ".gif"
+        if (recordedVid.videoLocation is not None) and (recordedVid.videoLocation != ""):
+            filePath = videos_root + recordedVid.videoLocation
+            thumbnailPath = videos_root + recordedVid.videoLocation[:-4] + ".png"
+            gifPath = videos_root + recordedVid.videoLocation[:-4] + ".gif"
 
-        if filePath != videos_root:
-            if (recordedVid.videoLocation is not None or recordedVid.videoLocation != ""):
-                if os.path.exists(filePath):  
-                    os.remove(filePath)
-                if os.path.exists(thumbnailPath):
-                    os.remove(thumbnailPath)
-                if os.path.exists(gifPath):
-                    os.remove(gifPath)
+            if filePath != videos_root:
+                if (recordedVid.videoLocation is not None or recordedVid.videoLocation != ""):
+                    if os.path.exists(filePath):  
+                        os.remove(filePath)
+                    if os.path.exists(thumbnailPath):
+                        os.remove(thumbnailPath)
+                    if os.path.exists(gifPath):
+                        os.remove(gifPath)
 
         # Delete Clips Attached to Video
         for clip in recordedVid.clips:

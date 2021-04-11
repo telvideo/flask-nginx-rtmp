@@ -27,7 +27,6 @@ import glob
 from classes import Channel
 from classes.Sec import User
 
-
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = config.dbLocation
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -38,6 +37,7 @@ db.app = app
 
 #system.newLog(0, "Testing Stuff")
 
-fred = "{}{}".format("fred ","boggs")
+vidList  =  RecordedVideo.RecordedVideo.query.order_by(RecordedVideo.RecordedVideo.videoDate.asc()).limit(10)
 
-print(fred)
+for vid in vidList:
+    print(vid.videoDate) 
