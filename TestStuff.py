@@ -24,6 +24,8 @@ import os
 from pathlib import Path
 import glob
 
+from functions import videoFunc
+
 from classes import Channel
 from classes.Sec import User
 
@@ -37,7 +39,19 @@ db.app = app
 
 #system.newLog(0, "Testing Stuff")
 
-vidList  =  RecordedVideo.RecordedVideo.query.order_by(RecordedVideo.RecordedVideo.videoDate.asc()).limit(10)
+#vidList  =  RecordedVideo.RecordedVideo.query.order_by(RecordedVideo.RecordedVideo.videoDate.asc()).limit(10)
 
-for vid in vidList:
-    print(vid.videoDate) 
+#for vid in vidList:
+#    print(vid.videoDate) 
+
+#if (current_user.id == recordedVid.owningUser or current_user.has_role('Admin') is True):
+
+
+if (1 == 2 or 2 == 2 ) :
+    videoID = 27
+
+videoID = 27
+
+#videoFunc.deleteVideo(videoID)
+
+

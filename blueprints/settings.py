@@ -423,7 +423,6 @@ def admin_page():
         vidList  =  RecordedVideo.RecordedVideo.query.order_by(RecordedVideo.RecordedVideo.videoDate.asc()).limit(250)
          
         missingSet = set()
-#        theVideos = RecordedVideo.RecordedVideo.query.all()
 
         videos_root = globalvars.videoRoot + 'videos/'
         for recordedVid in vidList:

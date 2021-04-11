@@ -29,57 +29,59 @@ def getVidLength(input_video):
 def deleteVideo(videoID):
     recordedVid = RecordedVideo.RecordedVideo.query.filter_by(id=videoID).first()
 
-    if (current_user.id == recordedVid.owningUser or current_user.has_role('Admin') is True):
-        videos_root = globalvars.videoRoot + 'videos/'
-        if (recordedVid.videoLocation is not None) and (recordedVid.videoLocation != ""):
-            filePath = videos_root + recordedVid.videoLocation
-            thumbnailPath = videos_root + recordedVid.videoLocation[:-4] + ".png"
-            gifPath = videos_root + recordedVid.videoLocation[:-4] + ".gif"
+    # only owningUsers or admins can delete
+    if (current_user.id != recordedVid.owningUser and (current_user.has_role('Admin') is False)):
+        return False
+        
+    # Delete Clips Attached to Video
+    for clip in recordedVid.clips:
+        db.session.delete(clip)
 
-            if filePath != videos_root:
-                if (recordedVid.videoLocation is not None or recordedVid.videoLocation != ""):
-                    if os.path.exists(filePath):  
-                        os.remove(filePath)
-                    if os.path.exists(thumbnailPath):
-                        os.remove(thumbnailPath)
-                    if os.path.exists(gifPath):
-                        os.remove(gifPath)
+    # Delete Upvotes Attached to Video
+    upvoteQuery = upvotes.videoUpvotes.query.filter_by(videoID=recordedVid.id).all()
+    for vote in upvoteQuery:
+        db.session.delete(vote)
 
-        # Delete Clips Attached to Video
-        for clip in recordedVid.clips:
-            thumbnailPath = videos_root + clip.thumbnailLocation
+    # Delete Comments Attached to Video
+    commentQuery = comments.videoComments.query.filter_by(videoID=recordedVid.id).all()
+    for comment in commentQuery:
+        db.session.delete(comment)
 
-            if thumbnailPath != videos_root:
-                if os.path.exists(thumbnailPath) and (
-                        clip.thumbnailLocation is not None or clip.thumbnailLocation != ""):
-                    os.remove(thumbnailPath)
-            db.session.delete(clip)
+    # Delete Views Attached to Video
+    viewQuery = views.views.query.filter_by(viewType=1, itemID=recordedVid.id).all()
+    for view in viewQuery:
+        db.session.delete(view)
 
-        # Delete Upvotes Attached to Video
-        upvoteQuery = upvotes.videoUpvotes.query.filter_by(videoID=recordedVid.id).all()
+    db.session.delete(recordedVid)
+    db.session.commit()
 
-        for vote in upvoteQuery:
-            db.session.delete(vote)
+    # Now that we have updated the database it's now OK to delete the physical files from disk
+    videos_root = globalvars.videoRoot + 'videos/'
+    if (recordedVid.videoLocation is not None or recordedVid.videoLocation != ""):
+        filePath = videos_root + recordedVid.videoLocation
+        thumbnailPath = videos_root + recordedVid.videoLocation[:-4] + ".png"
+        gifPath = videos_root + recordedVid.videoLocation[:-4] + ".gif"
 
-        # Delete Comments Attached to Video
-        commentQuery = comments.videoComments.query.filter_by(videoID=recordedVid.id).all()
+        if filePath != videos_root:
+            if os.path.exists(filePath):  
+                os.remove(filePath)
+            if os.path.exists(thumbnailPath):
+                os.remove(thumbnailPath)
+            if os.path.exists(gifPath):
+                os.remove(gifPath)
 
-        for comment in commentQuery:
-            db.session.delete(comment)
+    # Delete Clips Attached to Video
+    for clip in recordedVid.clips:
+        thumbnailPath = videos_root + clip.thumbnailLocation
 
-        # Delete Views Attached to Video
-        viewQuery = views.views.query.filter_by(viewType=1, itemID=recordedVid.id).all()
+        if thumbnailPath != videos_root:
+            if os.path.exists(thumbnailPath) and (
+                    clip.thumbnailLocation is not None or clip.thumbnailLocation != ""):
+                os.remove(thumbnailPath)
 
-        for view in viewQuery:
-            db.session.delete(view)
-
-        db.session.delete(recordedVid)
-
-        db.session.commit()
-        system.newLog(4, "Video Deleted - ID #" + str(videoID))
-        return True
-    return False
-
+    system.newLog(4, "Video Deleted - ID #" + str(videoID))
+    return True
+    
 def changeVideoMetadata(videoID, newVideoName, newVideoTopic, description, allowComments):
 
     recordedVidQuery = RecordedVideo.RecordedVideo.query.filter_by(id=videoID, owningUser=current_user.id).first()
