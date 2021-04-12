@@ -414,15 +414,13 @@ def admin_page():
                 themeList.append(theme)
 
         logsList = logs.logs.query.order_by(logs.logs.timestamp.desc()).limit(250)
-        vidList  =  RecordedVideo.RecordedVideo.query.order_by(RecordedVideo.RecordedVideo.videoDate.asc()).limit(250)
+        vidList  =  RecordedVideo.RecordedVideo.query.order_by(RecordedVideo.RecordedVideo.videoDate.asc()).limit(2000)
          
         missingSet = set()
 
         videos_root = globalvars.videoRoot + 'videos/'
         for recordedVid in vidList:
-            filePath = "{}{}".format(videos_root, recordedVid.videoLocation)
-
-            if os.path.exists(filePath) == False:
+            if os.path.exists("{}{}".format(videos_root, recordedVid.videoLocation)) == False:
                 missingSet.add(recordedVid.id)
         
         oAuthProvidersList = settings.oAuthProvider.query.all()
