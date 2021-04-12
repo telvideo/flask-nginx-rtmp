@@ -1322,10 +1322,10 @@
                           <div class="col-lg-10 col-md-12">
                               <h5>Videos</h5>
                           </div>
-                      </div>
+                      </div>                     
                       <div class="row">
                           <div class="col-12">
-                              <table class="table table-hover" id="vidTable">
+                              <table class="table table-hover">
                                   <thead class="shadow">
                                   <tr>
                                       <th>
@@ -1356,7 +1356,7 @@
                                   </thead>
                                   <tbody>
                                   {% for vid in vidList %}
-                                      <tr>
+                                      <tr id="HVideoList-{{vid.id}}">
                                           <td>
                                               {{vid.videoDate|normalize_date}}
                                           </td>
@@ -1370,7 +1370,7 @@
                                               {{vid.views}}
                                           </td>
                                           <td>
-                                              <i class="far fa-clock mr-1"></i>{{vid.length|hms_format}}<br/>
+                                              <i class="far fa-clock mr-1"></i>{{vid.length|hms_format}}
                                           </td>
                                           <td>
                                               {{vid.topic}}
@@ -1378,11 +1378,11 @@
                                           <td>
                                               {% if vid.id in missingSet %}<span class="badge badge-secondary">ERROR</span>{% else %}<span class="badge badge-success">OK</span>{% endif %}
                                           </td>
-                                          <td>
-                                              <a href="/settings/admin?action=delete&setting=video&videoID={{vid.id}}" class="btn btn-sm btn-danger shadow " data-toggle="tooltip" data-placement="top" title="Delete Video" ><i class="far fa-trash-alt"></i></a>
+                                          <td>                    
+                                              <button class="videoDeleteModalButton btn btn-danger shadow" onclick="mVideoDelete('{{vid.id}}')" title="Delete Video"><i class="fas fa-trash-alt"></i></button>
                                           </td>
                                       </tr>
-                                  {% endfor %}
+                                  {% endfor %}                                   
                                   </tbody>
                               </table>
                           </div>

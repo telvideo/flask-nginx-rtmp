@@ -192,13 +192,7 @@ def admin_page():
             setting = request.args.get("setting")
 
             if action == "delete":
-                if setting == "video":
-                    videoID = int(request.args.get("videoID"))
-                    videoFunc.deleteVideo(videoID)
-    
-                    return redirect(url_for('.admin_page', page="vids"))
-
-                elif setting == "topics":
+                if setting == "topics":
                     topicID = int(request.args.get("topicID"))
 
                     topicQuery = topics.topics.query.filter_by(id=topicID).first()
