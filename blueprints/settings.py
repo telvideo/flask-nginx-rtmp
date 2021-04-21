@@ -359,7 +359,7 @@ def admin_page():
         roleList = Sec.Role.query.all()
         channelList = Channel.Channel.query.all()
         streamList = Stream.Stream.query.all()
-        topicsList = topics.topics.query.all()
+        topicsList = topics.topics.query.order_by(topics.topics.name.asc())
         rtmpServers = settings.rtmpServer.query.all()
         edgeNodes = settings.edgeStreamer.query.all()
 
