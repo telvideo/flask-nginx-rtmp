@@ -1147,7 +1147,8 @@ def settings_channels_page():
                 flash("Invalid Change Attempt", "Error")
             redirect(url_for('.settings_channels_page'))
 
-    topicList = topics.topics.query.all()
+    topicList = topics.topics.query.order_by(topics.topics.name.asc())
+
     user_channels = Channel.Channel.query.filter_by(owningUser=current_user.id).all()
 
     activeRTMPQuery = settings.rtmpServer.query.filter_by(active=True).all()

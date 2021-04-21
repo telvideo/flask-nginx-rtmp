@@ -47,11 +47,39 @@ db.app = app
 #if (current_user.id == recordedVid.owningUser or current_user.has_role('Admin') is True):
 
 
-if (1 == 2 or 2 == 2 ) :
-    videoID = 27
 
-videoID = 27
+import shutil
 
-#videoFunc.deleteVideo(videoID)
+fullDiskThreshold = 90 / 100
+
+AGiG = 1024 * 1024 * 1024
+
+total, used, free = shutil.disk_usage("/")
+
+used = (AGiG*50)
+print("Total: %d GiB" % (total // (2**30)))
+print("Free : %d GiB" % (free // (2**30)))
+print("Used : %d GiB" % (used // (2**30)))
+print("")
+print("Total: %d Bytes" % total)
+print("Free : %d Bytes" % free)
+print("Used : %d Bytes" % used)
+
+Percentage = used / total
+print("Percentage", Percentage)
+print("fullDiskThreshold", fullDiskThreshold)
+
+if Percentage > fullDiskThreshold:
+    print("Full")
+else:
+    print("Not Full")
+
+vidList  =  RecordedVideo.RecordedVideo.query.order_by(RecordedVideo.RecordedVideo.videoDate.asc()).limit(2)
+
+for vid in vidList:
+    print("Delete: " + str(vid.id) + " " + str(vid.videoDate) + " " + str(vid.channelName) + " owningUser =" + str(vid.owningUser ))
+    
+    #result = videoFunc.deleteVideo(vid.id)
+
 
 
