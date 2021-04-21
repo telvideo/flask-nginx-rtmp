@@ -5,6 +5,7 @@
 from flask import Flask
 from conf import config
 
+from classes import settings
 from classes import Stream
 from classes import upvotes
 from classes import comments
@@ -53,6 +54,15 @@ print("-------------------------------------------------------------------------
 
 fileNameSet = set()
 
+
+#print("Site logo")
+sysSettings = settings.settings.query.all()[0]
+
+fileNameSet.add("{}{}".format(images_root, sysSettings.systemLogo))
+fileNameSet.add("{}{}".format(videos_root, sysSettings.systemLogo))
+fileNameSet.add(sysSettings.systemLogo)
+fileNameSet.add("{}{}".format("/opt/osp/", sysSettings.systemLogo))
+ 
 #print("Channel")
 theChannels = Channel.Channel.query.all()
 for theChan in theChannels:
