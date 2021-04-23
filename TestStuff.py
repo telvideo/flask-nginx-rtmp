@@ -2,6 +2,10 @@
 #from gevent import monkey
 #monkey.patch_all(thread=True)
 
+from flask import request, flash, render_template, redirect, url_for, Blueprint, current_app, Response, session, abort
+from flask_security import Security, SQLAlchemyUserDatastore, current_user, login_required, roles_required
+from flask_security.utils import hash_password
+
 from flask import Flask
 from conf import config
 
@@ -47,6 +51,21 @@ db.app = app
 #if (current_user.id == recordedVid.owningUser or current_user.has_role('Admin') is True):
 
 
+from flask import Flask, render_template
+
+
+app = Flask(__name__)
+
+@app.route("/")
+def index():
+    pagetitle = "HomePage"
+    return render_template("index.html",
+                            mytitle=pagetitle,
+                            mycontent="Hello World")
+#render_template('admin.html',name= "Fred")
+   
+print("fred")
+exit()
 
 import shutil
 

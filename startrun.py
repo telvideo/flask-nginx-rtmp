@@ -25,6 +25,12 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 db.app = app
 
+firstRunCheck = system.check_existing_settings()
+
+if firstRunCheck is False:
+    system.newLog(0, "First Startup NOT Deleting Active Streams")
+    quit() 
+    
 #delete all the stream upvotes
 print("Start delete active streams")
 theUpvotes = upvotes.streamUpvotes.query.all()

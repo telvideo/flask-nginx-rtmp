@@ -414,7 +414,7 @@ def admin_page():
                 themeList.append(theme)
 
         logsList = logs.logs.query.order_by(logs.logs.timestamp.desc()).limit(250)
-        vidList  =  RecordedVideo.RecordedVideo.query.order_by(RecordedVideo.RecordedVideo.videoDate.asc()).limit(2000)
+        vidList  =  RecordedVideo.RecordedVideo.query.order_by(RecordedVideo.RecordedVideo.videoDate.asc())#.limit(250)
          
         missingSet = set()
 
