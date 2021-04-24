@@ -1,3 +1,5 @@
+echo"--------------------------------------------------------"
+echo "Get latest code"
 echo "-------------------------------------------------------"
 systemctl stop osp.target 
 echo "OSP Stopped."
@@ -6,7 +8,7 @@ echo "Save config.py"
 cp /opt/osp/conf/config.py /opt
 rm -rf /opt/osp
 
-echo "Getting Boggs code from Gitlab..."
+echo "Getting code from Gitlab..."
 
 git clone https://gitlab.com/markboggs/flask-nginx-rtmp-manager.git /opt/osp
 echo "Cloned."
@@ -18,7 +20,7 @@ cp /opt/config.py /opt/osp/conf/config.py
 
 echo "Restart OSP."
 systemctl restart osp.target 
-echo "Copy new getboggsto /opt"
-cp /opt/osp/boggsget /opt 
+echo "Move new getboggs to /opt"
+mv /opt/osp/boggsget /opt 
 
 echo "Boggs get complete."
