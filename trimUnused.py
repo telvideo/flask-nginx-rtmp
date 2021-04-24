@@ -54,15 +54,18 @@ print("-------------------------------------------------------------------------
 
 fileNameSet = set()
 
-
 #print("Site logo")
 sysSettings = settings.settings.query.all()[0]
-
-fileNameSet.add("{}{}".format(images_root, sysSettings.systemLogo))
-fileNameSet.add("{}{}".format(videos_root, sysSettings.systemLogo))
+#print(sysSettings.systemLogo)
 fileNameSet.add(sysSettings.systemLogo)
-fileNameSet.add("{}{}".format("/opt/osp/", sysSettings.systemLogo))
+fileNameSet.add("{}{}".format(globalvars.videoRoot,sysSettings.systemLogo))
  
+newString = globalvars.videoRoot [:-1]
+fileNameSet.add("{}{}".format(newString,sysSettings.systemLogo))
+
+fileNameSet.add("{}{}".format("/opt/osp/", sysSettings.systemLogo))
+fileNameSet.add("{}{}".format("/opt/osp", sysSettings.systemLogo))
+
 #print("Channel")
 theChannels = Channel.Channel.query.all()
 for theChan in theChannels:
