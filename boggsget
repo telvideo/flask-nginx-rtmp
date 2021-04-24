@@ -20,7 +20,7 @@ cp /opt/config.py /opt/osp/conf/config.py
 
 echo "Restart OSP."
 systemctl restart osp.target 
-echo "Move new getboggs to /opt"
-mv /opt/osp/boggsget /opt 
+echo "Move new boggsget to /opt"
+cp /opt/osp/boggsget /opt 
 
 echo "Boggs get complete."
