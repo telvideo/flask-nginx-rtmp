@@ -12,10 +12,9 @@
 {% endblock %}
 
 {% block body %}
-
 <div class="container-fluid">
     <div class="row justify-content-center">
-        <div class="col-lg-10 col-md-12" style="margin-top:15px;">
+        <div class="col-12" style="margin-top:15px;">
             <ul class="nav nav-pills mb-3" id="admin-nav" role="tablist">
                 <li class="nav-item">
                     <a class="nav-link {% if page == None or page == 'dash' %} active {% endif %}"  role="tab" id="admin-nav-dashboard" href="#dashboard" data-toggle="pill" aria-controls="admin-nav-dashboard" aria-selected="true">Dashboard</a>
@@ -1321,12 +1320,7 @@
                     </div>
                 </div>                
                 <div class="tab-pane fade {% if page == 'vids' %}show active{% endif %}" role="tabpanel" aria-labelledby="admin-content-vids" id="vids">
-                    <div class="container-fluid">
-                        <div class="row">
-                            <div class="col-lg-10 col-md-12">
-                                <h5>Videos</h5>
-                            </div>
-                        </div>                     
+                    <div class="container-fluid">                                       
                         <div class="row">
                             <div class="col-12">
                                 <table class="table table-hover" id="vidTable">
@@ -1351,7 +1345,7 @@
                                             <b>Topic</b>
                                         </th>
                                         <th>
-                                            <b>Disk File</b>
+                                            <b>Disk</b>
                                         </th>
                                         <th>
                                             <b>Delete</b>
@@ -1368,7 +1362,7 @@
                                                 {{vid.owningUser|get_userName}}
                                             </td>
                                             <td>
-                                                {{vid.channelName}}
+                                                <a href="/play/{{vid.id}}"><span id="vidName-{{vid.id}}">{{vid.channelName}}</span></a>
                                             </td>
                                             <td>
                                                 {{vid.views}}
@@ -1382,8 +1376,10 @@
                                             <td>
                                                 {% if vid.id in missingSet %}<span class="badge badge-secondary">ERROR</span>{% else %}<span class="badge badge-success">OK</span>{% endif %}
                                             </td>
-                                            <td>                    
-                                                <button class="videoDeleteModalButton btn btn-danger shadow" onclick="mVideoDelete('{{vid.id}}')" title="Delete Video"><i class="fas fa-trash-alt"></i></button>
+                                            <td>    
+                                                {% if vid.id in missingSet %} <button class="videoDeleteModalButton btn btn-danger shadow btn-sm" onclick="mVideoDelete('{{vid.id}}')" title="Delete Video"><i class="fas fa-trash-alt fa-spin fa-2x"></i></button>
+                                                {% else %}<button class="videoDeleteModalButton btn btn-danger shadow btn-sm" onclick="mVideoDelete('{{vid.id}}')" title="Delete Video"><i class="fas fa-trash-alt"></i></button>
+                                                {% endif %}
                                             </td>
                                         </tr>
                                     {% endfor %}                                   
