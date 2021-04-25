@@ -18,9 +18,13 @@ echo "Chowned."
 echo "Replace config.py"
 cp /opt/config.py /opt/osp/conf/config.py
 
+echo "Upgrate database to 0.8.8 from 0.8.7 or error if already 0.8.8"
+sudo mysql -e "ALTER TABLE osp.settings ADD COLUMN proxyFQDN VARCHAR(2048) NULL AFTER requireConfirmedEmail"
+sudo mysql -e "ALTER TABLE osp.Stream ADD COLUMN rtmpServer INT NULL AFTER rtmpServer"
+
 echo "Restart OSP."
 systemctl restart osp.target 
-echo "Move new boggsget to /opt"
+echo "Copy possibly new boggsget to /opt"
 cp /opt/osp/boggsget /opt 
 
 echo "Boggs get complete."
