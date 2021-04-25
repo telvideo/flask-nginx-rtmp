@@ -1,0 +1,11 @@
+{
+  "Name": "Deployment",
+  "Maintainer": "Prohibited",
+  "Version": "1.0",
+  "Description": "The default Prohibited TV theme",
+  "Override": [
+    "index.html",
+    "userSettings.html",
+    "user_channels.html"
+  ]
+}
