@@ -20,7 +20,7 @@ cp /opt/config.py /opt/osp/conf/config.py
 
 echo "Upgrate database to 0.8.8 from 0.8.7 or error if already 0.8.8"
 sudo mysql -e "ALTER TABLE osp.settings ADD COLUMN proxyFQDN VARCHAR(2048) NULL AFTER requireConfirmedEmail"
-sudo mysql -e "ALTER TABLE osp.Stream ADD COLUMN rtmpServer INT NULL AFTER rtmpServer"
+sudo mysql -e "ALTER TABLE osp.Stream ADD COLUMN rtmpServer INT NULL AFTER totalViewers"
 
 echo "Restart OSP."
 systemctl restart osp.target 

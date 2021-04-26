@@ -6,6 +6,8 @@
   "Override": [
     "index.html",
     "userSettings.html",
-    "user_channels.html"
+    "user_channels.html",
+    "channelplayer.html",
+    "chatpopout.html"
   ]
 }
