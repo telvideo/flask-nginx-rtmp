@@ -38,7 +38,7 @@
      <div class="row px-2">
          <div class="col-lg col-xs-12 col-sm-12">
               <div class="index-video-title ml-2 my-2">
-                  <span class="float-left" id="channelName"><b>DF{{channel.channelName}}DF</b></span>
+                  <span class="float-left" id="channelName"><b>{{channel.channelName}}</b></span>
                   <span class="float-left px-1">
                     {% if current_user.is_authenticated %}
                       <button id="chanSubStateButton" class="btn btn-sm {% if subState == True %} btn-success {% else %} btn-outline-success {% endif %}" onclick='toggleChannelSub("{{channel.id}}")'>{% if subState == True %}<i class="fas fa-star"></i><span class="d-none d-sm-none d-md-inline"> Unsubscribe</span>{% else %}<i class="far fa-star"></i><span class="d-none d-sm-none d-md-inline"> Subscribe</span>{% endif %}</button>
