@@ -38,15 +38,15 @@
      <div class="row px-2">
          <div class="col-lg col-xs-12 col-sm-12">
               <div class="index-video-title ml-2 my-2">
-                  <span class="float-left" id="channelName"><b>{{channel.channelName}}</b></span>
-                  <span class="float-right mx-1">
+                  <span class="float-left" id="channelName"><b>DF{{channel.channelName}}DF</b></span>
+                  <span class="float-left px-1">
                     {% if current_user.is_authenticated %}
                       <button id="chanSubStateButton" class="btn btn-sm {% if subState == True %} btn-success {% else %} btn-outline-success {% endif %}" onclick='toggleChannelSub("{{channel.id}}")'>{% if subState == True %}<i class="fas fa-star"></i><span class="d-none d-sm-none d-md-inline"> Unsubscribe</span>{% else %}<i class="far fa-star"></i><span class="d-none d-sm-none d-md-inline"> Subscribe</span>{% endif %}</button>
                     {% else %}
                       <button class="btn btn-sm btn-outline-secondary disabled" disabled><i class="far fa-star"></i><span class="d-none d-sm-none d-md-"> Subscribe</span></button>
                     {% endif %}
                   </span>
-                  <span class="float-right mt-2">
+                  <span class="float-left px-1">
                       <span id="liveIndicatorBadge" class="badge badge-secondary"><b><i class="fas fa-video-slash"></i><span class="d-none d-sm-none d-md-inline"> Offline</span></b></span>
                     {% if channel.protected and sysSettings.protectionEnabled %}
                       <span class="badge badge-warning float-right mr-1 align-bottom"><i class="fas fa-user-lock"></i><span class="d-none d-sm-none d-md-inline"> Protected</span></span>
@@ -230,7 +230,7 @@
                     <div class="chatEntry flexbox">
                       <span class="chatInfo">
                         <span style="color:darkgreen" class="chatTimestamp float-right"></span>
-                        <span class="chatUsername":> </span>: <span style="color:white" class="chatMessage"></span>
+                        <span class="chatUsername"> </span> <span style="color:white" class="chatMessage"></span>
 
 <!--                        <div><span class="chatTimestamp float-right"></span></div>
                         <div><span class="chatUsername"></span></div>
