@@ -23,7 +23,7 @@
                     <span class="badge badge-secondary"><i class="fas fa-video-slash"></i> Offline</span>
                     {% endif %}
                     {% if channelData.protected and sysSettings.protectionEnabled %}<span class="badge badge-info"><i class="fas fa-user-lock"></i> Protected</span>{% endif %}<br>
-                    <i class="fas fa-star my-2 mr-2"></i> Subscribers: {{channelData.subscriptions|length}}<br>
+                    <i class="fas fa-star my-2 mr-2"></i> Followers: {{channelData.subscriptions|length}}<br>
                     <a href="/streamer/{{channelData.owningUser}}/">
                         <h2 class="display-5"><img width="34" height="34" class="userphoto" src="{{channelData.owningUser|get_pictureLocation}}" onerror="this.src='/static/img/user2.png';"> {{channelData.owningUser|get_userName}}</h2>
                     </a>
@@ -38,9 +38,9 @@
                 </span>
                 <span class="m-1">
                     {% if current_user.is_authenticated %}
-                    <button id="chanSubStateButton" class="btn {% if subState == True %} btn-success {% else %} btn-outline-secondary {% endif %}" onclick='toggleChannelSub("{{channelData.id}}")'>{% if subState == True %}<i class="fas fa-star"></i> Unsubscribe{% else %}<i class="far fa-star"></i> Subscribe{% endif %}</button>
+                    <button id="chanSubStateButton" class="btn {% if subState == True %} btn-success {% else %} btn-outline-secondary {% endif %}" onclick='toggleChannelSub("{{channelData.id}}")'>{% if subState == True %}<i class="fas fa-star"></i> Unfollow{% else %}<i class="far fa-star"></i> Follow{% endif %}</button>
                     {% else %}
-                    <button class="btn btn-outline-secondary disabled" disabled><i class="far fa-star"></i> Subscribe</button>
+                    <button class="btn btn-outline-secondary disabled" disabled><i class="far fa-star"></i> Follow</button>
                     {% endif %}
                 </span>
             </div>
@@ -312,10 +312,10 @@ function toggleChannelSub(chanID) {
 socket.on('sendChanSubResults', function (msg) {
     var subButton = document.getElementById('chanSubStateButton');
     if (msg['state'] === true) {
-        subButton.innerHTML = "<i class='fas fa-star'></i> Unsubscribe";
+        subButton.innerHTML = "<i class='fas fa-star'></i> Unfollow";
         subButton.className = "btn btn-success";
     } else {
-        subButton.innerHTML = "<i class='far fa-star'></i> Subscribe";
+        subButton.innerHTML = "<i class='far fa-star'></i> Follow";
         subButton.className = "btn btn-outline-secondary";
     }
   });

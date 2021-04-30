@@ -189,8 +189,8 @@ function enterRoom(room) {
 function sendMessage() {
     var chatInput = document.getElementById('chatinput');
     var message = chatInput.value;
-    if (message.length > 750) {
-        message = message.slice(0,750);
+    if (message.length > 420) {
+        message = message.slice(0,420);
     }
     if (message != '') {
         var o = {to: ROOMNAME + '@' + ROOM_SERVICE, type: 'groupchat'};

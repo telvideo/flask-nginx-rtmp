@@ -141,7 +141,7 @@
                                         {% if current_user.is_authenticated %}
                                         <button id="chanSubStateButton"
                                             class="btn {% if subState == True %} btn-outline-success {% else %} btn-outline-secondary {% endif %}"
-                                            onclick='toggleChannelSub("{{channel.id}}")'>{% if subState == True %}<i
+                                            title="Follow" onclick='toggleChannelSub("{{channel.id}}")'>{% if subState == True %}<i
                                                 class="fas fa-star"></i>{% else %}<i
                                                 class="far fa-star"></i>{% endif %}</button>
                                         {% else %}
@@ -221,7 +221,7 @@
                           <div class="chatFooterTop"></div>
                           <div class="chatFooterInput">
                               <div class="input-group">
-                                  <input id="chatinput" type="text" class="form-control" maxlength="750" autocomplete="off">
+                                  <input id="chatinput" type="text" class="form-control" maxlength="420" autocomplete="off">
                                   <div class="input-group-append">
                                       <button type="button" class=" btn btn-success form-control" id="openEmojiButton"><i class="far fa-smile"></i></button>
                                       <button type="button" class=" btn btn-primary form-control" id="sendChat" onclick="sendMessage();"><i class="fas fa-paper-plane"></i></button>
@@ -270,8 +270,10 @@
                             <img class="avatar rounded shadow" src="https://picsum.photos/48">
                           </span>-->
                           <span class="chatInfo">
-                            <span class="chatTimestamp"></span><span class="chatUsername ml-1"></span>:
-                            <span class="chatMessage ml-1"></span>
+                            <span style="color:darkgreen" class="chatTimestamp float-right"></span>
+                            <span class="chatUsername"> </span> <span style="color:white" class="chatMessage"></span>
+<!----                            <span class="chatTimestamp"></span><span class="chatUsername ml-1"></span>:
+                            <span class="chatMessage ml-1"></span> -->
                           </span>
                         </div>
                     </div>
