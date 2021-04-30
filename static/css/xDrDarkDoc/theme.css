@@ -1,6 +1,17 @@
+@font-face {
+  font-family: "LT Emphasis";
+  src: url("/static/fonts/LT Emphasis.ttf");
+}
+
 body {
 /*    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;*/
 }
+
+body {
+  font-family: "LT Emphasis";
+  color: #1e90ff;
+}
+
 a:link {
   color: #3488db;
 }
@@ -15,7 +26,7 @@ a:active {
   color: #3488db;
 } 
 a.btn, a.dropdown-item{
-  color: #fff !important;
+  color: #3488db !important;
 }
 text{
   color: #aaa;
@@ -46,11 +57,16 @@ table {
 
 .navbar{
 	border: 0px !important;
-	border-bottom: 1px solid #3488db !important;
+
+  border-bottom: 1px solid #13649f !important;
 }	
 .navbar .nav-link {
 	padding: 0.6rem 1rem;
+  color: #13649f !important;
+  font-size: 20px;
+  font-weight: bold;
 }
+
 .navbar-nav>li>a.profile-image {
   padding-top: 3px;
   padding-bottom: 5px;
@@ -76,7 +92,7 @@ table {
   right:30px;
   border-left: 14px solid transparent;
   border-right: 14px solid transparent;
-  border-bottom: 20px solid #3488db;
+  border-bottom: 20px solid #13649f;
   z-index: -1;
 }
 
@@ -125,9 +141,9 @@ label.btn, .btn{
   border-radius: 0.1rem !important;
 }
 .chatbox>input{
-background-color:#272B30 !important;
+background-color:#550505 !important;
 color: #aaa !important;
-border: 1px solid #3488db !important;
+border: 1px solid #13649f !important;
 border-radius: 0.1rem !important;
 }
 input, textarea, select{
@@ -137,14 +153,14 @@ border: 1px solid #000 !important;
 border-radius: 0.1rem !important;
 }
 .btn-outline-success{
-    color: #3488db !important;
+    color: #13649f !important;
 } 
 .btn-success{
-	background-image: linear-gradient(#3488dbc7, #3488db 60%, #3488dbb0) !important;
+	background-image: linear-gradient(#13649fc7, #13649f 60%, #13649fb0) !important;
 	color: #fff !important;
 }
 .btn-success:hover{
-	background-image: linear-gradient(#3488db, #3488db, #3488db) !important;
+	background-image: linear-gradient(#13649f, #13649f, #13649f) !important;
 	color: #fff !important;
 }
 ::-webkit-input-placeholder { /* WebKit browsers */
@@ -172,7 +188,7 @@ hr {
   -moz-border-left-colors: none;
   -moz-border-right-colors: none;
   -moz-border-top-colors: none;
-  border-color: #3488db;
+  border-color: #13649f;
   border-width: 1px 0;
   margin: 10px auto;
   width: 75%;
@@ -420,8 +436,7 @@ hr {
     
     .chatPanel {
       display: none;
-      scrollbar-color: #1b1e22 #272b30;
-      scrollbar-width: thin;
+      scrollbar-width: none;
       flex-flow: column;
       height: calc(100vh - 170px);
     }
@@ -491,7 +506,7 @@ hr {
     }
     
     #chatside {
-        border-left: 1px solid #32383e;
+        border-left: 1px solid #13649f;
         width:400px;
     }
     
@@ -587,8 +602,7 @@ hr {
     justify-content: center;
     max-height:90vh;
     overflow-y: auto;
-    scrollbar-color: #1b1e22 #272b30;
-    scrollbar-width: thin;
+    scrollbar-width: none;
 }
 
 .videoPanel{
@@ -643,7 +657,7 @@ hr {
 .toast {
     background: #272B30;
     color: #aaa;
-    border: 1px solid #3488db
+    border: 1px solid #13649f
 }
 .toast-header{
     background-color: unset;
@@ -669,16 +683,16 @@ hr {
 	margin-top: 5px;
 }
 #channel-tab.nav-link:hover, #channel-tab.nav-link:focus, #channel-tab.nav-link.active{
-	border-color: #3488db !important;
-	border-bottom: 1px solid #3488db !important;
+	border-color: #13649f !important;
+	border-bottom: 1px solid #13649f !important;
 }
 #videos-tab.nav-link:hover, #videos-tab.nav-link:focus, #videos-tab.nav-link.active{
-	border-color: #3488db !important;
-	border-bottom: 1px solid #3488db !important;
+	border-color: #13649f !important;
+	border-bottom: 1px solid #13649f !important;
 }
 #clips-tab.nav-link:hover, #clips-tab.nav-link:focus, #clips-tab.nav-link.active{
-	border-color: #3488db !important;
-	border-bottom: 1px solid #3488db !important;
+	border-color: #13649f !important;
+	border-bottom: 1px solid #13649f !important;
 }
 .channel-img {
     width:100%;
