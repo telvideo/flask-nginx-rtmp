@@ -4,29 +4,30 @@
 }
 
 body {
+  overflow: hidden;
 /*    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;*/
 }
 
 body {
   font-family: "LT Emphasis";
-  color: #13497d;
+  color: #1e90ff;
 }
 
 a:link {
-  color: #13497d;
+  color: #1e90ff;
 }
 a:visited {
-  color: #13497d;
+  color: #1e90ff;
 }
 a:hover {
   color: #fff;
   text-decoration: none;
 }
 a:active {
-  color: #13497d;
+  color: #1e90ff;
 } 
 a.btn, a.dropdown-item{
-  color: #13497d !important;
+  color: #1e90ff !important;
 }
 text{
   color: #aaa;
@@ -58,11 +59,11 @@ table {
 .navbar{
 	border: 0px !important;
 
-  border-bottom: 1px solid #13497d !important;
+  border-bottom: 1px solid #1e90ff !important;
 }	
 .navbar .nav-link {
 	padding: 0.6rem 1rem;
-  color: #13497d !important;
+  color: #1e90ff !important;
   font-size: 20px;
   font-weight: bold;
 }
@@ -92,7 +93,7 @@ table {
   right:30px;
   border-left: 14px solid transparent;
   border-right: 14px solid transparent;
-  border-bottom: 20px solid #13497d;
+  border-bottom: 20px solid #1e90ff;
   z-index: -1;
 }
 
@@ -143,7 +144,7 @@ label.btn, .btn{
 .chatbox>input{
 background-color:#550505 !important;
 color: #aaa !important;
-border: 1px solid #13497d !important;
+border: 1px solid #1e90ff !important;
 border-radius: 0.1rem !important;
 }
 input, textarea, select{
@@ -153,14 +154,14 @@ border: 1px solid #000 !important;
 border-radius: 0.1rem !important;
 }
 .btn-outline-success{
-    color: #13497d !important;
+    color: #1e90ff !important;
 } 
 .btn-success{
-	background-image: linear-gradient(#13497dc7, #13497d 60%, #13497db0) !important;
+	background-image: linear-gradient(#1e90ffc7, #1e90ff 60%, #1e90ffb0) !important;
 	color: #fff !important;
 }
 .btn-success:hover{
-	background-image: linear-gradient(#13497d, #13497d, #13497d) !important;
+	background-image: linear-gradient(#1e90ff, #1e90ff, #1e90ff) !important;
 	color: #fff !important;
 }
 ::-webkit-input-placeholder { /* WebKit browsers */
@@ -188,7 +189,7 @@ hr {
   -moz-border-left-colors: none;
   -moz-border-right-colors: none;
   -moz-border-top-colors: none;
-  border-color: #13497d;
+  border-color: #1e90ff;
   border-width: 1px 0;
   margin: 10px auto;
   width: 75%;
@@ -211,7 +212,7 @@ hr {
 }
 .file-upload-button:after {
     transition: 200ms all ease;
-    background: #13497d;
+    background: #1e90ff;
     color: #fff;
     font-size: 16px;
     text-align: center;
@@ -482,8 +483,9 @@ hr {
     
     .chatPanel .chatContent .chatEntryContainer .chatEntry .chatInfo .chatMessage {
       font-family: Arial, Helvetica, sans-serif;
-      overflow: hidden;
       word-wrap: break-word;
+      overflow: hidden;
+      scrollbar-width: none;
     }
     
     .chatPanel .chatFooter {
@@ -507,7 +509,7 @@ hr {
     }
     
     #chatside {
-        border-left: 1px solid #13497d;
+        border-left: 1px solid #1e90ff;
         width:400px;
     }
     
@@ -601,8 +603,8 @@ hr {
 #videoWindow {
     display: flex;
     justify-content: center;
-    max-height:90vh;
-    overflow-y: auto;
+    max-height:100vh;
+    overflow: hidden;
     scrollbar-width: none;
 }
 
@@ -633,8 +635,8 @@ hr {
     width: 0 !important
 }
 
-/* .videoPanel{ overflow: -moz-scrollbars-none; }
-.videoPanel{ -ms-overflow-style: none; } */
+.videoPanel{ overflow: -moz-scrollbars-none; }
+.videoPanel{ -ms-overflow-style: none; } 
 
 .liveindicator{
 	margin-left: 10px;
@@ -658,7 +660,7 @@ hr {
 .toast {
     background: #272B30;
     color: #aaa;
-    border: 1px solid #13497d
+    border: 1px solid #1e90ff
 }
 .toast-header{
     background-color: unset;
@@ -684,16 +686,16 @@ hr {
 	margin-top: 5px;
 }
 #channel-tab.nav-link:hover, #channel-tab.nav-link:focus, #channel-tab.nav-link.active{
-	border-color: #13497d !important;
-	border-bottom: 1px solid #13497d !important;
+	border-color: #1e90ff !important;
+	border-bottom: 1px solid #1e90ff !important;
 }
 #videos-tab.nav-link:hover, #videos-tab.nav-link:focus, #videos-tab.nav-link.active{
-	border-color: #13497d !important;
-	border-bottom: 1px solid #13497d !important;
+	border-color: #1e90ff !important;
+	border-bottom: 1px solid #1e90ff !important;
 }
 #clips-tab.nav-link:hover, #clips-tab.nav-link:focus, #clips-tab.nav-link.active{
-	border-color: #13497d !important;
-	border-bottom: 1px solid #13497d !important;
+	border-color: #1e90ff !important;
+	border-bottom: 1px solid #1e90ff !important;
 }
 .channel-img {
     width:100%;
