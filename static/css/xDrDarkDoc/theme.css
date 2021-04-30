@@ -9,24 +9,24 @@ body {
 
 body {
   font-family: "LT Emphasis";
-  color: #1e90ff;
+  color: #13497d;
 }
 
 a:link {
-  color: #3488db;
+  color: #13497d;
 }
 a:visited {
-  color: #3488db;
+  color: #13497d;
 }
 a:hover {
   color: #fff;
   text-decoration: none;
 }
 a:active {
-  color: #3488db;
+  color: #13497d;
 } 
 a.btn, a.dropdown-item{
-  color: #3488db !important;
+  color: #13497d !important;
 }
 text{
   color: #aaa;
@@ -58,11 +58,11 @@ table {
 .navbar{
 	border: 0px !important;
 
-  border-bottom: 1px solid #13649f !important;
+  border-bottom: 1px solid #13497d !important;
 }	
 .navbar .nav-link {
 	padding: 0.6rem 1rem;
-  color: #13649f !important;
+  color: #13497d !important;
   font-size: 20px;
   font-weight: bold;
 }
@@ -92,7 +92,7 @@ table {
   right:30px;
   border-left: 14px solid transparent;
   border-right: 14px solid transparent;
-  border-bottom: 20px solid #13649f;
+  border-bottom: 20px solid #13497d;
   z-index: -1;
 }
 
@@ -143,7 +143,7 @@ label.btn, .btn{
 .chatbox>input{
 background-color:#550505 !important;
 color: #aaa !important;
-border: 1px solid #13649f !important;
+border: 1px solid #13497d !important;
 border-radius: 0.1rem !important;
 }
 input, textarea, select{
@@ -153,14 +153,14 @@ border: 1px solid #000 !important;
 border-radius: 0.1rem !important;
 }
 .btn-outline-success{
-    color: #13649f !important;
+    color: #13497d !important;
 } 
 .btn-success{
-	background-image: linear-gradient(#13649fc7, #13649f 60%, #13649fb0) !important;
+	background-image: linear-gradient(#13497dc7, #13497d 60%, #13497db0) !important;
 	color: #fff !important;
 }
 .btn-success:hover{
-	background-image: linear-gradient(#13649f, #13649f, #13649f) !important;
+	background-image: linear-gradient(#13497d, #13497d, #13497d) !important;
 	color: #fff !important;
 }
 ::-webkit-input-placeholder { /* WebKit browsers */
@@ -188,7 +188,7 @@ hr {
   -moz-border-left-colors: none;
   -moz-border-right-colors: none;
   -moz-border-top-colors: none;
-  border-color: #13649f;
+  border-color: #13497d;
   border-width: 1px 0;
   margin: 10px auto;
   width: 75%;
@@ -211,7 +211,7 @@ hr {
 }
 .file-upload-button:after {
     transition: 200ms all ease;
-    background: #0275d8;
+    background: #13497d;
     color: #fff;
     font-size: 16px;
     text-align: center;
@@ -439,6 +439,7 @@ hr {
       scrollbar-width: none;
       flex-flow: column;
       height: calc(100vh - 170px);
+      height: calc(100vh - 100px);
     }
     .chatPanel .chatHeader {
       width:100%;
@@ -506,7 +507,7 @@ hr {
     }
     
     #chatside {
-        border-left: 1px solid #13649f;
+        border-left: 1px solid #13497d;
         width:400px;
     }
     
@@ -657,7 +658,7 @@ hr {
 .toast {
     background: #272B30;
     color: #aaa;
-    border: 1px solid #13649f
+    border: 1px solid #13497d
 }
 .toast-header{
     background-color: unset;
@@ -683,16 +684,16 @@ hr {
 	margin-top: 5px;
 }
 #channel-tab.nav-link:hover, #channel-tab.nav-link:focus, #channel-tab.nav-link.active{
-	border-color: #13649f !important;
-	border-bottom: 1px solid #13649f !important;
+	border-color: #13497d !important;
+	border-bottom: 1px solid #13497d !important;
 }
 #videos-tab.nav-link:hover, #videos-tab.nav-link:focus, #videos-tab.nav-link.active{
-	border-color: #13649f !important;
-	border-bottom: 1px solid #13649f !important;
+	border-color: #13497d !important;
+	border-bottom: 1px solid #13497d !important;
 }
 #clips-tab.nav-link:hover, #clips-tab.nav-link:focus, #clips-tab.nav-link.active{
-	border-color: #13649f !important;
-	border-bottom: 1px solid #13649f !important;
+	border-color: #13497d !important;
+	border-bottom: 1px solid #13497d !important;
 }
 .channel-img {
     width:100%;
