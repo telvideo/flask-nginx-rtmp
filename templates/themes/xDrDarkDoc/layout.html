@@ -117,7 +117,7 @@
         </li>
         <li class="nav-item dropdown">
           <a class="nav-link profile-image dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <img width="40" height="40" class="userphoto" src="/images/{{current_user.pictureLocation}}" onerror="this.src='/static/img/user2.png';"> {{current_user.username}}
+            <img width="40" height="40" class="userphoto mr-1" src="/images/{{current_user.pictureLocation}}" onerror="this.src='/static/img/user2.png';">{{current_user.username}}
           </a>
           <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
             {% if current_user.has_role('Admin') %}

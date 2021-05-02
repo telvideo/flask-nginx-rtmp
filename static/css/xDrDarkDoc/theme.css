@@ -9,7 +9,7 @@
 }
 
 :root{
- 
+  --tooltip-color: #12004b;
   --PDBlue: #1e90ff;
 }
 
@@ -31,21 +31,26 @@ body {
 }
 
   a:link {
-    color: #3488db;
+    color: var(--PDBlue);
   }
   a:visited {
-    color: #3488db;
+    color: var(--PDBlue);
   }
   a:hover {
-    color: #fff;
+    color: #13497d;
     text-decoration: none;
   }
   a:active {
-    color: #3488db;
+    color: var(--PDBlue);
   } 
   a.btn, a.dropdown-item{
     color: var(--PDBlue) !important;
   }
+
+  a.dropdown-item:hover {
+    background-color: #13497d !important;
+  }
+
   text{
     color: #aaa;
   }
@@ -77,16 +82,38 @@ body {
     color: var(--PDBlue) !important;
     border: 0px !important;
     border-bottom: 1px solid !important;
+
   }	
   .navbar .nav-link {
     font-size: 1.5em;
     /*font-size: 16px; */
-                
+
+    height:40px;
+    padding: 0.0rem 0.4rem 0.0rem 0.4rem !important;
+    margin: 0px 0px 0px 0px !important;
+
     color: var(--PDBlue) !important;
-    padding: 0.0rem 0.6rem 0.0rem 0.6rem !important;
+/*    padding: 0.0rem 0.6rem 0.0rem 0.6rem !important;
+    padding: 0.6rem 1rem;
+*/
     font-weight: bold;
+  }
+  /*
+  .nav-link{
+    background-color: #c9c9d1 !important;
 
   }
+
+/*  a.nav-link:hover {
+    background-color: #13497d !important;
+  }
+*/
+/*
+  .nav-item :hover {
+    background-color: #13497d !important;
+    color:green;
+  }*/
+
   .navbar-nav>li>a.profile-image {
     padding-top: 0px !important;
     padding-left: 0px !important;
@@ -97,6 +124,15 @@ body {
     border-right: 0px !important;
     padding: 0px !important;
   }
+
+  /*
+  .nav-link:hover{
+    background-color: #13497d !important;
+
+  }*/
+  
+ 
+
   #Email, #Fname {
     background-color:#272B30 !important;
   }
@@ -114,7 +150,7 @@ body {
     right:30px;
     border-left: 14px solid transparent;
     border-right: 14px solid transparent;
-    border-bottom: 20px solid #3488db;
+    border-bottom: 20px solid #1e90ff;
     z-index: -1;
   }
   
@@ -165,7 +201,7 @@ body {
   .chatbox>input{
   background-color:#272B30 !important;
   color: #aaa !important;
-  border: 1px solid #3488db !important;
+  border: 1px solid #1e90ff !important;
   border-radius: 0.1rem !important;
   }
   input, textarea, select{
@@ -175,14 +211,14 @@ body {
   border-radius: 0.1rem !important;
   }
   .btn-outline-success{
-      color: #3488db !important;
+      color: #1e90ff !important;
   } 
   .btn-success{
-    background-image: linear-gradient(#3488dbc7, #3488db 60%, #3488dbb0) !important;
+    background-image: linear-gradient(#1e90ffc7, #1e90ff 60%, #1e90ffb0) !important;
     color: #fff !important;
   }
   .btn-success:hover{
-    background-image: linear-gradient(#3488db, #3488db, #3488db) !important;
+    background-image: linear-gradient(#1e90ff, #1e90ff, #1e90ff) !important;
     color: #fff !important;
   }
   ::-webkit-input-placeholder { /* WebKit browsers */
@@ -210,7 +246,7 @@ body {
     -moz-border-left-colors: none;
     -moz-border-right-colors: none;
     -moz-border-top-colors: none;
-    border-color: #3488db;
+    border-color: #1e90ff;
     border-width: 1px 0;
     margin: 10px auto;
     width: 75%;
@@ -509,7 +545,7 @@ body {
       }
       
       .chatPanel .chatContent .chatEntryContainer .chatEntry .chatInfo .chatUsername {
-        font-weight: bold;
+        font-weight: normal !important; 
       }
       
       .chatPanel .chatContent .chatEntryContainer .chatEntry .chatInfo .chatMessage {
@@ -672,8 +708,6 @@ body {
      }
   }
   
- 
-  
   /* .videoPanel{ overflow: -moz-scrollbars-none; }
   .videoPanel{ -ms-overflow-style: none; } */
   
@@ -699,7 +733,7 @@ body {
   .toast {
       background: #272B30;
       color: #aaa;
-      border: 1px solid #3488db
+      border: 1px solid #1e90ff
   }
   .toast-header{
       background-color: unset;
@@ -725,16 +759,16 @@ body {
     margin-top: 5px;
   }
   #channel-tab.nav-link:hover, #channel-tab.nav-link:focus, #channel-tab.nav-link.active{
-    border-color: #3488db !important;
-    border-bottom: 1px solid #3488db !important;
+    border-color: #1e90ff !important;
+    border-bottom: 1px solid #1e90ff !important;
   }
   #videos-tab.nav-link:hover, #videos-tab.nav-link:focus, #videos-tab.nav-link.active{
-    border-color: #3488db !important;
-    border-bottom: 1px solid #3488db !important;
+    border-color: #1e90ff !important;
+    border-bottom: 1px solid #1e90ff !important;
   }
   #clips-tab.nav-link:hover, #clips-tab.nav-link:focus, #clips-tab.nav-link.active{
-    border-color: #3488db !important;
-    border-bottom: 1px solid #3488db !important;
+    border-color: #1e90ff !important;
+    border-bottom: 1px solid #1e90ff !important;
   }
   .channel-img {
       width:100%;
