@@ -185,6 +185,20 @@ function enterRoom(room) {
   return true;
 }
 
+
+function replaceURLs(message) {
+  if(!message) return;
+ 
+  var urlRegex = /(((https?:\/\/)|(www\.))[^\s]+)/g;
+  return message.replace(urlRegex, function (url) {
+    var hyperlink = url;
+    if (!hyperlink.match('^https?:\/\/')) {
+      hyperlink = 'http://' + hyperlink;
+    }
+    return '<a href="' + hyperlink + '" target="_blank" rel="noopener noreferrer">' + url + '</a>'
+  });
+}
+
 // Function for Sending Chat Input
 function sendMessage() {
     var chatInput = document.getElementById('chatinput');
@@ -192,6 +206,15 @@ function sendMessage() {
     if (message.length > 420) {
         message = message.slice(0,420);
     }
+   // message = encodeURIComponent(message);
+   // message = replaceURLs(message);
+   // message = message + "FRED";
+    
+
+    //var uri = "my test.asp?name=ståle&car=saab";
+    //var res = encodeURI(message);
+    //message = res;
+    
     if (message != '') {
         var o = {to: ROOMNAME + '@' + ROOM_SERVICE, type: 'groupchat'};
         var m = $msg(o);
