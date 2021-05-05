@@ -1373,14 +1373,22 @@
                                             <td>
                                                 {{vid.topic}}
                                             </td>
-                                            <td>
-                                                {% if vid.id in missingSet %}<span class="badge badge-secondary">ERROR</span>{% else %}<span class="badge badge-success">OK</span>{% endif %}
-                                            </td>
-                                            <td>    
-                                                {% if vid.id in missingSet %} <button class="videoDeleteModalButton btn btn-danger shadow btn-sm" onclick="mVideoDelete('{{vid.id}}')" title="Delete Video"><i class="fas fa-trash-alt fa-spin fa-2x"></i></button>
-                                                {% else %}<button class="videoDeleteModalButton btn btn-danger shadow btn-sm" onclick="mVideoDelete('{{vid.id}}')" title="Delete Video"><i class="fas fa-trash-alt"></i></button>
-                                                {% endif %}
-                                            </td>
+                                            {% if vid.id in missingSet %} 
+                                              <td>
+                                                  <span class="badge badge-secondary">ERROR</span>
+                                              </td>
+                                              <td>
+                                                <button class="videoDeleteModalButton btn btn-danger shadow btn-sm" onclick="mVideoDelete('{{vid.id}}')" title="Delete Video"><i class="fas fa-trash-alt fa-spin fa-2x"></i></button>
+                                              </td>
+                                            {% else %}
+                                              <td>
+                                                <span class="badge badge-success">OK</span>
+                                              </td>
+                                              <td>
+                                                <button class="videoDeleteModalButton btn btn-danger shadow btn-sm" onclick="mVideoDelete('{{vid.id}}')" title="Delete Video"><i class="fas fa-trash-alt"></i></button>
+                                              </td>
+                                            {% endif %}
+
                                         </tr>
                                     {% endfor %}                                   
                                     </tbody>
