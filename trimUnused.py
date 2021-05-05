@@ -103,9 +103,10 @@ fileNameSet.discard("{}{}".format(stickers_root,"None"))
 
 fileList =list()
 
-for r,d,f in os.walk(images_root):    # walk through dir trees getting all files we might need to delete 
-    for i in f: 
-        fileList.append( os.path.join(r,i))
+# Don't use this bit it will delete your site logo!
+#for r,d,f in os.walk(images_root):    # walk through dir trees getting all files we might need to delete 
+#    for i in f: 
+#        fileList.append( os.path.join(r,i))
 
 for r,d,f in os.walk(videos_root):  
     for i in f: 
