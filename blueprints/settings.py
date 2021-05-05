@@ -414,7 +414,13 @@ def admin_page():
                 themeList.append(theme)
 
         logsList = logs.logs.query.order_by(logs.logs.timestamp.desc()).limit(250)
-        vidList  =  RecordedVideo.RecordedVideo.query.order_by(RecordedVideo.RecordedVideo.videoDate.asc())#.limit(250)
+        #vidList  =  RecordedVideo.RecordedVideo.query.order_by(RecordedVideo.RecordedVideo.videoDate.asc())#.limit(250)
+        
+        vidList  =  RecordedVideo.RecordedVideo.query.with_entities(RecordedVideo.RecordedVideo.id, RecordedVideo.RecordedVideo.owningUser,
+                               RecordedVideo.RecordedVideo.views, RecordedVideo.RecordedVideo.length,
+                               RecordedVideo.RecordedVideo.channelName,
+                               RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate,
+                               RecordedVideo.RecordedVideo.videoLocation)
          
         missingSet = set()
 
@@ -422,7 +428,7 @@ def admin_page():
         for recordedVid in vidList:
             if os.path.exists("{}{}".format(videos_root, recordedVid.videoLocation)) == False:
                 missingSet.add(recordedVid.id)
-        
+
         oAuthProvidersList = settings.oAuthProvider.query.all()
 
         from app import ejabberd
