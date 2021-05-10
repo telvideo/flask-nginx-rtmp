@@ -1,12 +1,12 @@
 echo"--------------------------------------------------------"
 echo "Get latest code"
 echo "-------------------------------------------------------"
-systemctl stop osp.target 
+sudo systemctl stop osp.target 
 echo "OSP Stopped."
 
 echo "Save config.py"
-cp /opt/osp/conf/config.py /opt
-rm -rf /opt/osp
+sudo cp /opt/osp/conf/config.py /opt
+sudo rm -rf /opt/osp
 
 echo "Getting code from Gitlab..."
 
@@ -16,15 +16,13 @@ echo "Cloned."
 sudo chown -R "www-data:www-data" /opt/osp
 echo "Chowned."
 echo "Replace config.py"
-cp /opt/config.py /opt/osp/conf/config.py
+sudo cp /opt/config.py /opt/osp/conf/config.py
 
-echo "Commented out... DO NOT Upgrate database to 0.8.8 from 0.8.7 or error if already 0.8.8"
-echo sudo mysql -e "ALTER TABLE osp.settings ADD COLUMN proxyFQDN VARCHAR(2048) NULL AFTER requireConfirmedEmail"
-echo sudo mysql -e "ALTER TABLE osp.Stream ADD COLUMN rtmpServer INT NULL AFTER totalViewers"
+echo "Do Afterboggsget.sh"
+bash /opt/osp/Afterboggsget.sh
 
 echo "Restart OSP."
-systemctl restart osp.target 
-echo "Copy possibly new boggsget to /opt"
-cp /opt/osp/boggsget /opt 
-
+sudo systemctl restart osp.target 
+echo "Move possibly new boggsget to /opt"
+sudo mv /opt/osp/boggsget /opt 
 echo "Boggs get complete."

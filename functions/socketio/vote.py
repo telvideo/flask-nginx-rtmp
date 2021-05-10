@@ -94,6 +94,8 @@ def handle_upvoteChange(streamData):
                 db.session.delete(myVoteQuery)
 
             totalQuery = upvotes.streamUpvotes.query.filter_by(streamID=stream.id).count()
+            stream.NupVotes = totalQuery #Boggs
+
             myVoteQuery = upvotes.streamUpvotes.query.filter_by(userID=current_user.id, streamID=stream.id).first()
 
             db.session.commit()
@@ -116,6 +118,8 @@ def handle_upvoteChange(streamData):
                 db.session.delete(myVoteQuery)
 
             totalQuery = upvotes.videoUpvotes.query.filter_by(videoID=loc).count()
+            videoQuery.NupVotes = totalQuery #Boggs
+
             myVoteQuery = upvotes.videoUpvotes.query.filter_by(userID=current_user.id, videoID=loc).first()
 
             db.session.commit()
@@ -159,6 +163,8 @@ def handle_upvoteChange(streamData):
                 db.session.delete(myVoteQuery)
 
             totalQuery = upvotes.clipUpvotes.query.filter_by(clipID=loc).count()
+
+            clipQuery.NupVotes= totalQuery #Boggs
             myVoteQuery = upvotes.clipUpvotes.query.filter_by(userID=current_user.id, clipID=loc).first()
 
             db.session.commit()

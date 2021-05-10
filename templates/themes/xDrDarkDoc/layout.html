@@ -36,7 +36,7 @@
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary ">
     <a class="navbar-brand" href="/">
       <img src="/static/img/ProFull.png" height="40" class="d-inline-block align-top" alt="">
     </a>
@@ -50,13 +50,13 @@
           <input class="form-control search" name="term" type="search" placeholder="&#xf002; Search..." aria-label="Search" style="height:16px;font-weight: 900;font-family: 'Font Awesome 5 Free', Arial, Sans-serif;" size="24">
         </form>
         <li class="nav-item">
-          <a class="nav-link" href="/channel">CHANNELS</a>
+          <a class="nav-link zoom" title="CHANNELS" href="/channel"><b><i class="fas fa-tv"></i></b></a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="/topic">TOPICS</a>
+          <a class="nav-link zoom" title="TOPICS" href="/topic"><b><i class="fas fa-hashtag"></i></b></a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="/streamer">STREAMERS</a>
+          <a class="nav-link zoom" title="STREAMERS" href="/streamer"><b><i class="fas fa-users"></i> </b></a>
         </li>
         {% if current_user.is_authenticated == False %}
         <li class="nav-item">
@@ -72,7 +72,7 @@
           <a class="nav-link zoom" href="/notifications"><i class="fas fa-bell"></i> NOTIFICATIONS {% if notifications|count > 0 %}<span id="notificationCountMobile" class="badge badge-danger">{{notifications|count}}</span>{% endif %}</a>
         </li>
         <li class="nav-item dropdown pl-2 pr-1 d-none d-lg-block">
-          <a class="nav-link zoom" href="#" id="navbarDropdownNotificationLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <a class="nav-link zoom" title="NOTIFICATIONS" href="#" id="navbarDropdownNotificationLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <b><i class="fas fa-bell"></i></b> {% if notifications|count > 0 %}<span class="badge badge-danger" id="notificationCountNav">{{notifications|count}}</span>{% endif %}
           </a>
           <ul class="dropdown-menu notificationDropdownMenu shadow">
@@ -80,7 +80,7 @@
               <div class="row">
                 <div class="col-lg-12 col-sm-12 col-12">
                   <span>Notifications <span class="badge badge-light" id="notificationCountMenu">{{notifications|count}}</span></span>
-                  <a href="javascript:void(0);" class="float-right text-light" onclick="clearAllNotifications(); return false;">Mark all as read</a>
+                  <a href="javascript:void(0);" class="float-right text-light" onclick="clearAllNotifications(); return false;">Mark 69 as read</a>
                 </div>
               </div>
             </li>
@@ -116,8 +116,8 @@
           </ul>
         </li>
         <li class="nav-item dropdown">
-          <a class="nav-link profile-image dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <img width="40" height="40" class="userphoto mr-1" src="/images/{{current_user.pictureLocation}}" onerror="this.src='/static/img/user2.png';">{{current_user.username}}
+          <a class="nav-link profile-image dropdown-toggle" title={{current_user.username}} href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <img width="40" height="40" class="userphoto"  src="/images/{{current_user.pictureLocation}}" onerror="this.src='/static/img/user2.png';"><!--{{current_user.username}}-->
           </a>
           <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
             {% if current_user.has_role('Admin') %}

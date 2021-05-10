@@ -196,6 +196,8 @@ def rtmp_user_deauth_check(key, ipaddress):
                 for upvote in streamUpvotes:
                     newVideoUpvote = upvotes.videoUpvotes(upvote.userID, pendingVideo.id)
                     db.session.add(newVideoUpvote)
+
+                pendingVideo.NupVotes = len(streamUpvotes) #copy over from stream
                 db.session.commit()
 
             topicName = "Unknown"

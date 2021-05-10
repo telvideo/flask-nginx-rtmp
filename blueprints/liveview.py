@@ -30,7 +30,65 @@ def view_page(loc):
     if ejabberdServer != "127.0.0.1" and ejabberdServer != "localhost":
         xmppserver = ejabberdServer
 
-    requestedChannel = Channel.Channel.query.filter_by(channelLoc=loc).first()
+    #requestedChannel = Channel.Channel.query.filter_by(channelLoc=loc).first()
+
+    requestedChannel = Channel.Channel.query.filter_by(channelLoc=loc).with_entities(Channel.Channel.id,
+   # .join(RecordedVideo.RecordedVideo, RecordedVideo.RecordedVideo.channelID == Channel.Channel.id)\
+    Channel.Channel.owningUser,
+    Channel.Channel.streamKey,
+    Channel.Channel.channelName,
+    Channel.Channel.channelLoc,
+    Channel.Channel.topic,
+    Channel.Channel.views,
+    Channel.Channel.currentViewers,
+    Channel.Channel.record,
+    Channel.Channel.chatEnabled,
+    Channel.Channel.chatBG,
+    Channel.Channel.chatTextColor,
+    Channel.Channel.chatAnimation,
+    Channel.Channel.imageLocation,
+    Channel.Channel.offlineImageLocation,
+    Channel.Channel.description,
+    Channel.Channel.allowComments,
+    Channel.Channel.protected,
+    Channel.Channel.channelMuted,
+    Channel.Channel.showChatJoinLeaveNotification,
+    Channel.Channel.defaultStreamName,
+    Channel.Channel.autoPublish,
+    Channel.Channel.rtmpRestream,
+    Channel.Channel.rtmpRestreamDestination,
+    Channel.Channel.xmppToken,
+
+#    Channel.Channel.stream,
+#    Channel.Channel.recordedVideo,
+#    Channel.Channel.upvotes,
+#    Channel.Channel.inviteCodes,
+#    Channel.Channel.invitedViewers,
+#    Channel.Channel.subscriptions,
+#    Channel.Channel.webhooks,
+#    Channel.Channel.restreamDestinations,
+#    Channel.Channel.chatStickers,
+
+    Channel.Channel.vanityURL).first() 
+
+    #requestedChannel = Channel.Channel.query.filter_by(channelLoc=loc).first()
+
+    #boggs hacking
+  
+ #   stream = db.relationship('Stream', backref='channel', cascade="all, delete-orphan", lazy="joined")
+ #   recordedVideo = db.relationship('RecordedVideo', backref='channel', cascade="all, delete-orphan", lazy="joined")
+ #   upvotes = db.relationship('channelUpvotes', backref='stream', cascade="all, delete-orphan", lazy="joined")
+ #   inviteCodes = db.relationship('inviteCode', backref='channel', cascade="all, delete-orphan", lazy="joined")
+ #   invitedViewers = db.relationship('invitedViewer', backref='channel', cascade="all, delete-orphan", lazy="joined")
+ #   subscriptions = db.relationship('channelSubs', backref='channel', cascade="all, delete-orphan", lazy="joined")
+ #   webhooks = db.relationship('webhook', backref='channel', cascade="all, delete-orphan", lazy="joined")
+ #   restreamDestinations = db.relationship('restreamDestinations', backref='channelData', cascade="all, delete-orphan", lazy="joined")
+ #   chatStickers = db.relationship('stickers', backref='channel', cascade="all, delete-orphan", lazy="joined")
+
+
+
+
+    #####
     if requestedChannel is not None:
         if requestedChannel.protected and sysSettings.protectionEnabled:
             if not securityFunc.check_isValidChannelViewer(requestedChannel.id):
@@ -169,11 +227,11 @@ def view_page(loc):
                 rtmpURI = 'rtmp://' + sysSettings.siteAddress + ":1935/" + endpoint + "/" + requestedChannel.channelLoc
 
             clipsList = []
-            for vid in requestedChannel.recordedVideo:
-                for clip in vid.clips:
-                    if clip.published is True:
-                        clipsList.append(clip)
-            clipsList.sort(key=lambda x: x.views, reverse=True)
+    #        for vid in requestedChannel.recordedVideo:
+    #            for clip in vid.clips:
+    #                if clip.published is True:
+    #                    clipsList.append(clip)
+    #        clipsList.sort(key=lambda x: x.views, reverse=True)
 
             subState = False
             if current_user.is_authenticated:

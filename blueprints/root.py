@@ -44,7 +44,7 @@ def main_page():
             .with_entities(RecordedVideo.RecordedVideo.id, RecordedVideo.RecordedVideo.owningUser,
                             RecordedVideo.RecordedVideo.views, RecordedVideo.RecordedVideo.length,
                             RecordedVideo.RecordedVideo.thumbnailLocation, RecordedVideo.RecordedVideo.channelName,
-                            RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate,
+                            RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, RecordedVideo.RecordedVideo.NupVotes,
                             Sec.User.pictureLocation, Channel.Channel.protected,
                             Channel.Channel.channelName.label('ChanName')) \
             .order_by(RecordedVideo.RecordedVideo.views.desc()).limit(16)
@@ -56,7 +56,7 @@ def main_page():
             .with_entities(RecordedVideo.Clips.id, RecordedVideo.Clips.thumbnailLocation,
                             Channel.Channel.owningUser, RecordedVideo.Clips.views, RecordedVideo.Clips.length,
                             RecordedVideo.Clips.clipName, Channel.Channel.protected, Channel.Channel.channelName,
-                            RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate,
+                            RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, RecordedVideo.Clips.NupVotes,
                             Sec.User.pictureLocation) \
             .order_by(RecordedVideo.Clips.views.desc()).limit(16)
     # Sort by Most Recent
@@ -67,7 +67,7 @@ def main_page():
             .with_entities(RecordedVideo.RecordedVideo.id, RecordedVideo.RecordedVideo.owningUser,
                             RecordedVideo.RecordedVideo.views, RecordedVideo.RecordedVideo.length,
                             RecordedVideo.RecordedVideo.thumbnailLocation, RecordedVideo.RecordedVideo.channelName,
-                            RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate,
+                            RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, RecordedVideo.RecordedVideo.NupVotes,
                             Sec.User.pictureLocation, Channel.Channel.protected,
                             Channel.Channel.channelName.label('ChanName')) \
             .order_by(RecordedVideo.RecordedVideo.videoDate.desc()).limit(16)
@@ -79,7 +79,7 @@ def main_page():
             .with_entities(RecordedVideo.Clips.id, RecordedVideo.Clips.thumbnailLocation,
                             Channel.Channel.owningUser, RecordedVideo.Clips.views, RecordedVideo.Clips.length,
                             RecordedVideo.Clips.clipName, Channel.Channel.protected, Channel.Channel.channelName,
-                            RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate,
+                            RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, RecordedVideo.Clips.NupVotes,
                             Sec.User.pictureLocation) \
             .order_by(RecordedVideo.RecordedVideo.videoDate.desc()).limit(16)
     # Sort by Random
@@ -87,14 +87,14 @@ def main_page():
         recordedQuery = RecordedVideo.RecordedVideo.query.filter_by(pending=False, published=True)\
             .join(Channel.Channel, RecordedVideo.RecordedVideo.channelID == Channel.Channel.id)\
             .join(Sec.User, RecordedVideo.RecordedVideo.owningUser == Sec.User.id)\
-            .with_entities(RecordedVideo.RecordedVideo.id, RecordedVideo.RecordedVideo.owningUser, RecordedVideo.RecordedVideo.views, RecordedVideo.RecordedVideo.length, RecordedVideo.RecordedVideo.thumbnailLocation, RecordedVideo.RecordedVideo.channelName, RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, Sec.User.pictureLocation, Channel.Channel.protected, Channel.Channel.channelName.label('ChanName'))\
+            .with_entities(RecordedVideo.RecordedVideo.NupVotes, RecordedVideo.RecordedVideo.id, RecordedVideo.RecordedVideo.owningUser, RecordedVideo.RecordedVideo.views, RecordedVideo.RecordedVideo.length, RecordedVideo.RecordedVideo.thumbnailLocation, RecordedVideo.RecordedVideo.channelName, RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, Sec.User.pictureLocation, Channel.Channel.protected, Channel.Channel.channelName.label('ChanName'))\
             .order_by(func.random()).limit(16)
 
         clipQuery = RecordedVideo.Clips.query.filter_by(published=True)\
             .join(RecordedVideo.RecordedVideo, RecordedVideo.Clips.parentVideo == RecordedVideo.RecordedVideo.id)\
             .join(Channel.Channel, Channel.Channel.id==RecordedVideo.RecordedVideo.channelID)\
             .join(Sec.User, Sec.User.id == Channel.Channel.owningUser)\
-            .with_entities(RecordedVideo.Clips.id, RecordedVideo.Clips.thumbnailLocation, Channel.Channel.owningUser, RecordedVideo.Clips.views, RecordedVideo.Clips.length, RecordedVideo.Clips.clipName, Channel.Channel.protected, Channel.Channel.channelName, RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, Sec.User.pictureLocation)\
+            .with_entities(RecordedVideo.Clips.NupVotes, RecordedVideo.Clips.id, RecordedVideo.Clips.thumbnailLocation, Channel.Channel.owningUser, RecordedVideo.Clips.views, RecordedVideo.Clips.length, RecordedVideo.Clips.clipName, Channel.Channel.protected, Channel.Channel.channelName, RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, Sec.User.pictureLocation)\
             .order_by(func.random()).limit(16)
     # Fall Through - Sort by Views
     else:

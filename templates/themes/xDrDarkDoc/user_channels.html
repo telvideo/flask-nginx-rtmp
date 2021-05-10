@@ -131,7 +131,7 @@
                             <i class="far fa-clock mr-1"></i>{{clip.length|hms_format}}<br/>
                             <span id="clipDescription-{{clip.id}}" class="d-none">{{clip.description}}</span>
                             <i class="fas fa-users"></i> {{clip.views}}<br/>
-                            <i class="far fa-thumbs-up"></i> {{clip.upvotes|length}}<br/>
+                            <i class="far fa-thumbs-up"></i> {# {{clip.upvotes|length}} #} {{clip.NupVotes}}<br/>
                             <div class="form-group row">
                                 <div class="col-6">
                                     <label for="clipPublished-{{clip.id}}" class="col-form-label"><b>Published? </b></label>
@@ -210,6 +210,20 @@
                                                 <button type="button" class="btn btn-warning" id="generateGUID-{{channel.id}}"><i class="fas fa-sync"></i></button>
                                             </div>
                                         </div>
+                                        
+                                        
+                                        <label for="rtmpServer-{{channel.id}}" class="col-form-label"><b>RTMP Server</b></label>
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <button type="button" class="btn btn-primary" onclick="CopyAPI('rtmpKey')"><i class="fas fa-copy"></i></button>
+                                            </div>
+                                            <input type="text" class="form-control" name="streamKey" id="rtmpKey" value="rtmp://signal.prohibited.tv/stream" required readonly aria-describedby="generateGUID required">
+                                            <div class="input-group-append">
+
+                                            </div>
+                                        </div>
+                                        
+                                        
                                         <small id="streamKeyHelpBlock" class="form-text text-muted">
                                               <!--RTMP Ingests: {% for server in rtmpList %}rtmp://{{server}}/stream/ {% endfor %} -->
                                               RTMP Ingest: rtmp://signal.prohibited.tv/stream

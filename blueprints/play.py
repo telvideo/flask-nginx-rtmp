@@ -5,6 +5,7 @@ from os import path
 
 from classes.shared import db
 from classes import settings
+from classes import Channel
 from classes import RecordedVideo
 from classes import subscriptions
 from classes import topics
@@ -31,6 +32,22 @@ def view_vid_page(videoID):
 
     recordedVid = RecordedVideo.RecordedVideo.query.filter_by(id=videoID).first()
 
+## boggs needs to improve this
+
+#    recordedVid = RecordedVideo.RecordedVideo.query.filter_by(id=videoID) \
+#            .join(Channel.Channel, RecordedVideo.RecordedVideo.channelID == Channel.Channel.id) \
+#            .with_entities(RecordedVideo.RecordedVideo.published, RecordedVideo.RecordedVideo.videoLocation,
+#            Channel.Channel.protected,
+#            Channel.Channel.channelName,
+#            RecordedVideo.RecordedVideo.views, RecordedVideo.RecordedVideo.channelName,
+#            RecordedVideo.RecordedVideo.id, RecordedVideo.RecordedVideo.owningUser,
+#            RecordedVideo.RecordedVideo.views, RecordedVideo.RecordedVideo.length,
+#            RecordedVideo.RecordedVideo.thumbnailLocation, RecordedVideo.RecordedVideo.channelName,
+#            RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, RecordedVideo.RecordedVideo.NupVotes).first()
+
+            
+
+##
     if recordedVid is not None:
 
         if recordedVid.published is False:
@@ -42,9 +59,10 @@ def view_vid_page(videoID):
                 flash("No Such Video at URL", "error")
                 return redirect(url_for("root.main_page"))
 
-        if recordedVid.channel.protected and sysSettings.protectionEnabled:
-            if not securityFunc.check_isValidChannelViewer(recordedVid.channel.id):
-                return render_template(themes.checkOverride('channelProtectionAuth.html'))
+      # boggs why do this?
+      #  if recordedVid.channel.protected and sysSettings.protectionEnabled:
+      #      if not securityFunc.check_isValidChannelViewer(recordedVid.channel.id):
+      #          return render_template(themes.checkOverride('channelProtectionAuth.html'))
 
         # Check if the file exists in location yet and redirect if not ready
         if path.exists(videos_root + recordedVid.videoLocation) is False:
@@ -64,7 +82,7 @@ def view_vid_page(videoID):
         recordedVid.views = recordedVid.views + 1
         recordedVid.channel.views = recordedVid.channel.views + 1
 
-        topicList = topics.topics.query.all()
+        # Boggs Not used? topicList = topics.topics.query.all()
 
         streamURL = '/videos/' + recordedVid.videoLocation
 
@@ -93,7 +111,7 @@ def view_vid_page(videoID):
                 if chanSubQuery is not None:
                     subState = True
 
-            return render_template(themes.checkOverride('vidplayer.html'), video=recordedVid, streamURL=streamURL, topics=topicList, randomRecorded=randomRecorded, subState=subState, startTime=startTime)
+            return render_template(themes.checkOverride('vidplayer.html'), video=recordedVid, streamURL=streamURL, randomRecorded=randomRecorded, subState=subState, startTime=startTime)
         else:
             isAutoPlay = request.args.get("autoplay")
             if isAutoPlay is None:

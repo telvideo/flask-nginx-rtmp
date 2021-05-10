@@ -11,6 +11,7 @@
 :root{
   --tooltip-color: #12004b;
   --PDBlue: #1e90ff;
+  --background-image: url("/static/img/Mono_Dark_Background.png");
 }
 
 body::-webkit-scrollbar {
@@ -20,7 +21,7 @@ body::-webkit-scrollbar {
 }
 
 body {
-/*  font-family: "LT Emphasis"; */
+  /*font-family: "LT Emphasis"; */
   font-family: "MBomber";
 
   -ms-overflow-style: none;  
@@ -28,6 +29,10 @@ body {
 
 /*  color: #1e90ff; */
   color: var(--PDBlue);
+
+  /* Add-me-back for Probackground 
+  background-image: var(--background-image);*/
+
 }
 
   a:link {

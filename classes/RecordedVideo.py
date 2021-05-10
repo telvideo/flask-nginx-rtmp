@@ -20,6 +20,7 @@ class RecordedVideo(db.Model):
     allowComments = db.Column(db.Boolean)
     published = db.Column(db.Boolean)
     originalStreamID = db.Column(db.Integer)
+    NupVotes = db.Column(db.Integer)
     upvotes = db.relationship('videoUpvotes', backref='recordedVideo', cascade="all, delete-orphan", lazy="joined")
     comments = db.relationship('videoComments', backref='recordedVideo', cascade="all, delete-orphan", lazy="joined")
     clips = db.relationship('Clips', backref='recordedVideo', cascade="all, delete-orphan", lazy="joined")
@@ -36,6 +37,7 @@ class RecordedVideo(db.Model):
         self.pending = True
         self.published = published
         self.allowComments = allowComments
+        self.NupVotes = 0
 
     def __repr__(self):
         return '<id %r>' % self.id
@@ -55,6 +57,7 @@ class RecordedVideo(db.Model):
             'topic': self.topic,
             'views': self.views,
             'length': self.length,
+            'NupVotes': self.NupVotes,
             'upvotes': self.get_upvotes(),
             'videoLocation': '/videos/' + self.videoLocation,
             'thumbnailLocation': '/videos/' + self.thumbnailLocation,
@@ -77,8 +80,8 @@ class Clips(db.Model):
     thumbnailLocation = db.Column(db.String(255))
     gifLocation = db.Column(db.String(255))
     published = db.Column(db.Boolean)
+    NupVotes = db.Column(db.Integer)
     upvotes = db.relationship('clipUpvotes', backref='clip', cascade="all, delete-orphan", lazy="joined")
-
     def __init__(self, parentVideo, videoLocation, startTime, endTime, clipName, description):
         self.uuid = str(uuid4())
         self.parentVideo = parentVideo
@@ -90,6 +93,7 @@ class Clips(db.Model):
         self.length = endTime-startTime
         self.views = 0
         self.published = True
+        self.NupVotes = 0
 
     def __repr__(self):
         return '<id %r>' % self.id
@@ -105,6 +109,7 @@ class Clips(db.Model):
             'name': self.clipName,
             'description': self.description,
             'views': self.views,
+            'NupVotes': self.NupVotes,
             'videoLocation': '/videos/' + self.videoLocation,
             'thumbnailLocation': '/videos/' + self.thumbnailLocation,
             'gifLocation': '/videos/' + self.gifLocation

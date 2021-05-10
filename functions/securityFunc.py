@@ -14,7 +14,9 @@ from functions import cache
 
 @limiter.limit("100/second")
 def check_isValidChannelViewer(channelID):
-    if current_user.is_authenticated:
+    #return True # possible Boggs super hack. Why are we even doing this?
+
+    if current_user.is_authenticated:      
         # Verify if a Cached Entry Exists
         cachedResult = cache.checkInviteCache(channelID)
         if cachedResult is True:

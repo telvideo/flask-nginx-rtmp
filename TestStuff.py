@@ -65,6 +65,25 @@ def index():
 #render_template('admin.html',name= "Fred")
    
 print("fred")
+
+
+#recordedVid = RecordedVideo.RecordedVideo.query.filter_by(id=videoID).first()
+
+# only owningUsers or admins can delete
+#if (current_user.id != recordedVid.owningUser and (current_user.has_role('Admin') is False)):
+#    return False
+    
+# Delete Clips Attached to Video
+#for clip in recordedVid.clips:
+#    db.session.delete(clip)
+
+
+
+
+recordedVid = RecordedVideo.RecordedVideo.query.filter_by(id=136).first()
+recordedVid.NupVotes = recordedVid.NupVotes + 1 
+print(recordedVid.NupVotes)
+db.session.commit()
 exit()
 
 import shutil

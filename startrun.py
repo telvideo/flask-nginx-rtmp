@@ -4,7 +4,7 @@
 
 from flask import Flask
 from conf import config
-
+from classes import RecordedVideo
 from classes import Stream
 from classes import upvotes
 from classes import comments
@@ -42,7 +42,17 @@ theStream = Stream.Stream.query.all()
 for stre in theStream:
     db.session.delete(stre)
 db.session.commit()
-
 system.newLog(0, "Startup Deleting Active Streams")
 
-print("Deleted active streams")
+#check upvotes are what they should be
+allVideos = RecordedVideo.RecordedVideo.query.all()
+for vid in allVideos:
+    vid.NupVotes = upvotes.videoUpvotes.query.filter_by(videoID=vid.id).count()
+
+allClips = RecordedVideo.Clips.query.all()
+for clip in allClips:
+    clip.NupVotes = upvotes.clipUpvotes.query.filter_by(clipID=clip.id).count()
+
+db.session.commit()
+
+print("OSP Deleted active streams")

@@ -392,11 +392,10 @@ print({"level": "info", "message": "Setting Flask Context Processors"})
 def inject_notifications():
     notificationList = []
     if current_user.is_authenticated:
-        userNotificationQuery = notifications.userNotification.query.filter_by(userID=current_user.id).all()
+        userNotificationQuery = notifications.userNotification.query.filter_by(userID=current_user.id, read=False).order_by(notifications.userNotification.timestamp.desc()).limit(69)
+
         for entry in userNotificationQuery:
-            if entry.read is False:
-                notificationList.append(entry)
-        notificationList.sort(key=lambda x: x.timestamp, reverse=True)
+            notificationList.append(entry)
     return dict(notifications=notificationList)
 
 @app.context_processor
