@@ -30,8 +30,48 @@ def main_page():
         if GlobalfirstRunCheck is False:
             return render_template('/firstrun.html')
 
-    sysSettings = settings.settings.query.first()
-    activeStreams = Stream.Stream.query.order_by(Stream.Stream.currentViewers).all()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
+
+
+    #activeStreams = Stream.Stream.query.order_by(Stream.Stream.currentViewers).all()
+
+    activeStreams = Stream.Stream.query.join(Channel.Channel, Channel.Channel.id == Stream.Stream.linkedChannel) \
+            .join(Sec.User, Sec.User.id == Channel.Channel.owningUser).with_entities(Stream.Stream.id,
+#                Stream.Stream.uuid,
+#                Stream.Stream.startTimestamp,
+#                Stream.Stream.linkedChannel,
+#                Stream.Stream.streamKey,
+                Stream.Stream.streamName,
+#                Stream.Stream.topic,
+                Stream.Stream.currentViewers,
+                Stream.Stream.totalViewers,
+                Stream.Stream.topic,
+#                Stream.Stream.rtmpServer,
+                Stream.Stream.NupVotes,
+                Channel.Channel.channelLoc,
+                Sec.User.pictureLocation,
+                Channel.Channel.imageLocation,
+                Sec.User.username,
+                Channel.Channel.channelName,
+                Channel.Channel.protected
+                ).order_by(Stream.Stream.currentViewers).all()
+            ###
+
+    streamList =  []
+
+    for stre in activeStreams:
+        aStream = {"streamName":stre.streamName,
+        "currentViewers":stre.currentViewers,
+        "channelLoc":stre.channelLoc,
+        "pictureLocation":stre.pictureLocation,
+        "imageLocation":stre.imageLocation,
+        "NupVotes":stre.NupVotes,
+        "totalViewers":stre.totalViewers,
+        "username": stre.username,
+        "channelName":stre.channelName,
+        "topic":stre.topic}
+        streamList.append(aStream) 
 
     recordedQuery = None
     clipQuery = None
@@ -123,7 +163,7 @@ def main_page():
                                 Sec.User.pictureLocation) \
                 .order_by(RecordedVideo.Clips.views.desc()).limit(16)
 
-    return render_template(themes.checkOverride('index.html'), streamList=activeStreams, videoList=recordedQuery, clipList=clipQuery)
+    return render_template(themes.checkOverride('index.html'), streamList=streamList, videoList=recordedQuery, clipList=clipQuery)
 
 @root_bp.route('/search', methods=["POST"])
 def search_page():
@@ -231,7 +271,9 @@ def vanityURL_live_link(vanityURL):
 
 @root_bp.route('/auth', methods=["POST","GET"])
 def auth_check():
-    sysSettings = settings.settings.query.with_entities(settings.settings.protectionEnabled).first()
+    #sysSettings = settings.settings.query.with_entities(settings.settings.protectionEnabled).first()
+    sysSettings = settings.getSettingsFromRedis()
+
     if sysSettings.protectionEnabled is False:
         return 'OK'
 
@@ -277,21 +319,27 @@ def rtmp_check():
 # Redirect Streams
 @root_bp.route('/proxy/<channelLoc>/<file>')
 def proxy_redirect(channelLoc, file):
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
+
     proxyAddress = sysSettings.proxyFQDN
     protocol = sysSettings.siteProtocol
     return redirect(protocol + proxyAddress + '/live/' + channelLoc + '/' + file)
 
 @root_bp.route('/proxy-adapt/<channelLoc>.m3u8')
 def proxy_adaptive_redirect(channelLoc):
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
+
     proxyAddress = sysSettings.proxyFQDN
     protocol = sysSettings.siteProtocol
     return redirect(protocol + proxyAddress + '/live-adapt/' + channelLoc + '.m3u8')
 
 @root_bp.route('/proxy-adapt/<channelLoc>/<file>')
 def proxy_adaptive_subfolder_redirect(channelLoc, file):
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
+
     proxyAddress = sysSettings.proxyFQDN
     protocol = sysSettings.siteProtocol
     return redirect(protocol + proxyAddress + '/live-adapt/' + channelLoc + '/' + file)

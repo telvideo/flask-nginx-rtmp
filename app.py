@@ -18,6 +18,8 @@ import random
 
 # Import 3rd Party Libraries
 from flask import Flask, redirect, request, abort, flash, current_app, session
+from flask_redis import FlaskRedis
+
 from flask_session import Session
 from flask_security import Security, SQLAlchemyUserDatastore, login_required, current_user, roles_required, uia_email_mapper
 from flask_security.signals import user_registered
@@ -163,6 +165,8 @@ else:
 from classes.shared import limiter
 limiter.init_app(app)
 
+settings.setupRedis(app) # Boggs r.flushdb below??? IMO move code below to startrun.py?
+
 # Initialize Redis for Flask-Session
 if config.redisPassword == '' or config.redisPassword is None:
     r = redis.Redis(host=config.redisHost, port=config.redisPort)
@@ -170,7 +174,7 @@ if config.redisPassword == '' or config.redisPassword is None:
 else:
     r = redis.Redis(host=config.redisHost, port=config.redisPort, password=config.redisPassword)
     app.config["SESSION_REDIS"] = r
-r.flushdb()
+#r.flushdb()
 
 # Initialize Flask-SocketIO
 from classes.shared import socketio
@@ -197,6 +201,9 @@ toolbar = DebugToolbarExtension(app)
 # Initialize Flask-Security
 try:
     sysSettings = settings.settings.query.first()
+    #sysSettings = settings.getSettingsFromRedis()
+
+    
     app.config['SECURITY_TOTP_ISSUER'] = sysSettings.siteName
 except:
     app.config['SECURITY_TOTP_ISSUER'] = "OSP"
@@ -411,8 +418,9 @@ def inject_oAuthProviders():
 
 @app.context_processor
 def inject_sysSettings():
+    #sysSettings = db.session.query(settings.settings).first()
+    sysSettings = settings.getSettingsFromRedis()
 
-    sysSettings = db.session.query(settings.settings).first()
     allowRegistration = config.allowRegistration
     return dict(sysSettings=sysSettings, allowRegistration=allowRegistration)
 
@@ -506,7 +514,7 @@ try:
 except:
     pass
 if __name__ == '__main__':
-    app.jinja_env.auto_reload = True
-    app.config['TEMPLATES_AUTO_RELOAD'] = True
+    app.jinja_env.auto_reload = False
+    app.config['TEMPLATES_AUTO_RELOAD'] = False
     socketio.run(app, debug=config.debugMode)
     

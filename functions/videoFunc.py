@@ -85,7 +85,8 @@ def deleteVideo(videoID):
 def changeVideoMetadata(videoID, newVideoName, newVideoTopic, description, allowComments):
 
     recordedVidQuery = RecordedVideo.RecordedVideo.query.filter_by(id=videoID, owningUser=current_user.id).first()
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
 
     if recordedVidQuery is not None:
 
@@ -167,7 +168,8 @@ def moveVideo(videoID, newChannel):
     return False
 
 def createClip(videoID, clipStart, clipStop, clipName, clipDescription):
-    settingsQuery = settings.settings.query.first()
+    #settingsQuery = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
 
     # TODO Add Webhook for Clip Creation
     recordedVidQuery = RecordedVideo.RecordedVideo.query.filter_by(id=int(videoID), owningUser=current_user.id).first()

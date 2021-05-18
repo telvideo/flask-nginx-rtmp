@@ -27,7 +27,8 @@ play_bp = Blueprint('play', __name__, url_prefix='/play')
 
 @play_bp.route('/<videoID>')
 def view_vid_page(videoID):
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()    
     videos_root = globalvars.videoRoot + 'videos/'
 
     recordedVid = RecordedVideo.RecordedVideo.query.filter_by(id=videoID).first()
@@ -195,7 +196,8 @@ def delete_vid_page(videoID):
 @play_bp.route('/<videoID>/comment', methods=['GET','POST'])
 @login_required
 def comments_vid_page(videoID):
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
 
     recordedVid = RecordedVideo.RecordedVideo.query.filter_by(id=videoID).first()
 

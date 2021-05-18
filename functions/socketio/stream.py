@@ -38,7 +38,9 @@ def handle_viewer_total_request(streamData, room=None):
 def updateStreamData(message):
     channelLoc = message['channel']
 
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
+
     channelQuery = Channel.Channel.query.filter_by(channelLoc=channelLoc, owningUser=current_user.id).first()
 
     if channelQuery is not None:

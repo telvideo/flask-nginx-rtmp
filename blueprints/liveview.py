@@ -24,7 +24,8 @@ liveview_bp = Blueprint('liveview', __name__, url_prefix='/view')
 
 @liveview_bp.route('/<loc>/')
 def view_page(loc):
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
 
     xmppserver = sysSettings.siteAddress
     if ejabberdServer != "127.0.0.1" and ejabberdServer != "localhost":
@@ -33,7 +34,9 @@ def view_page(loc):
     #requestedChannel = Channel.Channel.query.filter_by(channelLoc=loc).first()
 
     requestedChannel = Channel.Channel.query.filter_by(channelLoc=loc).with_entities(Channel.Channel.id,
-   # .join(RecordedVideo.RecordedVideo, RecordedVideo.RecordedVideo.channelID == Channel.Channel.id)\
+
+    #.join(subscriptions.channelSubs,subscriptions.channelSubs.channelID == Channel.Channel.id)
+    #    # .join(RecordedVideo.RecordedVideo, RecordedVideo.RecordedVideo.channelID == Channel.Channel.id)\
     Channel.Channel.owningUser,
     Channel.Channel.streamKey,
     Channel.Channel.channelName,
@@ -58,13 +61,13 @@ def view_page(loc):
     Channel.Channel.rtmpRestream,
     Channel.Channel.rtmpRestreamDestination,
     Channel.Channel.xmppToken,
-
+  # subscriptions.channelSubs,
 #    Channel.Channel.stream,
 #    Channel.Channel.recordedVideo,
 #    Channel.Channel.upvotes,
 #    Channel.Channel.inviteCodes,
 #    Channel.Channel.invitedViewers,
-#    Channel.Channel.subscriptions,
+    Channel.Channel.Nsubscriptions,
 #    Channel.Channel.webhooks,
 #    Channel.Channel.restreamDestinations,
 #    Channel.Channel.chatStickers,
@@ -110,7 +113,9 @@ def view_page(loc):
 
         # Stream URL Generation
         streamURL = ''
-        edgeQuery = settings.edgeStreamer.query.filter_by(active=True).all()
+ #BOGGS We are not using this now...     edgeQuery = settings.edgeStreamer.query.filter_by(active=True).all()
+        edgeQuery = []
+        
         if sysSettings.proxyFQDN != None:
             if sysSettings.adaptiveStreaming is True:
                 streamURL = '/proxy-adapt/' + requestedChannel.channelLoc + '.m3u8'
@@ -128,7 +133,9 @@ def view_page(loc):
             else:
                 streamURL = '/live/' + requestedChannel.channelLoc + '/index.m3u8'
 
+        #Boggs this is injeced already so why send it in again need to not inject but only do this?
         topicList = topics.topics.query.all()
+
         chatOnly = request.args.get("chatOnly")
 
         # Grab List of Stickers for Chat
@@ -239,7 +246,45 @@ def view_page(loc):
                 if chanSubQuery is not None:
                     subState = True
 
-            return render_template(themes.checkOverride('channelplayer.html'), stream=streamData, streamURL=streamURL, topics=topicList, channel=requestedChannel, clipsList=clipsList,
+
+            # Boggs
+
+          #  streamQuery = Stream.Stream.query.order_by(Stream.Stream.currentViewers).all()
+            streamQuery = Stream.Stream.query.join(Channel.Channel, Channel.Channel.id == Stream.Stream.linkedChannel) \
+            .join(Sec.User, Sec.User.id == Channel.Channel.owningUser).with_entities(Stream.Stream.id,
+#                Stream.Stream.uuid,
+#                Stream.Stream.startTimestamp,
+#                Stream.Stream.linkedChannel,
+#                Stream.Stream.streamKey,
+                Stream.Stream.streamName,
+#                Stream.Stream.topic,
+                Stream.Stream.currentViewers,
+                Stream.Stream.totalViewers,
+#                Stream.Stream.rtmpServer,
+                Stream.Stream.NupVotes,
+                Channel.Channel.channelLoc,
+                Sec.User.pictureLocation,
+                Channel.Channel.imageLocation,
+                Sec.User.username,
+                Channel.Channel.channelName
+                ).order_by(Stream.Stream.currentViewers).all()
+            ###
+        
+            streamList =  []
+
+            for stre in streamQuery:
+                aStream = {"streamName":stre.streamName,
+                "currentViewers":stre.currentViewers,
+                "channelLoc":stre.channelLoc,
+                "pictureLocation":stre.pictureLocation,
+                "imageLocation":stre.imageLocation,
+                "NupVotes":stre.NupVotes,
+                "totalViewers":stre.totalViewers,
+                "username": stre.username,"channelName":stre.channelName}
+                streamList.append(aStream) 
+              #  print(stre)         
+                      
+            return render_template(themes.checkOverride('channelplayer.html'), streamList=streamList, stream=streamData, topics=topicList, streamURL=streamURL, channel=requestedChannel, clipsList=clipsList,
                                    subState=subState, secureHash=secureHash, rtmpURI=rtmpURI, xmppserver=xmppserver, stickerList=stickerList, stickerSelectorList=stickerSelectorList, bannedWords=bannedWordArray)
         else:
             isAutoPlay = request.args.get("autoplay")

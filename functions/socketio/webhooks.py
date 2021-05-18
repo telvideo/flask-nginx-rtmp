@@ -117,7 +117,8 @@ def testWebhook(message):
         if 'channelID' in message:
             channelID = int(message['channelID'])
 
-        sysSettings = settings.settings.query.first()
+        #sysSettings = settings.settings.query.first()
+        sysSettings = settings.getSettingsFromRedis()
         webhookQuery = None
 
         # Acquire a Channel to Test With

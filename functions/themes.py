@@ -10,8 +10,9 @@ from classes import settings
 
 # Checks Theme Override Data and if does not exist in override, use Defaultv2's HTML with theme's layout.html
 def checkOverride(themeHTMLFile):
-    sysSettings = db.session.query(settings.settings).with_entities(settings.settings.systemTheme, settings.settings.maintenanceMode).first()
-
+    #sysSettings = db.session.query(settings.settings).with_entities(settings.settings.systemTheme, settings.settings.maintenanceMode).first()
+    sysSettings = settings.getSettingsFromRedis()    
+    
     # Check for Maintenance Mode
     if sysSettings.maintenanceMode is True:
         if current_user.is_authenticated:

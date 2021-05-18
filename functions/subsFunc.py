@@ -11,7 +11,9 @@ from functions import system
 @system.asynch
 def runSubscription(subject, destination, message):
     with app.app_context():
-        sysSettings = settings.settings.query.first()
+        #sysSettings = settings.settings.query.first()
+        sysSettings = settings.getSettingsFromRedis()
+
         finalMessage = message + "<p>If you would like to unsubscribe, click the link below: <br><a href='" + sysSettings.siteProtocol + sysSettings.siteAddress + "/unsubscribe?email=" + destination + "'>Unsubscribe</a></p></body></html>"
         msg = Message(subject=subject, recipients=[destination])
         msg.sender = sysSettings.siteName + "<" + sysSettings.smtpSendAs + ">"

@@ -12,7 +12,8 @@ topics_bp = Blueprint('topic', __name__, url_prefix='/topic')
 
 @topics_bp.route('/')
 def topic_page():
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
     if sysSettings.showEmptyTables:
         topicsList = topics.topics.query.all() 
     else:

@@ -38,7 +38,7 @@
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary ">
     <a class="navbar-brand" href="/">
-      <img src="/static/img/ProFull.png" height="40" class="d-inline-block align-top" alt="">
+      <img src="/static/img/ProFull.png" class="d-inline-block align-top navbar-brand" alt="">
     </a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -69,11 +69,11 @@
         {% endif %}
         {% else %}
         <li class="nav-item px-2 d-block d-lg-none">
-          <a class="nav-link zoom" href="/notifications"><i class="fas fa-bell"></i> NOTIFICATIONS {% if notifications|count > 0 %}<span id="notificationCountMobile" class="badge badge-danger">{{notifications|count}}</span>{% endif %}</a>
+          <a class="nav-link zoom" href="/notifications"></i> NOTIFICATIONS {% if notifications|count > 0 %}<span id="notificationCountMobile" class="badge badge-danger">{{notifications|count}}</span>{% endif %}</a>
         </li>
         <li class="nav-item dropdown pl-2 pr-1 d-none d-lg-block">
           <a class="nav-link zoom" title="NOTIFICATIONS" href="#" id="navbarDropdownNotificationLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <b><i class="fas fa-bell"></i></b> {% if notifications|count > 0 %}<span class="badge badge-danger" id="notificationCountNav">{{notifications|count}}</span>{% endif %}
+             {% if notifications|count > 0 %}<span class="badge badge-danger" id="notificationCountNav">{{notifications|count}}</span>{% endif %}
           </a>
           <ul class="dropdown-menu notificationDropdownMenu shadow">
             <li class="head text-light bg-dark">

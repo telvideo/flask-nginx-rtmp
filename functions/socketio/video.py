@@ -102,7 +102,8 @@ def moveVideoSocketIO(message):
 
 @socketio.on('togglePublished')
 def togglePublishedSocketIO(message):
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
     if current_user.is_authenticated:
         videoID = int(message['videoID'])
         videoQuery = RecordedVideo.RecordedVideo.query.filter_by(owningUser=current_user.id, id=videoID).first()

@@ -25,7 +25,9 @@ def disconnect():
 def handle_new_viewer(streamData):
     channelLoc = str(streamData['data'])
 
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
+
 
     requestedChannel = Channel.Channel.query.filter_by(channelLoc=channelLoc).first()
     stream = Stream.Stream.query.filter_by(streamKey=requestedChannel.streamKey).first()
@@ -87,7 +89,9 @@ def handle_new_viewer(streamData):
 def handle_add_usercount(streamData):
     channelLoc = str(streamData['data'])
 
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
+
 
     requestedChannel = Channel.Channel.query.filter_by(channelLoc=channelLoc).first()
     streamData = Stream.Stream.query.filter_by(streamKey=requestedChannel.streamKey).first()
@@ -109,7 +113,9 @@ def handle_add_usercount(streamData):
 def handle_leaving_viewer(streamData):
     channelLoc = str(streamData['data'])
 
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
+
 
     requestedChannel = Channel.Channel.query.filter_by(channelLoc=channelLoc).first()
     stream = Stream.Stream.query.filter_by(streamKey=requestedChannel.streamKey).first()

@@ -35,58 +35,105 @@
 
 {% block body %}
 
-<div class="container-fluid ">
-    <div class="row">
-        <div class="col-12">
-            <div class="index-video-title">
-                <a href="/channel/{{channel.id}}"><span class="float-left"
-                        id="channelName">{{channel.channelName}}</span></a>
+<div id="mySidenav" class="sidenav my-0 py-0" onmouseover="openNav();" onmouseout="closeNav();">
+    {% for stream in streamList %}
+    <li class="row mx-0 my-0 py-0 px-0 ">
+        <a href="/view/{{stream.channelLoc}}/" class="mx-0 px-0">
+            <div class="mx-0 px-0 my-0">
+                <img class="shadow gif lazy sidenavPic" {% if channel.protected %} src="/static/img/video-locked.jpg"
+                onerror="this.src='/static/img/video-locked.jpg';" {% else %}
+                src="/static/img/video-placeholder.jpg" onerror="this.src='/static/img/video-placeholder.jpg';" {%
+                endif %} data-src="/stream-thumb/{{stream.channelLoc}}.png">
+                    
+                <img class="sidenavPic" src="/images/{{stream.pictureLocation}}"
+                    onerror="this.src='/static/img/user2.png';">
+                
+                <img class="sidenavPic px-0" src="/images/{{stream.imageLocation}}"
+                    onerror="this.src='/static/img/user2.png';">
 
-                <h6 style="display: inline; margin: 0px;"><span id="liveIndicatorBadge"
-                        class="float-left m-2 liveindicator badge badge-secondary"><b><i
-                                class="fas fa-video-slash"></i><span class="d-none d-sm-none d-md-inline">
-                                Offline</span></b></span> {% if channel.protected and sysSettings.protectionEnabled %}<span class="liveindicator badge badge-info float-left m-2"><i class="fas fa-user-lock"></i><span
-                            class="d-none d-sm-none d-md-inline"> Protected</span></span></h6>{% endif %}
+                    <div class="displayCard-counts mx-0 my-0">
+                        <b> {{stream.username}} <span style="font-size:9px"><i class="fas fa-eye"></i></span>
+ 
+                        <b> {{stream.currentViewers}}       <span style="font-size:9px"><i class="fas fa-users"></i></span></b>  
+                        <b> {{stream.totalViewers}}         <span style="font-size:9px"><i class="fas fa-thumbs-up"></i></span></b>  
+                        <b> {{stream.NupVotes}}             <span style="font-size:9px">.<br></span></b>
+                        <span style="font-size:12px"> {{stream.streamName|limit_title}} {{stream.channelName}} </span>
+                    </div>
+            </div>
+        </a>
+    </li>
+    {% endfor %}
+    <!-- These adds fu*k up the vid player (tracking) idk why ? -->
+    <!-- <script data-cfasync="false" type="text/javascript" src="https://www.onclickperformance.com/a/display.php?r=4468731"></script>  -->
+    <!-- <script data-cfasync="false" type="text/javascript" src="https://www.onclickperformance.com/a/display.php?r=4468727"></script> -->
+
+</div> <!--mySidenav -->
+
+<div id="main" class="px-0 py-0 ">
+    <div class="container-fluid pl-1 mr-1 py-0" id="tmain">
+        <div class="row">
+            <div class="col-12">
+                <div class="index-video-title">
+                    <a href="/channel/{{channel.id}}"><span class="float-left"
+                            id="channelName">{{channel.channelName}}</span></a>
+
+                    <h6 style="display: inline; margin: 0px;"><span id="liveIndicatorBadge"
+                            class="float-left m-2 liveindicator badge badge-secondary"><b><i
+                                    class="fas fa-video-slash"></i><span class="d-none d-sm-none d-md-inline">
+                                    Offline</span></b></span> {% if channel.protected and sysSettings.protectionEnabled
+                        %}<span class="liveindicator badge badge-info float-left m-2"><i
+                                class="fas fa-user-lock"></i><span class="d-none d-sm-none d-md-inline">
+                                Protected</span></span></h6>{% endif %}
+                        
+
+                        <span class="float-left px-2">
+                            {% if current_user.is_authenticated %}
+                                <button id="chanSubStateButton" class="btn btn-sm {% if subState == True %} btn-outline-success {% else %} btn-success {% endif %}" onclick='toggleChannelSub("{{channel.id}}")'>{% if subState == True %}<i class="fas fa-star"></i><span class="d-none d-sm-none d-md-inline"> Unfollow</span>{% else %}<i class="far fa-star"></i><span class="d-none d-sm-none d-md-inline"> Follow</span>{% endif %}</button>
+                            {% else %}
+                                <button class="btn btn-sm btn-outline-secondary disabled" disabled><i class="far fa-star"></i><span class="d-none d-sm-none d-md-"> Follow</span></button>
+                            {% endif %}
+                            </span>
+
+                </div>
             </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="{% if channel.chatEnabled == True %}col-lg{% else %} col-12{% endif %} col-xs-12 col-sm-12"
-            id="videoWindow">
-            <div class="videoPanel">
-                <div class="player">
-                    <div id="videoContainer">
-                        <video id="video" class="shadow videoStream video-js vjs-big-play-centered"
-                            poster="/stream-thumb/{{channel.channelLoc}}.png" autoplay playsinline controls
-                            preload="auto" data-setup='{"fluid": true, "liveui": true}'>
-                            <p class="vjs-no-js">
-                                To view this video please enable JavaScript, and consider upgrading to a web
-                                browser that
-                                <a href="https://videojs.com/html5-video-support/" target="_blank">supports
-                                    HTML5 video</a>
-                            </p>
-                        </video>
+        <div class="row">
+            <div class="{% if channel.chatEnabled == True %}col-lg{% else %} col-12{% endif %} col-xs-12 col-sm-12"
+                id="videoWindow">
+                <div class="videoPanel">
+                    <div class="player">
+                        <div id="videoContainer">
+                            <video id="video" class="shadow videoStream video-js vjs-big-play-centered"
+                                poster="/stream-thumb/{{channel.channelLoc}}.png" autoplay playsinline controls
+                                preload="auto" data-setup='{"fluid": true, "liveui": true}'>
+                                <p class="vjs-no-js">
+                                    To view this video please enable JavaScript, and consider upgrading to a web
+                                    browser that
+                                    <a href="https://videojs.com/html5-video-support/" target="_blank">supports
+                                        HTML5 video</a>
+                                </p>
+                            </video>
+                        </div>
+                        <div id="offlineImage" style="display:none;" class="mPannel">
+                            <img class="videoStream shadow mPannel" {% if channel.offlineImageLocation !=None %}
+                                src="/images/{{channel.offlineImageLocation}}" {% else %}
+                                src="/static/img/video-placeholder.jpg" {% endif %}
+                                onerror="this.onerror=null;this.src='/static/img/video-placeholder.jpg';">
+                        </div>
                     </div>
-                    <div id="offlineImage" style="display:none;">
-                        <img class="videoStream shadow" {% if channel.offlineImageLocation !=None %}
-                            src="/images/{{channel.offlineImageLocation}}" {% else %}
-                            src="/static/img/video-placeholder.jpg" {% endif %}
-                            onerror="this.onerror=null;this.src='/static/img/video-placeholder.jpg';">
-                    </div>
-                </div>
-                <div class="row pl-1">
-                    <div class="video-buttons-row">
+                    <div class="row pl-1">
+                        <div class="video-buttons-row">
+                          <!--- 
+                            <span class="float-right  mr-3">
+                                <button id="give1Button" type="button" class="btn  btn-primary" title="Give 1 Boggs"
+                                    onclick="sendMessage()">1</button>
+                            </span>
 
-                        <span class="float-right  mr-3">
-                            <button id="give1Button" type="button" class="btn  btn-primary"
-                                onclick="sendMessage()">1</button>
-                        </span>
-
-                        <span class="float-right">
-                            <button id="give10Button" type="button" class="btn  btn-primary"
-                                onclick="sendMessage()">10</button>
-                        </span>
-
+                            <span class="float-right">
+                                <button id="give10Button" type="button" class="btn  btn-primary"
+                                    title="Give 10 Boggs coins" onclick="sendMessage()">10</button>
+                            </span>
+                            
                         <span class="float-right">
                             <button id="give100Button" type="button" class="btn  btn-primary"
                                 onclick="sendMessage()">100</button>
@@ -96,292 +143,300 @@
                             <button id="give1000Button" type="button" class="btn  btn-primary"
                                 onclick="sendMessage()">1000</button>
                         </span>
-
-                        <span class="float-right">
-                            <!-- <button id="give1000Button" type="button" class="btn  btn-primary ml-1"
+                        -->
+                            <span class="float-right mr-3" >
+                                <!-- <button id="give1000Button" type="button" class="btn  btn-primary ml-1"
                                         onclick="sendMessage()">1000</button>
                                    -->
-                            <button id="popButton" type="button" class="btn  btn-primary"
-                                onClick="popoutChat();return false;"
-                                class="btn btn-primary {% if channel.chatEnabled == False %}disabled {% endif %}"
-                                title="Pop-out Chat" href="#"><i class="fas fa-comment"></i>
-                            </button>
-                        </span>
-                        <span class="float-right pl-1">
-                            {% if channel.chatEnabled == True %}
-                            <button id="toggleButton" type="button" class="btn  btn-primary" onclick="toggleChat()"
-                                title="Toggle Chat" href="#"><i class="fas fa-eye-slash"></i>
-                            </button>
-                            {% else %}
-                            <button id="dtoggleButton" type="button" disabled class="btn  btn-primary"
-                                onclick="toggleChat()" title="Toggle Chat" href="#"><i class="fas fa-eye-slash"></i>
-                            </button>
+                                <button id="popButton" type="button" class="btn  btn-primary"
+                                    onClick="popoutChat();return false;"
+                                    class="btn btn-primary {% if channel.chatEnabled == False %}disabled {% endif %}"
+                                    title="Pop-out Chat" href="#"><i class="fas fa-comment"></i>
+                                </button>
+                            </span>
+                            <!---
+                            <span class="float-right pl-1">
+                              {#  {% if channel.chatEnabled == True %} %}
+                                <button id="toggleButton" type="button" class="btn  btn-primary" onclick="toggleChat()"
+                                    title="Toggle Chat" href="#"><i class="fas fa-eye-slash"></i>
+                                </button>
+                             {#    {% else %} #}
+                                <button id="dtoggleButton" type="button" disabled class="btn  btn-primary"
+                                    onclick="toggleChat()" title="Toggle Chat" href="#"><i class="fas fa-eye-slash"></i>
+                                </button>
+                             {#    {% endif %}  #}
+                            </span>
+                        -->
+                            {% if channel.owningUser == current_user.id %}
+                            <span class="float-left" style="margin-right: 10px">
+                                <button type="button" class="btn btn-primary ml-2" data-toggle="modal"
+                                    title="Edit Stream" data-target="#editModal">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </span>
                             {% endif %}
-                        </span>
+                            <span class="float-left">
+                                <span id="streamMetadataName" class="stream-title"><b><i
+                                            class="fas fa-video mr-2"></i>{% if
+                                        stream != None %}
+                                        {{stream.streamName|limit_title}} {% else %} No Stream
+                                        {% endif %}</b></span><br />
+                                <span id="streamMetadataTopic"><b><i class="fas fa-hashtag mr-2"></i></b> <a
+                                        href="/topic/{{stream.topic}}/">{% if stream != None %}
+                                        {{stream.topic|get_topicName}} {% else %} {{channel.topic|get_topicName}}
+                                        {% endif %}</a></span>
+                                <i class="fas fa-clock mx-2"></i> <span id="streamTime"> 00:00:00</span>
+                            </span>
+                            <span class="float-right">
+                                <i class="fas fa-users mx-2"></i> {{channel.views}}
+                                <i class="fas fa-star mx-2"></i> {{channel.Nsubscriptions}}<br />
+                                <i class="fas fa-eye mx-2"></i> <span
+                                    id="currentViewers">{{channel.currentViewers}}</span>
+                            </span>
+                             </span>
+                            <span class="float-right mx-1">
+                                <button id="upvoteButton" type="button" class="btn btn-primary ml-1"
+                                    onclick="changeUpvote();" title="Like" {% if current_user.is_authenticated==false
+                                    %} disabled aria-disabled="true" {% endif %}>
+                                    <i id="upVoteIcon" class="far fa-thumbs-up"> <span id="totalUpvotes"></span> 
+                                       {# {{stream.NupVotes}} #} </i>
+                                </button>
+                            </span>
+                            <span class="float-right pl-1">
+                                <button id="shareButton" type="button" class="btn btn-primary" data-toggle="modal"
+                                    data-target="#shareModal" title="Share Stream" aria-pressed="false"
+                                    autocomplete="off" href="#"><i class="fas fa-share-alt"></i>
+                                </button>
+                            </span>
 
-                        {% if channel.owningUser == current_user.id %}
-                        <span class="float-left" style="margin-right: 10px">
-                            <button type="button" class="btn btn-primary ml-2" data-toggle="modal" title="Edit Stream"
-                                data-target="#editModal">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                        </span>
-                        {% endif %}
-                        <span class="float-left">
-                            <span id="streamMetadataName" class="stream-title"><b><i class="fas fa-video mr-2"></i>{% if
-                                    stream != None %}
-                                    {{stream.streamName|limit_title}} {% else %} No Stream
-                                    {% endif %}</b></span><br />
-                            <span id="streamMetadataTopic"><b><i class="fas fa-hashtag mr-2"></i></b> <a
-                                    href="/topic/{{stream.topic}}/">{% if stream != None %}
-                                    {{stream.topic|get_topicName}} {% else %} {{channel.topic|get_topicName}}
-                                    {% endif %}</a></span>
-                            <i class="fas fa-clock mx-2"></i> <span id="streamTime"> 00:00:00</span>
-                        </span>
-                        <span class="float-right">
-                            <i class="fas fa-users mx-2"></i> {{channel.views}}
-                            <i class="fas fa-star mx-2"></i> {{channel.subscriptions|length}}<br />
-                            <i class="fas fa-eye mx-2"></i> <span id="currentViewers">{{channel.currentViewers}}</span>
-                        </span>
-                        <span class="float-right mx-1">
-                            {% if current_user.is_authenticated %}
-                            <button id="chanSubStateButton"
-                                class="btn {% if subState == True %} btn-outline-success {% else %} btn-outline-secondary {% endif %}"
-                                title="Follow" onclick='toggleChannelSub("{{channel.id}}")'>{% if subState == True %}<i
-                                    class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}</button>
-                            {% else %}
-                            <button id="chanSubStateButton" class="btn btn-outline-secondary disabled" disabled><i
-                                    class="far fa-star"></i></button>
-                            {% endif %}
-                        </span>
-                        <span class="float-right mx-1">
-                            <button id="upvoteButton" type="button" class="btn btn-outline-secondary ml-1"
-                                onclick="changeUpvote();" title="Upvote" {% if current_user.is_authenticated==false %}
-                                disabled aria-disabled="true" {% endif %}>
-                                <i id="upVoteIcon" class="far fa-thumbs-up"> <span id="totalUpvotes"></span> {# {{stream.NupVotes }} #} </i>
-                            </button>
-                        </span>
-                        <span class="float-right pl-1">
-                            <button id="shareButton" type="button" class="btn btn-primary" data-toggle="modal"
-                                data-target="#shareModal" title="Share Stream" aria-pressed="false" autocomplete="off"
-                                href="#"><i class="fas fa-share-alt"></i>
-                            </button>
-                        </span>
+                        </div>
+                    </div>
+                    <div class="row m-2">
+                        <div class="channeldescription">{% if channel.description != None
+                            %}{{channel.description|markdown}}{% else %}No Description Available {% endif %}</div>
+    <!-- <script data-cfasync="false" type="text/javascript" src="https://www.onclickperformance.com/a/display.php?r=4468731"></script>  -->
+    <!-- <script data-cfasync="false" type="text/javascript" src="https://www.onclickperformance.com/a/display.php?r=4468727"></script> -->
+    <!-- <center><script data-cfasync="false" type="text/javascript" src="https://www.onclickperformance.com/a/display.php?r=4468639"></script> </center> -->
 
                     </div>
-                </div>
-                <div class="row m-2">
-                    <div class="channeldescription">{% if channel.description != None
-                        %}{{channel.description|markdown}}{% else %}No Description Available {% endif %}</div>
                 </div>
             </div>
-        </div>
-        {% if channel.chatEnabled == True %}
-        <div id="chatside" class="col-lg-auto col-xs-12 col-sm-12">
-            <div>
-                <div id="loader" class="chatloader">
-                    <div class="chatloader-view">
-                        <h2>Connecting...</h2>
-                        <div class="d-flex justify-content-center">
-                            <div class="spinner-border" role="status">
-                                <span class="sr-only">Loading...</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div id="unavailable" class="chatloader">
-                    <div class="chatloader-view">
-                        <h2>You have been disconnected from the chat.</h2><br>
-                        <br>
-                        <div id="disconnectReason">Reason: (<span id="reasonCode"></span>) - <span
-                                id="reasonText"></span></div><br><br>
-                        <h1><i class="fas fa-exclamation-triangle"></i></h1><br>
-                        <br>
-                        <button class="btn btn-success" onclick="connectChat();">Reconnect</button>
-                    </div>
-                </div>
-                <div id="chatPanel" class="chatPanel">
-                    <div class="chatHeader">
-                        <div class="chatCounts">
-                            <img width="50" src="/static/img/MascotFinal.png" alt="Mascot" class="center">
-                        <!--    <img width="50" height="50" src="/static/img/Mascot_3.png" alt="Prosmile2" class="center"> -->
-                            <img width="50" height="50" src="/static/img/Mascot_1.png" alt="Prosmile1" class="center">
-                            <img width="50" height="50" src="/static/img/Mascot_2_legs.png" alt="Prosmile2" class="center">
-
-                            
-                            <span class="float-right"><button type="button" class="btn btn-outline-primary"
-                                    onclick="showOccupants();"><i class="fas fa-user-friends"></i> <span
-                                        id="chatTotal"></span></button></span>
-                            <span id="modDisplayButton" class="float-right" style="display:none;"><button type="button"
-                                    class="btn btn-outline-warning" onclick="openModDisplay();"><i
-                                        class="fas fa-user-shield"></i></button></span>
-                        </div>
-                    </div>
-                    <div id="chatContentWindow" class="chatContent">
-                        <div id="modDisplay" class="modDisplayOverlay">
-                            <div class="membersList card my-2">
-                                <div class="card-header bg-primary"><b>Banned Users</b></div>
-                                <div id="OutcastList" class="card-body"></div>
-                            </div>
-                        </div>
-                        <div id="chatMembers" class="chatMembersOverlay">
-                            <div class="membersList card my-2">
-                                <div class="card-header bg-primary"><b>Moderator</b></div>
-                                <div id="ModeratorList" class="card-body"></div>
-                            </div>
-                            <div class="membersList card my-2">
-                                <div class="card-header bg-primary"><b>Participant</b></div>
-                                <div id="ParticipantList" class="card-body"></div>
-                            </div>
-                            <div class="membersList card my-2">
-                                <div class="card-header bg-primary"><b>Guest</b></div>
-                                <div id="VisitorList" class="card-body"></div>
-                            </div>
-                        </div>
-                        <div id="chat" class="chatSection"></div>
-                    </div>
-                    <div class="chatFooter">
-                        <div class="chatFooterTop"></div>
-                        <div class="chatFooterInput">
-                            <div class="input-group">
-                                <input id="chatinput" type="text" class="form-control" maxlength="420"
-                                    autocomplete="off">
-                                <div class="input-group-append">
-                                    <button type="button" class=" btn btn-success form-control" id="openEmojiButton"><i
-                                            class="far fa-smile"></i></button>
-                                    <button type="button" class=" btn btn-primary form-control" id="sendChat"
-                                        onclick="sendMessage();"><i class="fas fa-paper-plane"></i></button>
+            {% if channel.chatEnabled == True %}
+            <div id="chatside" class="col-lg-auto col-xs-12 col-sm-12">
+                <div>
+                    <div id="loader" class="chatloader">
+                        <div class="chatloader-view">
+                            <h2>Connecting...</h2>
+                            <div class="d-flex justify-content-center">
+                                <div class="spinner-border" role="status">
+                                    <span class="sr-only">Loading...</span>
                                 </div>
-                                <div class="chatsticker-composer-popover chatsticker-composer-emoji-popover shadow">
-                                    <div class="chatsticker-emoji-picker w-100">
-                                        <div class="chatsticker-composer-popover-header"><input
-                                                class="chatsticker-composer-popover-input" placeholder="Search..."
-                                                aria-label="Search" value="" oninput="searchSticker();"
-                                                style="background-color:#ffffff;"></div>
-                                        <div class="chatsticker-composer-popover-body-container">
-                                            <div class="chatsticker-composer-popover-body">
-                                                <div class="chatsticker-emoji-picker-groups">
-                                                    <div class="chatsticker-emoji-picker-group">
-                                                        <div class="chatsticker-emoji-picker-group-title">Default</div>
-                                                        {% for sticker in stickerSelectorList['builtin'] %}
-                                                        <span class="chatsticker-emoji-picker-emoji"
-                                                            title="{{ sticker.name }}"><img src="{{ sticker.file }}"
-                                                                height="32px" alt="{{ sticker.name }}"
-                                                                title="{{ sticker.name }}" /></span>
-                                                        {% endfor %}
-                                                    </div>
-                                                    <div class="chatsticker-emoji-picker-group">
-                                                        <div class="chatsticker-emoji-picker-group-title">Global</div>
-                                                        {% for sticker in stickerSelectorList['global'] %}
-                                                        <span class="chatsticker-emoji-picker-emoji"
-                                                            title="{{ sticker.name }}"><img src="{{ sticker.file }}"
-                                                                height="32px" alt="{{ sticker.name }}"
-                                                                title="{{ sticker.name }}" /></span>
-                                                        {% endfor %}
-                                                    </div>
-                                                    <div class="chatsticker-emoji-picker-group">
-                                                        <div class="chatsticker-emoji-picker-group-title">Channel</div>
-                                                        {% for sticker in stickerSelectorList['channel'] %}
-                                                        <span class="chatsticker-emoji-picker-emoji"
-                                                            title="{{ sticker.name }}"><img src="{{ sticker.file }}"
-                                                                height="32px" alt="{{ sticker.name }}"
-                                                                title="{{ sticker.name }}" /></span>
-                                                        {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div id="unavailable" class="chatloader">
+                        <div class="chatloader-view">
+                            <h2>You have been disconnected from the chat.</h2><br>
+                            <br>
+                            <div id="disconnectReason">Reason: (<span id="reasonCode"></span>) - <span
+                                    id="reasonText"></span></div><br><br>
+                            <h1><i class="fas fa-exclamation-triangle"></i></h1><br>
+                            <br>
+                            <button class="btn btn-success" onclick="connectChat();">Reconnect</button>
+                        </div>
+                    </div>
+                    <div id="chatPanel" class="chatPanel">
+                        <div class="chatHeader">
+                            <div class="chatCounts">
+                                <img width="50" src="/static/img/MascotFinal.png" alt="Mascot" class="center">
+                                <!--    <img width="50" height="50" src="/static/img/Mascot_3.png" alt="Prosmile2" class="center"> -->
+                                <img width="50" height="50" src="/static/img/Mascot_1.png" alt="Prosmile1"
+                                    class="center">
+                                <img width="50" height="50" src="/static/img/Mascot_2_legs.png" alt="Prosmile2"
+                                    class="center">
+
+
+                                <span class="float-right"><button type="button" class="btn btn-outline-primary"
+                                        onclick="showOccupants();"><i class="fas fa-user-friends"></i> <span
+                                            id="chatTotal"></span></button></span>
+                                <span id="modDisplayButton" class="float-right" style="display:none;"><button
+                                        type="button" class="btn btn-outline-warning" onclick="openModDisplay();"><i
+                                            class="fas fa-user-shield"></i></button></span>
+                            </div>
+                        </div>
+                        <div id="chatContentWindow" class="chatContent">
+                            <div id="modDisplay" class="modDisplayOverlay">
+                                <div class="membersList card my-2">
+                                    <div class="card-header bg-primary"><b>Banned Users</b></div>
+                                    <div id="OutcastList" class="card-body"></div>
+                                </div>
+                            </div>
+                            <div id="chatMembers" class="chatMembersOverlay">
+                                <div class="membersList card my-2">
+                                    <div class="card-header bg-primary"><b>Moderator</b></div>
+                                    <div id="ModeratorList" class="card-body"></div>
+                                </div>
+                                <div class="membersList card my-2">
+                                    <div class="card-header bg-primary"><b>Participant</b></div>
+                                    <div id="ParticipantList" class="card-body"></div>
+                                </div>
+                                <div class="membersList card my-2">
+                                    <div class="card-header bg-primary"><b>Guest</b></div>
+                                    <div id="VisitorList" class="card-body"></div>
+                                </div>
+                            </div>
+                            <div id="chat" class="chatSection"></div>
+                        </div>
+                        <div class="chatFooter">
+                            <div class="chatFooterTop"></div>
+                            <div class="chatFooterInput">
+                                <div class="input-group">
+                                    <input id="chatinput" type="text" class="form-control" maxlength="420"
+                                        autocomplete="off">
+                                    <div class="input-group-append">
+                                        <button type="button" class=" btn btn-success form-control"
+                                            id="openEmojiButton"><i class="far fa-smile"></i></button>
+                                        <!---                                        <button type="button" class=" btn btn-primary form-control" id="sendChat"
+                                       onclick="sendMessage();"><i class="fas fa-paper-plane"></i></button>
+-->
+                                    </div>
+                                    <div class="chatsticker-composer-popover chatsticker-composer-emoji-popover shadow">
+                                        <div class="chatsticker-emoji-picker w-100">
+                                            <div class="chatsticker-composer-popover-header"><input
+                                                    class="chatsticker-composer-popover-input" placeholder="Search..."
+                                                    aria-label="Search" value="" oninput="searchSticker();"
+                                                    style="background-color:#ffffff;"></div>
+                                            <div class="chatsticker-composer-popover-body-container">
+                                                <div class="chatsticker-composer-popover-body">
+                                                    <div class="chatsticker-emoji-picker-groups">
+                                                        <div class="chatsticker-emoji-picker-group">
+                                                            <div class="chatsticker-emoji-picker-group-title">Default
+                                                            </div>
+                                                            {% for sticker in stickerSelectorList['builtin'] %}
+                                                            <span class="chatsticker-emoji-picker-emoji"
+                                                                title="{{ sticker.name }}"><img src="{{ sticker.file }}"
+                                                                    height="32px" alt="{{ sticker.name }}"
+                                                                    title="{{ sticker.name }}" /></span>
+                                                            {% endfor %}
+                                                        </div>
+                                                        <div class="chatsticker-emoji-picker-group">
+                                                            <div class="chatsticker-emoji-picker-group-title">Global
+                                                            </div>
+                                                            {% for sticker in stickerSelectorList['global'] %}
+                                                            <span class="chatsticker-emoji-picker-emoji"
+                                                                title="{{ sticker.name }}"><img src="{{ sticker.file }}"
+                                                                    height="32px" alt="{{ sticker.name }}"
+                                                                    title="{{ sticker.name }}" /></span>
+                                                            {% endfor %}
+                                                        </div>
+                                                        <div class="chatsticker-emoji-picker-group">
+                                                            <div class="chatsticker-emoji-picker-group-title">Channel
+                                                            </div>
+                                                            {% for sticker in stickerSelectorList['channel'] %}
+                                                            <span class="chatsticker-emoji-picker-emoji"
+                                                                title="{{ sticker.name }}"><img src="{{ sticker.file }}"
+                                                                    height="32px" alt="{{ sticker.name }}"
+                                                                    title="{{ sticker.name }}" /></span>
+                                                            {% endfor %}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="chatsticker-composer-popover-caret"></div>
                                     </div>
-                                    <div class="chatsticker-composer-popover-caret"></div>
                                 </div>
                             </div>
+                            <div class="chatFooterBottom"></div>
+                            <div id='log' style="display:none;"></div>
                         </div>
-                        <div class="chatFooterBottom"></div>
-                        <div id='log' style="display:none;"></div>
                     </div>
                 </div>
-            </div>
 
-            <div class="chatEntryContainer" data-type="chatmessagetemplate" style="display:none;">
-                <div class="chatEntry flexbox">
-                    <!--<span class="chatImage float-left">
+                <div class="chatEntryContainer" data-type="chatmessagetemplate" style="display:none;">
+                    <div class="chatEntry flexbox">
+                        <!--<span class="chatImage float-left">
                             <img class="avatar rounded shadow" src="https://picsum.photos/48">
                           </span>-->
-                    <span class="chatInfo">
-                        <span style="color:darkgreen" class="chatTimestamp float-right mr-1"></span>
-                        <span class="chatUsername"> </span> <span style="color:white" class="chatMessage"></span>
-                        <!----                            <span class="chatTimestamp"></span><span class="chatUsername ml-1"></span>:
+                        <span class="chatInfo">
+                            <span style="color:darkgreen" class="chatTimestamp float-right mr-1"></span>
+                            <span class="chatUsername"> </span> <span style="color:white" class="chatMessage"></span>
+                            <!----                            <span class="chatTimestamp"></span><span class="chatUsername ml-1"></span>:
                             <span class="chatMessage ml-1"></span> -->
-                    </span>
-                </div>
-            </div>
-
-            <div id="profileBox" class="rounded profileBox m-2" data-type="profileBoxTemplate" style="display:none;">
-                <div class="profileBoxHeader">
-                    <button type="button" class="close mr-2" data-dismiss="" aria-label="Close"
-                        onclick="closeProfileBox();">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    <img id="profileBox-photo" src="/static/img/user2.png"
-                        class="profileBoxPic rounded shadow m-2 float-left">
-                    <span id="profileBox-username" class="py-2 font-weight-bold"></span><br>
-                    <div id="iconBar">
-                        <span class="iconBarIcon" id="iconBar-owner" style="display:none;"><i class="fas fa-crown"
-                                data-toggle="tooltip" data-placement="bottom" title="Owner"></i></span>
-                        <span class="iconBarIcon" id="iconBar-admin" style="display:none;"><i class="fas fa-user-tie"
-                                data-toggle="tooltip" data-placement="bottom" title="Admin"></i></span>
-                        <span class="iconBarIcon" id="iconBar-member" style="display:none;"><i
-                                class="iconBarIcon fas fa-award" data-toggle="tooltip" data-placement="bottom"
-                                title="Member"></i></span>
-                        <span class="iconBarIcon" id="iconBar-mod" style="display:none;"><i
-                                class="iconBarIcon fas fa-user-shield" data-toggle="tooltip" data-placement="bottom"
-                                title="Moderator"></i></span>
-                        <span class="iconBarIcon" id="iconBar-voice" style="display:none;"><i
-                                class="iconBarIcon fas fa-bullhorn" data-toggle="tooltip" data-placement="bottom"
-                                title="Participant"></i></span>
-                        <span class="iconBarIcon" id="iconBar-visitor" style="display:none;"><i class="fas fa-user"
-                                data-toggle="tooltip" data-placement="bottom" title="Visitor"></i></span>
-                        <span class="iconBarIcon" id="iconBar-muted" style="display:none;"><i
-                                class="iconBarIcon fas fa-comment-slash" data-toggle="tooltip" data-placement="bottom"
-                                title="Muted"></i></span>
+                        </span>
                     </div>
                 </div>
-                <div class="profileBoxBottom mt-2 mx-2">
-                    <button id="profileBox-openProfileButton" type="button"
-                        class="btn btn-sm btn-primary shadow">Profile</button>
-                    <button id="profileBox-muteButton" class="btn btn-sm btn-primary" onclick="toggleMute();"><i
-                            class="fas fa-toggle-off"></i> Mute</button>
-                    <div id="profileBox-modControls" class="dropdown dropleft float-right" style="display:none;">
-                        <button class="btn btn-sm btn-secondary dropdown-toggle" type="button"
-                            id="dropdownMenuButtonProfileBox" data-toggle="dropdown" aria-haspopup="true"
-                            aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            <h6 class="dropdown-header">Mod Controls</h6>
-                            <button class="dropdown-item" type="button" onclick="modKick();">Kick</button>
-                            <button class="dropdown-item" type="button" onclick="modBan();">Ban</button>
-                            <div class="dropdown-divider"></div>
-                            <h6 class="dropdown-header">Change Role</h6>
-                            <button class="dropdown-item" type="button" onclick="modSetAffiliation('admin');">Set as
-                                Moderator</button>
-                            <button class="dropdown-item" type="button" onclick="modSetAffiliation('member');">Set as
-                                Participant</button>
-                            <button class="dropdown-item" type="button" onclick="modSetAffiliation('none');">Set as
-                                Guest</button>
-                            <div class="dropdown-divider"></div>
-                            <h6 class="dropdown-header">Channel Voice Controls</h6>
-                            <!--<button class="dropdown-item" type="button" onclick="modSetRole('moderator');">Set as Moderator</button>-->
-                            <button class="dropdown-item" type="button"
-                                onclick="modSetRole('participant');">Voice</button>
-                            <button class="dropdown-item" type="button"
-                                onclick="modSetRole('visitor');">Devoice</button>
 
+                <div id="profileBox" class="rounded profileBox m-2" data-type="profileBoxTemplate"
+                    style="display:none;">
+                    <div class="profileBoxHeader">
+                        <button type="button" class="close mr-2" data-dismiss="" aria-label="Close"
+                            onclick="closeProfileBox();">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <img id="profileBox-photo" src="/static/img/user2.png"
+                            class="profileBoxPic rounded shadow m-2 float-left">
+                        <span id="profileBox-username" class="py-2 font-weight-bold"></span><br>
+                        <div id="iconBar">
+                            <span class="iconBarIcon" id="iconBar-owner" style="display:none;"><i class="fas fa-crown"
+                                    data-toggle="tooltip" data-placement="bottom" title="Owner"></i></span>
+                            <span class="iconBarIcon" id="iconBar-admin" style="display:none;"><i
+                                    class="fas fa-user-tie" data-toggle="tooltip" data-placement="bottom"
+                                    title="Admin"></i></span>
+                            <span class="iconBarIcon" id="iconBar-member" style="display:none;"><i
+                                    class="iconBarIcon fas fa-award" data-toggle="tooltip" data-placement="bottom"
+                                    title="Member"></i></span>
+                            <span class="iconBarIcon" id="iconBar-mod" style="display:none;"><i
+                                    class="iconBarIcon fas fa-user-shield" data-toggle="tooltip" data-placement="bottom"
+                                    title="Moderator"></i></span>
+                            <span class="iconBarIcon" id="iconBar-voice" style="display:none;"><i
+                                    class="iconBarIcon fas fa-bullhorn" data-toggle="tooltip" data-placement="bottom"
+                                    title="Participant"></i></span>
+                            <span class="iconBarIcon" id="iconBar-visitor" style="display:none;"><i class="fas fa-user"
+                                    data-toggle="tooltip" data-placement="bottom" title="Visitor"></i></span>
+                            <span class="iconBarIcon" id="iconBar-muted" style="display:none;"><i
+                                    class="iconBarIcon fas fa-comment-slash" data-toggle="tooltip"
+                                    data-placement="bottom" title="Muted"></i></span>
+                        </div>
+                    </div>
+                    <div class="profileBoxBottom mt-2 mx-2">
+                        <button id="profileBox-openProfileButton" type="button"
+                            class="btn btn-sm btn-primary shadow">Profile</button>
+                        <button id="profileBox-muteButton" class="btn btn-sm btn-primary" onclick="toggleMute();"><i
+                                class="fas fa-toggle-off"></i> Mute</button>
+                        <div id="profileBox-modControls" class="dropdown dropleft float-right" style="display:none;">
+                            <button class="btn btn-sm btn-secondary dropdown-toggle" type="button"
+                                id="dropdownMenuButtonProfileBox" data-toggle="dropdown" aria-haspopup="true"
+                                aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <h6 class="dropdown-header">Mod Controls</h6>
+                                <button class="dropdown-item" type="button" onclick="modKick();">Kick</button>
+                                <button class="dropdown-item" type="button" onclick="modBan();">Ban</button>
+                                <div class="dropdown-divider"></div>
+                                <h6 class="dropdown-header">Change Role</h6>
+                                <button class="dropdown-item" type="button" onclick="modSetAffiliation('admin');">Set as
+                                    Moderator</button>
+                                <button class="dropdown-item" type="button" onclick="modSetAffiliation('member');">Set
+                                    as
+                                    Participant</button>
+                                <button class="dropdown-item" type="button" onclick="modSetAffiliation('none');">Set as
+                                    Guest</button>
+                                <div class="dropdown-divider"></div>
+                                <h6 class="dropdown-header">Channel Voice Controls</h6>
+                                <!--<button class="dropdown-item" type="button" onclick="modSetRole('moderator');">Set as Moderator</button>-->
+                                <button class="dropdown-item" type="button"
+                                    onclick="modSetRole('participant');">Voice</button>
+                                <button class="dropdown-item" type="button"
+                                    onclick="modSetRole('visitor');">Devoice</button>
+
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        {% endif %}
+            {% endif %}
 
+        </div>
     </div>
 </div>
 {% if channel.owningUser == current_user.id %}
@@ -494,6 +549,18 @@
 {% endblock %}
 
 {% block scripts %}
+
+<script>
+    function openNav() {
+        document.getElementById("mySidenav").style.width = "221px";
+        document.getElementById("main").style.marginLeft = "221px";
+    }
+
+    function closeNav() {
+        document.getElementById("mySidenav").style.width = "70px";
+        document.getElementById("main").style.marginLeft = "70px";
+    }
+</script>
 
 <script>
     var player = videojs('video', {
@@ -741,8 +808,8 @@
         {% else %}
         MyWindows = window.open('/view/{{channel.channelLoc}}/?chatOnly=True&guestUser=' + username, 'myWindow', 'width=500,height=900');
         {% endif %}
-        var chatbox = document.getElementById("chatside");
-        chatbox.style.display = "none";
+        //var chatbox = document.getElementById("chatside");
+        //chatbox.style.display = "none";
     }
 </script>
 
@@ -902,13 +969,14 @@
     socket.on('sendChanSubResults', function (msg) {
         var subButton = document.getElementById('chanSubStateButton');
         if (msg['state'] === true) {
-            subButton.innerHTML = "<i class='fas fa-star'></i>";
-            subButton.className = "btn btn-outline-success";
+            subButton.innerHTML = "<i class='fas fa-star'></i><span class='d-none d-sm-none d-md-inline'> UnFollow</span>";
+            subButton.className = "btn btn-sm btn-outline-success";
         } else {
-            subButton.innerHTML = "<i class='far fa-star'></i>";
-            subButton.className = "btn btn-outline-secondary";
+            subButton.innerHTML = "<i class='far fa-star'></i><span class='d-none d-sm-none d-md-inline'> Follow</span>";
+            subButton.className = "btn btn-sm btn-success";
         }
-    });
+      });
+
 </script>
 
 <script>

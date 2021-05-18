@@ -31,6 +31,7 @@ class Channel(db.Model):
     rtmpRestreamDestination = db.Column(db.String(4096))
     xmppToken = db.Column(db.String(64))
     vanityURL = db.Column(db.String(1024))
+    Nsubscriptions = db.Column(db.Integer)
     stream = db.relationship('Stream', backref='channel', cascade="all, delete-orphan", lazy="joined")
     recordedVideo = db.relationship('RecordedVideo', backref='channel', cascade="all, delete-orphan", lazy="joined")
     upvotes = db.relationship('channelUpvotes', backref='stream', cascade="all, delete-orphan", lazy="joined")

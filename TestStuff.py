@@ -20,6 +20,7 @@ from classes import stickers
 from functions import database
 from functions import system
 from classes.shared import db
+from classes import settings
 
 from globals import globalvars
 from classes import RecordedVideo
@@ -34,6 +35,8 @@ from classes import Channel
 from classes.Sec import User
 
 app = Flask(__name__)
+
+app.config['SESSION_TYPE'] = 'redis'
 app.config['SQLALCHEMY_DATABASE_URI'] = config.dbLocation
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -53,6 +56,11 @@ db.app = app
 
 from flask import Flask, render_template
 
+def myfun():
+    sysSettings = settings.settings.query.first()
+
+#    sysSettings = settings.settings("Boggger!","","","",0,0,0,0,0,0,0,0,0,0,0,0)
+    return(sysSettings)
 
 app = Flask(__name__)
 
@@ -66,19 +74,30 @@ def index():
    
 print("fred")
 
+#fredSys=myfun()
 
-#recordedVid = RecordedVideo.RecordedVideo.query.filter_by(id=videoID).first()
-
-# only owningUsers or admins can delete
-#if (current_user.id != recordedVid.owningUser and (current_user.has_role('Admin') is False)):
-#    return False
-    
-# Delete Clips Attached to Video
-#for clip in recordedVid.clips:
-#    db.session.delete(clip)
+myset = settings.getSettingsFromRedis()
 
 
 
+import redis
+
+r = redis.Redis(host=config.redisHost, port=config.redisPort, decode_responses=True)
+
+#r = redis.StrictRedis(decode_responses=True)
+
+myStr = "Fred String"
+r.set('MARK TEST',str(myStr))
+fred = str(r.get('MARK TEST'))
+
+
+if fred == myStr:
+    print("Yes")
+
+r.delete("MARK TEST")
+fred = r.get('MARK TEST')
+
+exit()
 
 recordedVid = RecordedVideo.RecordedVideo.query.filter_by(id=136).first()
 recordedVid.NupVotes = recordedVid.NupVotes + 1 
@@ -86,6 +105,7 @@ print(recordedVid.NupVotes)
 db.session.commit()
 exit()
 
+# This bit of code could be used to stop the hard drive over flowing maybe...
 import shutil
 
 fullDiskThreshold = 90 / 100

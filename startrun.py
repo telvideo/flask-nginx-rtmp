@@ -4,6 +4,8 @@
 
 from flask import Flask
 from conf import config
+from classes import settings
+from classes import Channel
 from classes import RecordedVideo
 from classes import Stream
 from classes import upvotes
@@ -44,7 +46,7 @@ for stre in theStream:
 db.session.commit()
 system.newLog(0, "Startup Deleting Active Streams")
 
-#check upvotes are what they should be
+# check upvotes are what they should be
 allVideos = RecordedVideo.RecordedVideo.query.all()
 for vid in allVideos:
     vid.NupVotes = upvotes.videoUpvotes.query.filter_by(videoID=vid.id).count()
@@ -52,6 +54,13 @@ for vid in allVideos:
 allClips = RecordedVideo.Clips.query.all()
 for clip in allClips:
     clip.NupVotes = upvotes.clipUpvotes.query.filter_by(clipID=clip.id).count()
+
+
+# check the channel subs
+allchannels = Channel.Channel.query.all()
+for chan in allchannels: 
+    totalQuery = subscriptions.channelSubs.query.filter_by(channelID=chan.id).count()
+    chan.Nsubscriptions = totalQuery
 
 db.session.commit()
 

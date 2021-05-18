@@ -13,7 +13,9 @@ channels_bp = Blueprint('channel', __name__, url_prefix='/channel')
 
 @channels_bp.route('/')
 def channels_page():
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
+    
     if sysSettings.showEmptyTables:
         channelList = Channel.Channel.query.all()
     else:

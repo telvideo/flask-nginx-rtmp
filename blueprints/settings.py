@@ -185,7 +185,8 @@ def user_addInviteCode():
 @roles_required('Admin')
 def admin_page():
     videos_root = current_app.config['WEB_ROOT'] + 'videos/'
-    sysSettings = settings.settings.query.first()
+    sysSettings = settings.settings.query.first() #This can't use settings.getSettingsFromRedis() as it's changed
+
     if request.method == 'GET':
         if request.args.get("action") is not None:
             action = request.args.get("action")
@@ -588,8 +589,9 @@ def admin_page():
                 sysSettings.systemLogo = systemLogo
 
             db.session.commit()
-
+            settings.informRedisOfUpdate()
             sysSettings = settings.settings.query.first()
+            #sysSettings = settings.getSettingsFromRedis()
 
             current_app.config.update(
                 SERVER_NAME=None,
@@ -971,7 +973,8 @@ def rtmpStat_page(node):
 @login_required
 @roles_required('Streamer')
 def settings_channels_page():
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
 
     videos_root = current_app.config['WEB_ROOT'] + 'videos/'
 
@@ -1272,7 +1275,8 @@ def settings_channels_page():
 @login_required
 @roles_required('Streamer')
 def settings_channels_chat_page():
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
 
     if request.method == 'POST':
         from app import ejabberd
@@ -1348,7 +1352,7 @@ def initialSetup():
 
     if firstRunCheck is False:
 
-        sysSettings = settings.settings.query.all()
+        sysSettings = settings.settings.query.all()  # do not call sysSettings = settings.getSettingsFromRedis()
 
         for setting in sysSettings:
             db.session.delete(setting)
@@ -1433,8 +1437,10 @@ def initialSetup():
                                                globalvars.version)
             db.session.add(serverSettings)
             db.session.commit()
+            settings.informRedisOfUpdate()
 
             sysSettings = settings.settings.query.first()
+            #sysSettings = settings.getSettingsFromRedis()
 
             if settings is not None:
                 current_app.config.update(

@@ -84,7 +84,158 @@ class settings(db.Model):
             'adaptiveStreaming': self.adaptiveStreaming,
             'maintenanceMode': self.maintenanceMode
         }
+###
 
+import redis
+
+from flask_redis import FlaskRedis
+
+r = FlaskRedis(decode_responses=True)
+
+def setupRedis(theapp):
+    r.init_app(theapp)
+
+# refill the redis from the database and tell everyone that they need to refresh their version of the redis
+def informRedisOfUpdate():
+    fillRedis()
+    rTest = r.get('OSP REDIS')
+    if rTest ==  None:                              
+        rTest=1
+    rTest = int(rTest) +1   # Add one so that all processes (and ours) notice that they need to refresh their global version of redis
+    r.set('OSP REDIS',int(rTest)) 
+
+# Fill redis with data read from database.  Called once at startup and whenever informRedisOfUpdate() is called
+def fillRedis():
+
+    lsysSettings = settings.query.first()       #get real data from database using local handle
+
+    r.set("id", lsysSettings.id)
+    r.set("siteName", lsysSettings.siteName)
+    r.set("siteProtocol", lsysSettings.siteProtocol)
+    r.set("siteAddress", lsysSettings.siteAddress)
+    r.set("smtpAddress", lsysSettings.smtpAddress)
+    r.set("smtpPort", lsysSettings.smtpPort)
+    r.set("smtpTLS", int(lsysSettings.smtpSSL))
+    r.set("smtpSSL", int(lsysSettings.smtpSSL))
+    r.set("smtpUsername", lsysSettings.smtpUsername)
+    r.set("smtpPassword", lsysSettings.smtpPassword)
+    r.set("smtpSendAs", lsysSettings.smtpSendAs)
+    r.set("allowRecording", int(lsysSettings.allowRecording))
+    r.set("allowUploads", int(lsysSettings.allowUploads))
+    r.set("protectionEnabled", int(lsysSettings.protectionEnabled))
+    r.set("adaptiveStreaming", int(lsysSettings.adaptiveStreaming))
+    r.set("background", lsysSettings.background)
+    r.set("showEmptyTables", int(lsysSettings.showEmptyTables))
+    r.set("allowComments", int(lsysSettings.allowComments))
+    r.set("systemTheme", lsysSettings.systemTheme)
+    r.set("systemLogo", lsysSettings.systemLogo)
+    r.set("version", lsysSettings.version)
+    r.set("sortMainBy", lsysSettings.sortMainBy)
+    r.set("restreamMaxBitrate", lsysSettings.restreamMaxBitrate)
+    r.set("serverMessageTitle", lsysSettings.serverMessageTitle)
+    r.set("serverMessage", lsysSettings.serverMessage)
+    r.set("maxClipLength", lsysSettings.maxClipLength)
+
+    #r.set("proxyFQDN", sysSettings.proxyFQDN)
+    if lsysSettings.proxyFQDN == None:
+        r.set("proxyFQDN", "None")
+    else:
+        r.set("proxyFQDN", lsysSettings.proxyFQDN)
+
+    r.set("maintenanceMode", int(lsysSettings.maintenanceMode))
+    r.set("buildEdgeOnRestart", int(lsysSettings.buildEdgeOnRestart))
+
+    #r.set("allowRegistration", int(sysSettings.allowRegistration))
+    if lsysSettings.allowRegistration == None:
+        r.set("allowRegistration", 0)
+    else:
+        r.set("allowRegistration", int(lsysSettings.allowRegistration))
+    #r.set("requireConfirmedEmail", int(sysSettings.requireConfirmedEmail))
+    if lsysSettings.requireConfirmedEmail == None:
+        r.set("requireConfirmedEmail", 0)
+    else:
+        r.set("requireConfirmedEmail", int(lsysSettings.requireConfirmedEmail))
+
+# Globals used to store a copy of redis data so we don't need to load it from Redis every time
+gsysSettings = settings("Resis Not set","","","",0,0,0,0,0,0,0,0,0,0,0,0)   # Do not use gsysSettings as part of any actual database call or it will break sql 
+gsysSettingsCounter = int(0)
+
+def getSettingsFromRedis():
+    global gsysSettings
+    global gsysSettingsCounter
+
+    #msysSettings = settings.query.first()          # remove two comments to not use redis for settings
+    #return(msysSettings)
+
+    rTest = r.get('OSP REDIS')
+    if rTest ==  None:                              
+        fillRedis()                                 # create redis if not there
+        r.set('OSP REDIS',int(1))                   # set initial value
+        rTest=1
+
+    rTest = int(rTest)
+    if rTest == gsysSettingsCounter:                # if someone else has not changed them...
+        return(gsysSettings)                        # return our global copy
+
+    # setting must have changed so get them
+    
+    gsysSettingsCounter = rTest                     # so we don't get them all again next time
+
+    #gsysSettings = settings("Resis Not set","","","",0,0,0,0,0,0,0,0,0,0,0,0)    
+    gsysSettings.id = int(r.get("id"))
+    gsysSettings.siteName = r.get("siteName")
+    gsysSettings.siteProtocol = r.get("siteProtocol")
+    gsysSettings.siteAddress = r.get("siteAddress")
+    gsysSettings.smtpAddress = r.get("smtpAddress")
+    gsysSettings.smtpPort = int(r.get("smtpPort"))
+    gsysSettings.smtpTLS = int(r.get("smtpTLS"))
+    gsysSettings.smtpSSL = int(r.get("smtpSSL"))
+    gsysSettings.smtpUsername = r.get("smtpUsername")
+    gsysSettings.smtpPassword = r.get("smtpPassword")
+    gsysSettings.smtpSendAs = r.get("smtpSendAs") 
+    gsysSettings.allowRecording = bool(int(r.get("allowRecording")))
+    gsysSettings.allowUploads = bool(int(r.get("allowUploads")))
+    gsysSettings.protectionEnabled = bool(int(r.get("protectionEnabled")))
+    gsysSettings.adaptiveStreaming = bool(int(r.get("adaptiveStreaming")))
+    gsysSettings.background = r.get("background") 
+    gsysSettings.showEmptyTables = bool(int(r.get("showEmptyTables")))
+    gsysSettings.allowComments = bool(int(r.get("allowComments")))
+    gsysSettings.systemTheme = r.get("systemTheme") 
+    gsysSettings.systemLogo = r.get("systemLogo") 
+    gsysSettings.version = r.get("version") 
+    gsysSettings.sortMainBy = int(r.get("sortMainBy")) 
+    gsysSettings.restreamMaxBitrate = int(r.get("restreamMaxBitrate")) 
+    gsysSettings.serverMessageTitle = r.get("serverMessageTitle") 
+    gsysSettings.serverMessage = r.get("serverMessage") 
+    gsysSettings.maxClipLength = int(r.get("maxClipLength"))
+
+    proxyFQDN = r.get("proxyFQDN") 
+
+    if proxyFQDN == "None":
+        gsysSettings.proxyFQDN = None
+    else:
+        gsysSettings.proxyFQDN = proxyFQDN
+
+    gsysSettings.maintenanceMode = bool(int(r.get("maintenanceMode")))
+    gsysSettings.buildEdgeOnRestart = bool(int(r.get("buildEdgeOnRestart")))
+
+    gsysSettings.allowRegistration = bool(int(r.get("allowRegistration")))
+    gsysSettings.requireConfirmedEmail = bool(int(r.get("requireConfirmedEmail")))
+
+    #r.set("allowRegistration", int(sysSettings.allowRegistration)) if these are not working we might need something like this?
+#    if sysSettings.allowRegistration == None:
+#        r.set("allowRegistration", 0)
+#    else:
+#        r.set("allowRegistration", int(sysSettings.allowRegistration))
+#    #r.set("requireConfirmedEmail", int(sysSettings.requireConfirmedEmail))
+#    if sysSettings.requireConfirmedEmail == None:
+#        r.set("requireConfirmedEmail", 0)
+#    else:
+#        r.set("requireConfirmedEmail", int(sysSettings.requireConfirmedEmail))
+
+    return(gsysSettings)
+
+####
 class edgeStreamer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     address = db.Column(db.String(1024))

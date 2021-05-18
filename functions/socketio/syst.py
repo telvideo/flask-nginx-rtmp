@@ -88,7 +88,9 @@ def deleteChannelAdmin(message):
                 shutil.rmtree(filePath, ignore_errors=True)
 
             from app import ejabberd
-            sysSettings = settings.settings.query.first()
+            #sysSettings = settings.settings.query.first()
+            sysSettings = settings.getSettingsFromRedis()
+            
             ejabberd.destroy_room(channelQuery.channelLoc, 'conference.' + sysSettings.siteAddress)
 
             system.newLog(1, "User " + current_user.username + " deleted Channel " + str(channelQuery.id))
@@ -136,7 +138,8 @@ def get_resource_usage(message):
 
 @socketio.on('testEmail')
 def test_email(info):
-    sysSettings = settings.settings.query.all()
+    #sysSettings = settings.settings.query.all()
+    sysSettings = settings.getSettingsFromRedis()
     validTester = False
     if sysSettings == [] or sysSettings is None:
         validTester = True

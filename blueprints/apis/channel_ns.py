@@ -93,7 +93,8 @@ class api_1_ListChannels(Resource):
 
                     # Establish XMPP Channel
                     from app import ejabberd
-                    sysSettings = settings.settings.query.all()[0]
+                    #sysSettings = settings.settings.query.all()[0]
+                    sysSettings = settings.getSettingsFromRedis()
                     ejabberd.create_room(newChannel.channelLoc, 'conference.' + sysSettings.siteAddress, sysSettings.siteAddress)
                     ejabberd.set_room_affiliation(newChannel.channelLoc, 'conference.' + sysSettings.siteAddress, int(requestAPIKey.userID) + "@" + sysSettings.siteAddress, "owner")
 
