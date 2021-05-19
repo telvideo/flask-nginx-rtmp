@@ -9,8 +9,10 @@ sudo mysql -e "ALTER TABLE osp.Clips ADD COLUMN NupVotes INT NULL DEFAULT 0 AFTE
 sudo mysql -e "ALTER TABLE osp.userNotification ADD INDEX timeStamp (timestamp DESC) VISIBLE"
 sudo mysql -e "ALTER TABLE osp.Channel ADD COLUMN Nsubscriptions INT NULL DEFAULT 0 AFTER vanityURL"
 
-echo "install flask verion of redis... THIS IS NEW SH*T AND HAS MAYBE NOT WORKED RIGHT... Maybe it's already installed???  if you are doing something else silly with Redis which Mark does not know about then that's why this does not work or maybe you need something else installed first to make this pip work if it did not ...???"
+echo "install flask verion of redis... THIS IS NEW SH*T AND HAS MAYBE NOT WORKED RIGHT... Maybe it's already installed???  if you are doing something else silly with Redis which Mark does not know about then that's why this does not work or maybe you need something else installed first to make these pips work if they did not ...???"
 sudo pip install flask-redis
-echo "Hope the pip worked! (lol)..."
+echo "install pottery which is used to critical section startup"
+sudo pip3 install pottery
+echo "Hope the pips worked! (lol)..."
 
 echo "Afterboggsget done..."
