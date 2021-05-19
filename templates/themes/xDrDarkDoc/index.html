@@ -12,7 +12,6 @@
 
 {% block body %}
 
-
 <div class="container-fluid p-2" id="index-live-container">
     {% if sysSettings.serverMessage != "" and sysSettings.serverMessage != None %}
     <div class="jumbotron shadow mt-2 p-3">
@@ -31,11 +30,8 @@
     {% endif %}
 </div>
 
-
-
  <!-- Carousel Code from w3 schools -->
- <div id="demo" class="carousel slide" data-ride="carousel" data-interval="4000" data-pause="hover">
-
+ <div id="Prohibited_carousel" class="carousel slide" data-ride="carousel" data-interval="5000" data-pause="hover">
 
   <!-- The slideshow -->
   <div class="carousel-inner"">
@@ -43,24 +39,25 @@
       <center><a href="https://www.zazzle.com/store/prohibitedtv"><img src="/static/img/2.png" alt="Prohibited TV Merch" width="50%"></a></center>
     </div>
 
-    {% for video in videoList %}
+    {% for stream in streamList %}
     <div class="carousel-item .icon-next">
-      <center><a href="/play/{{video.id}}"><img src="/videos/{{video.thumbnailLocation}}" alt="Prohibited TV Linktree" width="50%"></a></center>
+      <center><a href="/view/{{stream.channelLoc}}"><img src="/stream-thumb/{{stream.channelLoc}}.png" onerror="this.src='/static/img/video-placeholder.jpg';" alt="Prohibited TV Linktree" width="50%"></a></center>
+      <div class="carousel-caption d-none d-md-block">
+        <h5>{{stream.streamName}}</h5>      
+      </div>
     </div>
-    {% endfor %}
 
+    {% endfor %}
   </div>
 
   <!-- Left and right controls -->
-  <a class="carousel-control-prev" href="#demo" data-slide="prev">
+  <a class="carousel-control-prev" href="#Prohibited_carousel" data-slide="prev">
     <span class="carousel-control-prev-icon"></span>
   </a>
-  <a class="carousel-control-next" href="#demo" data-slide="next">
+  <a class="carousel-control-next" href="#Prohibited_carousel" data-slide="next">
     <span class="carousel-control-next-icon"></span>
   </a>
 </div>
-
-
 
 <div class="container-fluid p-2" id="index-streams-container">
     <div class="row mx-4">

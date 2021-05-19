@@ -71,19 +71,28 @@ def index():
                             mytitle=pagetitle,
                             mycontent="Hello World")
 #render_template('admin.html',name= "Fred")
+import redis
    
 print("fred")
 
 #fredSys=myfun()
 
-myset = settings.getSettingsFromRedis()
 
-
-
-import redis
-
+#myset = settings.getSettingsFromRedis()
 r = redis.Redis(host=config.redisHost, port=config.redisPort, decode_responses=True)
+import time
 
+from pottery import Redlock
+redis_lock = Redlock(key='OSP_DB_INIT_HANDLER', masters={r})
+redis_lock.acquire()
+
+n =0
+while n==0:
+    print("Locked")
+    time.sleep(1)
+
+
+print("BOB")
 #r = redis.StrictRedis(decode_responses=True)
 
 myStr = "Fred String"

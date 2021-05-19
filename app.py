@@ -19,6 +19,7 @@ import random
 # Import 3rd Party Libraries
 from flask import Flask, redirect, request, abort, flash, current_app, session
 from flask_redis import FlaskRedis
+from pottery import Redlock
 
 from flask_session import Session
 from flask_security import Security, SQLAlchemyUserDatastore, login_required, current_user, roles_required, uia_email_mapper
@@ -165,7 +166,7 @@ else:
 from classes.shared import limiter
 limiter.init_app(app)
 
-settings.setupRedis(app) # Boggs r.flushdb below??? IMO move code below to startrun.py?
+settings.setupRedis(app) # Boggs needs to password this!
 
 # Initialize Redis for Flask-Session
 if config.redisPassword == '' or config.redisPassword is None:
@@ -174,7 +175,7 @@ if config.redisPassword == '' or config.redisPassword is None:
 else:
     r = redis.Redis(host=config.redisHost, port=config.redisPort, password=config.redisPassword)
     app.config["SESSION_REDIS"] = r
-#r.flushdb()
+#r.flushdb() # we can't flush the redis anymore as we use it now to store system settings...
 
 # Initialize Flask-SocketIO
 from classes.shared import socketio
@@ -235,23 +236,25 @@ try:
 except Exception as e:
     print("ejabberdctl failed to load: " + str(e))
 
+# only one process at a time is allowed to do some things until this lock is released
+redis_init_lock = Redlock(key='OSP_DB_INIT_HANDLER', masters={r})
+redis_init_lock.acquire()
+
 # Loop Check if OSP DB Init is Currently Being Handled by and Process
-OSP_DB_INIT_HANDLER = None
-while OSP_DB_INIT_HANDLER != globalvars.processUUID:
-    OSP_DB_INIT_HANDLER = r.get('OSP_DB_INIT_HANDLER')
-    if OSP_DB_INIT_HANDLER != None:
-        OSP_DB_INIT_HANDLER = OSP_DB_INIT_HANDLER.decode('utf-8')
-    else:
-        r.set('OSP_DB_INIT_HANDLER', globalvars.processUUID)
-        time.sleep(random.random())
+#OSP_DB_INIT_HANDLER = None
+#while OSP_DB_INIT_HANDLER != globalvars.processUUID:
+#    OSP_DB_INIT_HANDLER = r.get('OSP_DB_INIT_HANDLER')
+#    if OSP_DB_INIT_HANDLER != None:
+#        OSP_DB_INIT_HANDLER = OSP_DB_INIT_HANDLER.decode('utf-8')
+#    else:
+#        r.set('OSP_DB_INIT_HANDLER', globalvars.processUUID)
+#        time.sleep(random.random())
 
 # Once Attempt Database Load and Validation
 try:
     database.init(app, user_datastore)
 except:
     print("DB Load Fail due to Upgrade or Issues")
-# Clear Process from OSP DB Init
-r.delete('OSP_DB_INIT_HANDLER')
 
 # Perform System Fixes
 try:
@@ -278,6 +281,9 @@ try:
 except:
     print({"level": "error", "message": "Unable to initialize OSP Edge Conf.  May be first run or DB Issue."})
 print({"level": "info", "message": "Initializing OAuth Info"})
+
+redis_init_lock.release() # let another process into the code we have been protecting
+
 # Initialize oAuth
 from classes.shared import oauth
 from functions.oauth import fetch_token
