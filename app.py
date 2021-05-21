@@ -237,7 +237,7 @@ except Exception as e:
     print("ejabberdctl failed to load: " + str(e))
 
 # only one process at a time is allowed to do some things until this lock is released
-redis_init_lock = Redlock(key='OSP_DB_INIT_HANDLER', masters={r})
+redis_init_lock = Redlock(key='OSP_DB_INIT_HANDLER', masters={r},auto_release_time=5*1000)
 redis_init_lock.acquire()
 
 # Loop Check if OSP DB Init is Currently Being Handled by and Process
@@ -282,7 +282,8 @@ except:
     print({"level": "error", "message": "Unable to initialize OSP Edge Conf.  May be first run or DB Issue."})
 print({"level": "info", "message": "Initializing OAuth Info"})
 
-redis_init_lock.release() # let another process into the code we have been protecting
+if redis_init_lock.locked(): 
+    redis_init_lock.release() # let another process into the code we have been protecting
 
 # Initialize oAuth
 from classes.shared import oauth

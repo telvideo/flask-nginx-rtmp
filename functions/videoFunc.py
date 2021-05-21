@@ -169,7 +169,7 @@ def moveVideo(videoID, newChannel):
 
 def createClip(videoID, clipStart, clipStop, clipName, clipDescription):
     #settingsQuery = settings.settings.query.first()
-    sysSettings = settings.getSettingsFromRedis()
+    settingsQuery = settings.getSettingsFromRedis()
 
     # TODO Add Webhook for Clip Creation
     recordedVidQuery = RecordedVideo.RecordedVideo.query.filter_by(id=int(videoID), owningUser=current_user.id).first()
