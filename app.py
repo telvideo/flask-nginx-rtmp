@@ -236,7 +236,7 @@ try:
 except Exception as e:
     print("ejabberdctl failed to load: " + str(e))
 
-# only one process at a time is allowed to do some things until this lock is released
+# only one process at a time is allowed to do some things until this lock is released after 5 seconds or by redis_init_lock.release()
 redis_init_lock = Redlock(key='OSP_DB_INIT_HANDLER', masters={r},auto_release_time=5*1000)
 redis_init_lock.acquire()
 
