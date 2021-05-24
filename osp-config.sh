@@ -443,6 +443,9 @@ install_osp() {
   then
           sudo cp $DIR/setup/gunicorn/osp.target /etc/systemd/system/ >> $OSPLOG 2>&1
           sudo cp $DIR/setup/gunicorn/osp-worker@.service /etc/systemd/system/ >> $OSPLOG 2>&1
+
+          sudo cp $DIR/setup/gunicorn/osp-onetime.service /etc/systemd/system/ >> $OSPLOG 2>&1
+          
           sudo systemctl daemon-reload >> $OSPLOG 2>&1
           sudo systemctl enable osp.target >> $OSPLOG 2>&1
   else

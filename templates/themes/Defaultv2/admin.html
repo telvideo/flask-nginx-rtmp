@@ -12,10 +12,9 @@
 {% endblock %}
 
 {% block body %}
-
 <div class="container-fluid">
     <div class="row justify-content-center">
-        <div class="col-lg-10 col-md-12" style="margin-top:15px;">
+        <div class="col-12" style="margin-top:15px;">
             <ul class="nav nav-pills mb-3" id="admin-nav" role="tablist">
                 <li class="nav-item">
                     <a class="nav-link {% if page == None or page == 'dash' %} active {% endif %}"  role="tab" id="admin-nav-dashboard" href="#dashboard" data-toggle="pill" aria-controls="admin-nav-dashboard" aria-selected="true">Dashboard</a>
@@ -49,6 +48,9 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {% if page == 'streams' %} active {% endif %}" role="tab" id="admin-nav-streams" href="#streamsList" data-toggle="pill" aria-controls="admin-nav-streams" aria-selected="false">Streams</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if page == 'vids' %} active {% endif %}" role="tab" id="admin-nav-vids" href="#vids" data-toggle="pill" aria-controls="admin-nav-vids" aria-selected="false">Videos</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {% if page == 'logs' %} active {% endif %}" role="tab" id="admin-nav-logs" href="#logs" data-toggle="pill" aria-controls="admin-nav-logs" aria-selected="false">Logs</a>
@@ -1316,6 +1318,84 @@
                             </div>
                         </div>
                     </div>
+                </div>                
+                <div class="tab-pane fade {% if page == 'vids' %}show active{% endif %}" role="tabpanel" aria-labelledby="admin-content-vids" id="vids">
+                    <div class="container-fluid">                                       
+                        <div class="row">
+                            <div class="col-12">
+                                <table class="table table-hover" id="vidTable">
+                                    <thead class="shadow">
+                                    <tr>
+                                        <th>
+                                            <b>Date</b>
+                                        </th>
+                                        <th>
+                                            <b>User</b>
+                                        </th>
+                                        <th>
+                                            <b>Name</b>
+                                        </th>
+                                        <th>
+                                            <b>Views</b>
+                                        </th>
+                                        <th>
+                                            <b>Length</b>
+                                        </th>
+                                        <th>
+                                            <b>Topic</b>
+                                        </th>
+                                        <th>
+                                            <b>Disk</b>
+                                        </th>
+                                        <th>
+                                            <b>Delete</b>
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for vid in vidList %}
+                                        <tr id="HVideoList-{{vid.id}}">
+                                            <td>
+                                                {{vid.videoDate|normalize_date}}
+                                            </td>
+                                            <td>
+                                                {{vid.owningUser|get_userName}}
+                                            </td>
+                                            <td>
+                                                <a href="/play/{{vid.id}}"><span id="vidName-{{vid.id}}">{{vid.channelName}}</span></a>
+                                            </td>
+                                            <td>
+                                                {{vid.views}}
+                                            </td>
+                                            <td>
+                                                <i class="far fa-clock mr-1"></i>{{vid.length|hms_format}}
+                                            </td>
+                                            <td>
+                                                {{vid.topic}}
+                                            </td>
+                                            {% if vid.id in missingSet %} 
+                                              <td>
+                                                  <span class="badge badge-secondary">ERROR</span>
+                                              </td>
+                                              <td>
+                                                <button class="videoDeleteModalButton btn btn-danger shadow btn-sm" onclick="mVideoDelete('{{vid.id}}')" title="Delete Video"><i class="fas fa-trash-alt fa-spin fa-2x"></i></button>
+                                              </td>
+                                            {% else %}
+                                              <td>
+                                                <span class="badge badge-success">OK</span>
+                                              </td>
+                                              <td>
+                                                <button class="videoDeleteModalButton btn btn-danger shadow btn-sm" onclick="mVideoDelete('{{vid.id}}')" title="Delete Video"><i class="fas fa-trash-alt"></i></button>
+                                              </td>
+                                            {% endif %}
+
+                                        </tr>
+                                    {% endfor %}                                   
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1396,6 +1476,13 @@
             "order": [[ 0, "desc" ]]
         });
     } );
+
+    $(document).ready(function() {
+        $('#vidTable').DataTable({
+            "order": [[ 0, "desc" ]]
+        });
+    } );
+  
 </script>
 
 <script type="text/javascript" src="/static/js/admin.js"></script>

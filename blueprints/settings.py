@@ -39,6 +39,7 @@ from classes import stickers
 
 from functions import system
 from functions import themes
+from functions import videoFunc
 
 from globals import globalvars
 
@@ -358,7 +359,7 @@ def admin_page():
         roleList = Sec.Role.query.all()
         channelList = Channel.Channel.query.all()
         streamList = Stream.Stream.query.all()
-        topicsList = topics.topics.query.all()
+        topicsList = topics.topics.query.order_by(topics.topics.name.asc())
         rtmpServers = settings.rtmpServer.query.all()
         edgeNodes = settings.edgeStreamer.query.all()
 
@@ -413,6 +414,20 @@ def admin_page():
                 themeList.append(theme)
 
         logsList = logs.logs.query.order_by(logs.logs.timestamp.desc()).limit(250)
+        #vidList  =  RecordedVideo.RecordedVideo.query.order_by(RecordedVideo.RecordedVideo.videoDate.asc())#.limit(250)
+        
+        vidList  =  RecordedVideo.RecordedVideo.query.with_entities(RecordedVideo.RecordedVideo.id, RecordedVideo.RecordedVideo.owningUser,
+                               RecordedVideo.RecordedVideo.views, RecordedVideo.RecordedVideo.length,
+                               RecordedVideo.RecordedVideo.channelName,
+                               RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate,
+                               RecordedVideo.RecordedVideo.videoLocation)
+         
+        missingSet = set()
+
+        videos_root = globalvars.videoRoot + 'videos/'
+        for recordedVid in vidList:
+            if os.path.exists("{}{}".format(videos_root, recordedVid.videoLocation)) == False:
+                missingSet.add(recordedVid.id)
 
         oAuthProvidersList = settings.oAuthProvider.query.all()
 
@@ -439,7 +454,7 @@ def admin_page():
                                remoteSHA=remoteSHA, themeList=themeList, statsViewsDay=statsViewsDay,
                                viewersTotal=viewersTotal, currentViewers=currentViewers, nginxStatData=nginxStatData,
                                globalHooks=globalWebhookQuery, defaultRoleDict=defaultRoles,
-                               logsList=logsList, edgeNodes=edgeNodes, rtmpServers=rtmpServers, oAuthProvidersList=oAuthProvidersList,
+                               logsList=logsList, vidList = vidList, missingSet = missingSet, edgeNodes=edgeNodes, rtmpServers=rtmpServers, oAuthProvidersList=oAuthProvidersList,
                                ejabberdStatus=ejabberd, bannedWords=bannedWordString, globalStickers=globalStickers, page=page)
     elif request.method == 'POST':
 
@@ -1138,7 +1153,8 @@ def settings_channels_page():
                 flash("Invalid Change Attempt", "Error")
             redirect(url_for('.settings_channels_page'))
 
-    topicList = topics.topics.query.all()
+    topicList = topics.topics.query.order_by(topics.topics.name.asc())
+
     user_channels = Channel.Channel.query.filter_by(owningUser=current_user.id).all()
 
     activeRTMPQuery = settings.rtmpServer.query.filter_by(active=True).all()

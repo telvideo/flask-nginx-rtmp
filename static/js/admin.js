@@ -655,3 +655,11 @@ function toggleDiv(selDiv){
     $('.settingsOption').hide();
     $(divid).show();
 }
+
+function mVideoDelete(videoID) {
+  var videoEntry = document.getElementById('HVideoList-' + videoID);
+  
+  videoEntry.parentNode.removeChild(videoEntry);
+  socket.emit('deleteVideo', {videoID: videoID});
+}
+

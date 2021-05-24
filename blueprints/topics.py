@@ -14,7 +14,7 @@ topics_bp = Blueprint('topic', __name__, url_prefix='/topic')
 def topic_page():
     sysSettings = settings.settings.query.first()
     if sysSettings.showEmptyTables:
-        topicsList = topics.topics.query.all()
+        topicsList = topics.topics.query.all() 
     else:
         topicIDList = []
         for streamInstance in db.session.query(Stream.Stream.topic).distinct():
@@ -30,7 +30,7 @@ def topic_page():
             if topicQuery is not None:
                 topicsList.append(topicQuery)
 
-    topicsList.sort(key=lambda x: x.name)
+    topicsList.sort(key=lambda x: x.name.lower())
 
     return render_template(themes.checkOverride('topics.html'), topicsList=topicsList)
 

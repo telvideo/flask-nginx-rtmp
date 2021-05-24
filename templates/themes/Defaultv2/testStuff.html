@@ -1,0 +1,223 @@
+{% extends "themes/" + sysSettings.systemTheme + "/layout.html" %}
+
+{% block head %}
+<title>{{sysSettings.siteName}} - Administration Page</title>
+
+<script type="text/javascript" src="/static/vendor/socketio/js/socket.io.js"></script>
+<script type="text/javascript" src="/static/vendor/chartjs/js/Chart.bundle.min.js"></script>
+<script type="text/javascript" src="/static/vendor/bootstrap-tagsinput/tagsinput.js"></script>
+<link rel="stylesheet" type="text/css" href="/static/vendor/datatables/css/datatables.css"/>
+<link rel="stylesheet" type="text/css" href="/static/vendor/datatables/css/datatables.boostrap4.css"/>
+<link rel="stylesheet" type="text/css" href="/static/vendor/bootstrap-tagsinput/tagsinput.css"/>
+{% endblock %}
+
+{% block body %}
+
+
+                <div class="tab-pane fade {% if page == 'logs' %}show active{% endif %}" role="tabpanel" aria-labelledby="admin-content-logs" id="logs">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-lg-10 col-md-12">
+                                <h5>Logs</h5>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <table class="table table-hover" id="logTable">
+                                    <thead class="shadow">
+                                    <tr>
+                                        <th>
+                                            <b>Timestamp</b>
+                                        </th>
+                                        <th>
+                                            <b>Type</b>
+                                        </th>
+                                        <th>
+                                            <b>Message</b>
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for log in logsList %}
+                                        <tr>
+                                            <td>
+                                                {{log.timestamp|normalize_date}}
+                                            </td>
+                                            <td>
+                                                {{log.type|get_logType}}
+                                            </td>
+                                            <td>
+                                                {{log.message}}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>                
+                <div class="tab-pane fade {% if page == 'vids' %}show active{% endif %}" role="tabpanel" aria-labelledby="admin-content-vids" id="vids">
+                  <div class="container-fluid">
+                      <div class="row">
+                          <div class="col-lg-10 col-md-12">
+                              <h5>Videos</h5>
+                          </div>
+                      </div>                     
+                      <div class="row">
+                          <div class="col-12">
+                              <table class="table table-hover">
+                                  <thead class="shadow">
+                                  <tr>
+                                      <th>
+                                          <b>Date</b>
+                                      </th>
+                                      <th>
+                                          <b>User</b>
+                                      </th>
+                                      <th>
+                                          <b>Name</b>
+                                      </th>
+                                      <th>
+                                          <b>Views</b>
+                                      </th>
+                                      <th>
+                                          <b>Length</b>
+                                      </th>
+                                      <th>
+                                          <b>Topic</b>
+                                      </th>
+                                      <th>
+                                          <b>File Error</b>
+                                      </th>
+                                      <th>
+                                          <b>Delete</b>
+                                      </th>
+                                  </tr>
+                                  </thead>
+                                  <tbody>
+                                  {% for vid in vidList %}
+                                      <tr id="HVideoList-{{vid.id}}">
+                                          <td>
+                                         
+                                          </td>
+                                          <td>
+                                         
+                                          </td>
+                                          <td>
+                                              {{vid.channelName}}
+                                          </td>
+                                          <td>
+                                              {{vid.views}}
+                                          </td>
+                                          <td>
+
+                                          </td>
+                                          <td>
+                                              {{vid.topic}}
+                                          </td>
+                                          <td>
+
+                                          </td>
+                                          <td>                    
+
+                                          </td>
+                                      </tr>
+                                  {% endfor %}                                   
+                                  </tbody>
+                              </table>
+                          </div>
+                      </div>
+                  </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript" src="/static/vendor/datatables/js/jquery.datatables.js"></script>
+<script type="text/javascript" src="/static/vendor/datatables/js/datatables.js"></script>
+<script>
+    var viewerChartWidth = 1024;
+    var viewerChartHeight = 380;
+    var viewerChartDataLive = [
+        {% for entry in statsViewsDay['live'] %}
+            {x:'{{entry['t']}}',y:{{entry['y']}}},
+        {% endfor %}
+    ];
+    var viewerChartDataVideo = [
+        {% for entry in statsViewsDay['recorded'] %}
+            {x:'{{entry['t']}}', y:{{entry['y']}}},
+        {% endfor %}
+    ];
+
+    $(document).ready(function() {
+        $('#webhookTable').DataTable(
+        {
+          'order': [[ 0, "asc" ]],
+          'stateSave': true,
+          'columnDefs': [
+          { 'searchable': false, 'targets': [3,4,5,6] },
+          { 'orderable': false, 'targets': [3,4,5,6] }
+          ]
+        }
+      );
+    } );
+
+    $(document).ready(function() {
+        $('#users').DataTable(
+        {
+          'order': [[ 2, "asc" ]],
+          'stateSave': true,
+          'columnDefs': [
+          { 'searchable': false, 'targets': [0,1,8] },
+          { 'orderable': false, 'targets': [0,1,8] }
+          ]
+        }
+      );
+    } );
+
+    $(document).ready(function() {
+        $('#channelsTable').DataTable(
+        {
+          'order': [[ 2, "asc" ]],
+          'columnDefs': [
+          { 'searchable': false, 'targets': [0,1,7,12] },
+          { 'orderable': false, 'targets': [0,1,12] }
+          ]
+        }
+      );
+    } );
+
+    $(document).ready(function() {
+        $('#streamsTable').DataTable(
+        {
+          'order': [[ 2, "asc" ]],
+          'columnDefs': [
+          { 'searchable': false, 'targets': [0,1,6,7,8] },
+          { 'orderable': false, 'targets': [0,1,8] }
+          ]
+        }
+      );
+    } );
+
+    $(document).ready(function() {
+        $('#logTable').DataTable({
+            "order": [[ 0, "desc" ]]
+        });
+    } );
+
+    $(document).ready(function() {
+        $('#vidTable').DataTable({
+            "order": [[ 0, "desc" ]]
+        });
+    } );
+  
+</script>
+
+<script type="text/javascript" src="/static/js/admin.js"></script>
+{% endblock %}
+
