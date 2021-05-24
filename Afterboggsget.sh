@@ -10,11 +10,12 @@ sudo mysql -e "ALTER TABLE osp.userNotification ADD INDEX timeStamp (timestamp D
 sudo mysql -e "ALTER TABLE osp.Channel ADD COLUMN Nsubscriptions INT NULL DEFAULT 0 AFTER vanityURL"
 sudo mysql -e "ALTER TABLE osp.user ADD COLUMN verified INT NULL DEFAULT 0 AFTER xmppToken"
 sudo mysql -e "ALTER TABLE osp.videoComments ADD COLUMN NupVotes INT NULL DEFAULT 0 AFTER videoID"
+apt install python-pip
 
 echo "install flask verion of redis... THIS IS NEW SH*T AND HAS MAYBE NOT WORKED RIGHT... Maybe it's already installed???  if you are doing something else silly with Redis which Mark does not know about then that's why this does not work or maybe you need something else installed first to make these pips work if they did not ...???"
-sudo pip install flask-redis
+pip install flask-redis
 echo "install pottery which is used to critical section startup"
-sudo pip3 install pottery
+pip3 install pottery
 echo "Hope the pips worked! (lol)..."
 
 echo "Afterboggsget done..."
