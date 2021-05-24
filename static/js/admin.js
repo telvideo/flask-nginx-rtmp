@@ -663,3 +663,16 @@ function mVideoDelete(videoID) {
   socket.emit('deleteVideo', {videoID: videoID});
 }
 
+function toggleVerified(userID) {
+  var myIcon = document.getElementById('toggle-verified-icon-' + userID);
+  var mSrc = myIcon.src;  
+
+  const regex = new RegExp('verified-badge*');  //really hacky way of doing this probably? idk js!
+  
+  if (regex.test(mSrc)==1)
+    myIcon.src = '/static/img/user2.png'
+  else
+    myIcon.src = "/static/img/verified-badge.png"
+    
+  socket.emit('toggleVerified', {userID: userID});
+}

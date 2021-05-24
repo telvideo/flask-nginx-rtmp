@@ -95,6 +95,7 @@ class User(db.Model, UserMixin):
     oAuthID = db.Column(db.String(2048))
     oAuthProvider = db.Column(db.String(40))
     xmppToken = db.Column(db.String(64))
+    verified = db.Column(db.Integer)
     oAuthToken = db.relationship('OAuth2Token', backref='userObj', lazy='joined')
     roles = db.relationship('Role', secondary=roles_users, backref=db.backref('users', lazy='dynamic'))
     invites = db.relationship('invitedViewer', backref='user', lazy="dynamic")

@@ -9,6 +9,20 @@
   --background-image: url("/static/img/Mono_Dark_Background.png");
 }
 
+.btnTest{
+  /*background:url("/static/img/verified-badge.png") no-repeat left center; */
+  padding:1px;
+  height: 35px;
+  width:35px;
+}  
+
+.verfiedIcon {
+  width: 30px !important ; 
+  height: 30px !important;
+  padding:0px !important;
+  margin:0px !important;
+}
+
 .sidenavPicContainer{
   width: 300px !important ; 
   height: 100px !important;
@@ -857,7 +871,9 @@ body {
   }
   
   .video-card-body .video-title a, .card-header .video-title a{
-    color: #fff;
+    /*color: #fff;*/
+    color: var(--PDLBlue) !important;
+
   }
   
   .dropzone {

@@ -898,6 +898,7 @@
                                   <th><i class="fas fa-passport"></i> Auth Type</th>
                                   <th><i class="fas fa-file-contract"></i> Provider</th>
                                   <th><i class="fas fa-user-clock"></i> Active</th>
+                                  <th><i class="fas fa-user"></i> Verfied</th>
                                   <th><i class="fas fa-user-shield"></i> Roles</th>
                                   <th><i class="fas fa-cog"></i> Options</th>
                                 </tr>
@@ -911,7 +912,21 @@
                                   <td>{{user.email}}</td>
                                   <td><span class="badge badge-primary">{% if user.authType == 0 %}Local{% elif user.authType == 1 %}oAuth{% endif %}</span></td>
                                   <td>{% if user.authType == 1 %}<span class="badge badge-primary">{{user.oAuthProvider}}</span>{% endif %}</td>
-                                   <td>{% if user.active == true %}<span class="badge badge-success">True</span>{% else %}<span class="badge badge-secondary">False</span>{% endif %}</td>
+                                  <td>{% if user.active == true %}<span class="badge badge-success">True</span>{% else %}<span class="badge badge-secondary">False</span>{% endif %}</td>
+
+                                  <td>
+                                      {% if user.verified == 1 %}                                 
+                                        <img id="toggle-verified-icon-{{user.id}}" class = "verfiedIcon" src="/static/img/verified-badge.png" alt="badge">
+                                      {% else %}                                                             
+                                        <img id="toggle-verified-icon-{{user.id}}" class = "verfiedIcon" src="/static/img/user2.png" alt="badge">
+                                      {% endif %}
+
+                                      <!---  <button  id="toggle-verified-button-{{user.id}}" class="btn btnTest " onclick="toggleVerified('{{user.id}}')" title="Toggle Tag"></button> -->
+                                    
+                                      <button class="btn btn-sm btn-success shadow" data-toggle="tooltip" data-placement="top" onclick="toggleVerified('{{user.id}}')" title="Toggle Verfied"><i class="fas fa-user"></i>
+                                  </td>  
+                              
+                               
                                   <td>
                                     {% for role in user.roles %}
                                         <span class="badge badge-info">{{role.name}} <a href="/settings/admin?action=delete&setting=userRole&userID={{user.id}}&roleID={{role.id}}" class="{% if user.id == current_user.id %} disabled {% endif %}"><i class="far fa-trash-alt"></i></a></span><br>

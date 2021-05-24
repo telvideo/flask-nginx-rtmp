@@ -143,6 +143,8 @@ def handle_upvoteChange(streamData):
                 db.session.delete(myVoteQuery)
 
             totalQuery = upvotes.commentUpvotes.query.filter_by(commentID=loc).count()
+            videoCommentQuery.NupVotes = totalQuery #Boggs
+
             myVoteQuery = upvotes.commentUpvotes.query.filter_by(userID=current_user.id, commentID=loc).first()
 
             db.session.commit()

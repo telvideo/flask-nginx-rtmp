@@ -1,6 +1,7 @@
 from flask import Blueprint, request, url_for, render_template, redirect, flash
 from flask_security import current_user, login_required
 from sqlalchemy.sql.expression import func
+from sqlalchemy.sql import text
 from os import path
 
 from classes.shared import db
@@ -35,19 +36,46 @@ def view_vid_page(videoID):
 
 ## boggs needs to improve this
 
-#    recordedVid = RecordedVideo.RecordedVideo.query.filter_by(id=videoID) \
-#            .join(Channel.Channel, RecordedVideo.RecordedVideo.channelID == Channel.Channel.id) \
-#            .with_entities(RecordedVideo.RecordedVideo.published, RecordedVideo.RecordedVideo.videoLocation,
-#            Channel.Channel.protected,
-#            Channel.Channel.channelName,
-#            RecordedVideo.RecordedVideo.views, RecordedVideo.RecordedVideo.channelName,
-#            RecordedVideo.RecordedVideo.id, RecordedVideo.RecordedVideo.owningUser,
-#            RecordedVideo.RecordedVideo.views, RecordedVideo.RecordedVideo.length,
-#            RecordedVideo.RecordedVideo.thumbnailLocation, RecordedVideo.RecordedVideo.channelName,
-#            RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, RecordedVideo.RecordedVideo.NupVotes).first()
+    chanQuery = Channel.Channel.query.filter_by(id=recordedVid.channelID).with_entities(Channel.Channel.protected, 
+        Channel.Channel.channelName,
+        Channel.Channel.Nsubscriptions).first()
 
-            
+#    chanQuery = Channel.Channel.query.filter_by(id=recordedVid.channelID).first()    
 
+    theVid = {"id":recordedVid.id,
+        "videoDate":recordedVid.videoDate,
+        "channelName":recordedVid.channelName,
+        "topic":recordedVid.topic,
+        "topicName":templateFilters.get_topicName(recordedVid.topic),
+        "views":recordedVid.views,
+        "videoLocation":recordedVid.videoLocation,
+        "length":recordedVid.length,
+        "thumbnailLocation":recordedVid.thumbnailLocation,
+        "gifLocation":recordedVid.gifLocation,
+        "allowComments":recordedVid.allowComments,
+        "pending":recordedVid.pending,
+        "NupVotes":recordedVid.NupVotes,
+        "description":recordedVid.description,
+        "owningUser":recordedVid.owningUser,
+        "channelID":recordedVid.channelID,
+
+        "channelProtected":chanQuery.protected,
+        "channelName":chanQuery.channelName,
+        "nChannelSubs":chanQuery.Nsubscriptions,
+        
+
+        "pending":recordedVid.pending}
+
+   # Boggs Do this instead os below query ??
+   # for comment in recordedVid.comments:  
+   #     theCom = {"id":recordedVid.id,
+   #     "videoDate":recordedVid.videoDate,
+   #     "channelName":recordedVid.channelName, ...
+     
+    videoComments = recordedVid.comments
+    
+    tRecID = recordedVid.channelID
+    vidLoc = recordedVid.videoLocation
 ##
     if recordedVid is not None:
 
@@ -78,21 +106,26 @@ def view_vid_page(videoID):
             except:
                 return render_template(themes.checkOverride('notready.html'), video=recordedVid)
             recordedVid.length = duration
-        db.session.commit()
+ #       db.session.commit()
 
         recordedVid.views = recordedVid.views + 1
-        recordedVid.channel.views = recordedVid.channel.views + 1
-
-        # Boggs Not used? topicList = topics.topics.query.all()
-
-        streamURL = '/videos/' + recordedVid.videoLocation
-
-        isEmbedded = request.args.get("embedded")
 
         newView = views.views(1, recordedVid.id)
         db.session.add(newView)
+
+        # do direct SQL on channel table to avoid a slow DB call 
+        cmd = 'UPDATE Channel SET views = views + 1  WHERE id = :vidID'
+
+        myID = recordedVid.id
+        result = db.engine.execute(text(cmd), vidID = myID)
+        
         db.session.commit()
 
+        #streamURL = '/videos/' + recordedVid.videoLocation
+        streamURL = '/videos/' + vidLoc
+        isEmbedded = request.args.get("embedded")
+        topicList = topics.topics.query.all()
+     
         # Function to allow custom start time on Video
         startTime = None
         if 'startTime' in request.args:
@@ -104,15 +137,25 @@ def view_vid_page(videoID):
 
         if isEmbedded is None or isEmbedded == "False":
 
-            randomRecorded = RecordedVideo.RecordedVideo.query.filter(RecordedVideo.RecordedVideo.pending == False, RecordedVideo.RecordedVideo.id != recordedVid.id, RecordedVideo.RecordedVideo.published == True).order_by(func.random()).limit(12)
+            randomRecorded = RecordedVideo.RecordedVideo.query.filter(RecordedVideo.RecordedVideo.pending == False, RecordedVideo.RecordedVideo.id != recordedVid.id, RecordedVideo.RecordedVideo.published == True).with_entities(RecordedVideo.RecordedVideo.owningUser,
+                RecordedVideo.RecordedVideo.channelID,
+                RecordedVideo.RecordedVideo.id,                        
+                RecordedVideo.RecordedVideo.channelName,
+                RecordedVideo.RecordedVideo.topic,
+                RecordedVideo.RecordedVideo.views,
+                RecordedVideo.RecordedVideo.length,
+                RecordedVideo.RecordedVideo.NupVotes,
+                RecordedVideo.RecordedVideo.gifLocation,
+                RecordedVideo.RecordedVideo.thumbnailLocation,
+                RecordedVideo.RecordedVideo.videoDate).order_by(func.random()).limit(4)
 
             subState = False
             if current_user.is_authenticated:
-                chanSubQuery = subscriptions.channelSubs.query.filter_by(channelID=recordedVid.channel.id, userID=current_user.id).first()
+                chanSubQuery = subscriptions.channelSubs.query.filter_by(channelID=tRecID, userID=current_user.id).first()
                 if chanSubQuery is not None:
                     subState = True
 
-            return render_template(themes.checkOverride('vidplayer.html'), video=recordedVid, streamURL=streamURL, randomRecorded=randomRecorded, subState=subState, startTime=startTime)
+            return render_template(themes.checkOverride('vidplayer.html'), video=theVid, topics = topicList, videoComments = videoComments, streamURL=streamURL, randomRecorded=randomRecorded, subState=subState, startTime=startTime)
         else:
             isAutoPlay = request.args.get("autoplay")
             if isAutoPlay is None:
@@ -121,7 +164,7 @@ def view_vid_page(videoID):
                 isAutoPlay = True
             else:
                 isAutoPlay = False
-            return render_template(themes.checkOverride('vidplayer_embed.html'), video=recordedVid, streamURL=streamURL, topics=topicList, isAutoPlay=isAutoPlay, startTime=startTime)
+            return render_template(themes.checkOverride('vidplayer_embed.html'), video=recordedVid, streamURL=streamURL, isAutoPlay=isAutoPlay, startTime=startTime)
     else:
         flash("No Such Video at URL","error")
         return redirect(url_for("root.main_page"))

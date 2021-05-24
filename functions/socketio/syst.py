@@ -216,3 +216,22 @@ def disable_2fa(msg):
             system.newLog(1, "User " + current_user.username + " disabled 2FA for " + str(userQuery.username))
     db.session.close()
     return 'OK'
+
+@socketio.on('toggleVerified')
+def toggledVerified(msg):
+    db.session.commit()
+         
+    if current_user.has_role('Admin'):
+        userID = int(msg['userID'])
+        userQuery = Sec.User.query.filter_by(id=userID).first()
+        if userQuery is not None:
+            if userQuery.verified == 1:
+                 userQuery.verified = 0
+            else:
+                 userQuery.verified = 1
+
+            db.session.commit()
+            system.newLog(1, "User " + current_user.username + " toggleVerified " + str(userQuery.username))
+    db.session.close()
+    return 'OK'
+

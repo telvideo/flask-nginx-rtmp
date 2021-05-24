@@ -44,7 +44,7 @@ def view_page(loc):
     Channel.Channel.topic,
     Channel.Channel.views,
     Channel.Channel.currentViewers,
-    Channel.Channel.record,
+ #   Channel.Channel.record,
     Channel.Channel.chatEnabled,
     Channel.Channel.chatBG,
     Channel.Channel.chatTextColor,
@@ -56,10 +56,10 @@ def view_page(loc):
     Channel.Channel.protected,
     Channel.Channel.channelMuted,
     Channel.Channel.showChatJoinLeaveNotification,
-    Channel.Channel.defaultStreamName,
-    Channel.Channel.autoPublish,
-    Channel.Channel.rtmpRestream,
-    Channel.Channel.rtmpRestreamDestination,
+#    Channel.Channel.defaultStreamName,
+#    Channel.Channel.autoPublish,
+#    Channel.Channel.rtmpRestream,
+#    Channel.Channel.rtmpRestreamDestination,
     Channel.Channel.xmppToken,
   # subscriptions.channelSubs,
 #    Channel.Channel.stream,
@@ -74,23 +74,9 @@ def view_page(loc):
 
     Channel.Channel.vanityURL).first() 
 
-    #requestedChannel = Channel.Channel.query.filter_by(channelLoc=loc).first()
-
-    #boggs hacking
-  
- #   stream = db.relationship('Stream', backref='channel', cascade="all, delete-orphan", lazy="joined")
- #   recordedVideo = db.relationship('RecordedVideo', backref='channel', cascade="all, delete-orphan", lazy="joined")
- #   upvotes = db.relationship('channelUpvotes', backref='stream', cascade="all, delete-orphan", lazy="joined")
- #   inviteCodes = db.relationship('inviteCode', backref='channel', cascade="all, delete-orphan", lazy="joined")
- #   invitedViewers = db.relationship('invitedViewer', backref='channel', cascade="all, delete-orphan", lazy="joined")
- #   subscriptions = db.relationship('channelSubs', backref='channel', cascade="all, delete-orphan", lazy="joined")
- #   webhooks = db.relationship('webhook', backref='channel', cascade="all, delete-orphan", lazy="joined")
- #   restreamDestinations = db.relationship('restreamDestinations', backref='channelData', cascade="all, delete-orphan", lazy="joined")
- #   chatStickers = db.relationship('stickers', backref='channel', cascade="all, delete-orphan", lazy="joined")
-
-
-
-
+    streamerQuery = Sec.User.query.filter_by(id=requestedChannel.owningUser).\
+        with_entities(Sec.User.verified, Sec.User.pictureLocation).first()
+        
     #####
     if requestedChannel is not None:
         if requestedChannel.protected and sysSettings.protectionEnabled:
@@ -113,7 +99,7 @@ def view_page(loc):
 
         # Stream URL Generation
         streamURL = ''
- #BOGGS We are not using this now...     edgeQuery = settings.edgeStreamer.query.filter_by(active=True).all()
+#BOGGS We are not using this now...     edgeQuery = settings.edgeStreamer.query.filter_by(active=True).all()
         edgeQuery = []
         
         if sysSettings.proxyFQDN != None:
@@ -133,7 +119,7 @@ def view_page(loc):
             else:
                 streamURL = '/live/' + requestedChannel.channelLoc + '/index.m3u8'
 
-        #Boggs this is injeced already so why send it in again need to not inject but only do this?
+        #Boggs this is injeced already so why send it in again need to not inject but only do this when needed?
         topicList = topics.topics.query.all()
 
         chatOnly = request.args.get("chatOnly")
@@ -202,7 +188,7 @@ def view_page(loc):
                         flash("Invalid User","error")
                         return(redirect(url_for("root.main_page")))
 
-                return render_template(themes.checkOverride('chatpopout.html'), stream=streamData, streamURL=streamURL, sysSettings=sysSettings, channel=requestedChannel, hideBar=hideBar, guestUser=guestUser,
+                return render_template(themes.checkOverride('chatpopout.html'), streamer=streamerQuery, stream=streamData, streamURL=streamURL, sysSettings=sysSettings, channel=requestedChannel, hideBar=hideBar, guestUser=guestUser,
                                        xmppserver=xmppserver, stickerList=stickerList, stickerSelectorList=stickerSelectorList, bannedWords=bannedWordArray)
             else:
                 flash("Chat is Not Enabled For This Stream","error")
@@ -210,7 +196,7 @@ def view_page(loc):
         isEmbedded = request.args.get("embedded")
 
         #requestedChannel = Channel.Channel.query.filter_by(channelLoc=loc).first()
-
+                
         if isEmbedded is None or isEmbedded == "False" or isEmbedded == "false":
 
             secureHash = None
@@ -247,14 +233,12 @@ def view_page(loc):
                     subState = True
 
 
-            # Boggs
-
           #  streamQuery = Stream.Stream.query.order_by(Stream.Stream.currentViewers).all()
             streamQuery = Stream.Stream.query.join(Channel.Channel, Channel.Channel.id == Stream.Stream.linkedChannel) \
             .join(Sec.User, Sec.User.id == Channel.Channel.owningUser).with_entities(Stream.Stream.id,
 #                Stream.Stream.uuid,
 #                Stream.Stream.startTimestamp,
-#                Stream.Stream.linkedChannel,
+                Stream.Stream.linkedChannel,
 #                Stream.Stream.streamKey,
                 Stream.Stream.streamName,
 #                Stream.Stream.topic,
@@ -264,6 +248,7 @@ def view_page(loc):
                 Stream.Stream.NupVotes,
                 Channel.Channel.channelLoc,
                 Sec.User.pictureLocation,
+                Sec.User.verified,
                 Channel.Channel.imageLocation,
                 Sec.User.username,
                 Channel.Channel.channelName
@@ -273,6 +258,7 @@ def view_page(loc):
             streamList =  []
 
             for stre in streamQuery:
+
                 aStream = {"streamName":stre.streamName,
                 "currentViewers":stre.currentViewers,
                 "channelLoc":stre.channelLoc,
@@ -280,11 +266,13 @@ def view_page(loc):
                 "imageLocation":stre.imageLocation,
                 "NupVotes":stre.NupVotes,
                 "totalViewers":stre.totalViewers,
-                "username": stre.username,"channelName":stre.channelName}
+                "username": stre.username,
+                "channelName":stre.channelName,
+                "verified":stre.verified}
                 streamList.append(aStream) 
               #  print(stre)         
-                      
-            return render_template(themes.checkOverride('channelplayer.html'), streamList=streamList, stream=streamData, topics=topicList, streamURL=streamURL, channel=requestedChannel, clipsList=clipsList,
+            
+            return render_template(themes.checkOverride('channelplayer.html'), streamer=streamerQuery, streamList=streamList, stream=streamData, topics=topicList, streamURL=streamURL, channel=requestedChannel, clipsList=clipsList,
                                    subState=subState, secureHash=secureHash, rtmpURI=rtmpURI, xmppserver=xmppserver, stickerList=stickerList, stickerSelectorList=stickerSelectorList, bannedWords=bannedWordArray)
         else:
             isAutoPlay = request.args.get("autoplay")

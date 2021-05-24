@@ -77,6 +77,15 @@
                     <a href="/channel/{{channel.id}}"><span class="float-left"
                             id="channelName">{{channel.channelName}}</span></a>
 
+                        <!----    <img class="sidenavPic" src="/images/{{streamer.pictureLocation}}"
+                            onerror="this.src='/static/img/user2.png';">
+                        -->
+                            <img src="/images/{{streamer.pictureLocation}}" width="25" height="25" class="float-left" alt="">
+                          
+                            {% if streamer.verified == 1 %}
+                                <img src="/static/img/verified-badge.png" width="25" height="25" class="float-left" alt="">
+                            {% endif %}
+
                     <h6 style="display: inline; margin: 0px;"><span id="liveIndicatorBadge"
                             class="float-left m-2 liveindicator badge badge-secondary"><b><i
                                     class="fas fa-video-slash"></i><span class="d-none d-sm-none d-md-inline">
