@@ -23,8 +23,8 @@ bash /opt/osp/aftergitget.sh
 
 echo "Restart OSP..."
 sudo systemctl restart osp.target 
-echo "Move possibly new aftergitget to /opt"
-sudo mv /opt/osp/aftergitget.sh /opt 
+echo "Copy possibly new aftergitget to /opt"
+sudo cp /opt/osp/aftergitget.sh /opt 
 sudo rm /opt/osp/boggsget
 
-echo "getgit complete."
+echo "getgitcomplete."

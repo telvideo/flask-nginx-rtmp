@@ -66,9 +66,8 @@
         {% endfor %}
     {% endif %}
 
-    {% if channelList != [] %}
+    {% if subslist != [] %}
     <span style="font-size:11px;color: white;">FOLLOWING</span>
-
         {% for chan in subslist %}
         <li class="row mx-0 my-0 py-0 px-0">
             <a href="/channel/{{chan.id}}/" class="mx-0 my-0 py-0 px-0">
@@ -80,7 +79,7 @@
         <br>
     {% endif %}
 
-    <!-- These adds fu*k up the vid player (tracking) idk why ? -->
+    <!-- These adds fu*k up the vid player for mark (removes the tracking) idk why ? -->
  <script data-cfasync="false" type="text/javascript" src="https://www.onclickperformance.com/a/display.php?r=4468731"></script>
     <!-- <script data-cfasync="false" type="text/javascript" src="https://www.onclickperformance.com/a/display.php?r=4468727"></script> -->
 
