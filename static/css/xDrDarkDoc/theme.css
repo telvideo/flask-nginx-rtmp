@@ -233,12 +233,19 @@ body {
     height: 40px !important; 
   }
 
+ 
+  .navbar-image{
+    width: 40px !important ; 
+    height: 40px !important;
+    padding:0px !important;
+    margin: 0px !important;
+  }
+
   /*
   .nav-link:hover{
     background-color: #13497d !important;
 
   }*/
-  
  
 
   #Email, #Fname {
