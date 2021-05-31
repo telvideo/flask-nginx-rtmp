@@ -23,7 +23,7 @@
                     <span class="badge badge-secondary"><i class="fas fa-video-slash"></i> Offline</span>
                     {% endif %}
                     {% if channelData.protected and sysSettings.protectionEnabled %}<span class="badge badge-info"><i class="fas fa-user-lock"></i> Protected</span>{% endif %}<br>
-                    <i class="fas fa-star my-2 mr-2"></i> Followers: {{channelData.subscriptions|length}}<br>
+                    <i class="fas fa-star my-2 mr-2"></i> Followers: {{channelData.Nsubscriptions}}<br>
                     <a href="/streamer/{{channelData.owningUser}}/">
                         <h2 class="display-5"><img width="34" height="34" class="userphoto" src="{{channelData.owningUser|get_pictureLocation}}" onerror="this.src='/static/img/user2.png';"> {{channelData.owningUser|get_userName}}</h2>
                     </a>
@@ -168,7 +168,7 @@
                         <i class="fas fa-hashtag mr-2"></i> <a href="/topic/{{channel.topic}}/"><span class="topic">{{channel.topic|get_topicName}}</span></a>
                         <span class="float-right">
                             <i class="fas fa-users mr-2"></i> <span class="views">{{channel.views}}</span>
-                            <i class="fas fa-star mx-2"></i> <span class="subs">{{channel.subscriptions|length}}</span>
+                            <i class="fas fa-star mx-2"></i> <span class="subs">{{channel.Nsubscriptions}}</span>
                         </span>
                     </div>
                 </li>
