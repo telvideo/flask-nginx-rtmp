@@ -118,7 +118,7 @@ def get_topicName(topicID):
     return "None"
 
 def get_userName(userID):
-    userQuery = Sec.User.query.filter_by(id=int(userID)).first()
+    userQuery = Sec.User.query.filter_by(id=int(userID)).with_entities(Sec.User.username).first()
     if userQuery is None:
         return "Unknown User"
     else:
@@ -141,7 +141,7 @@ def get_Video_Comments_Filter(videoID):
     return result
 
 def get_pictureLocation(userID):
-    userQuery = Sec.User.query.filter_by(id=int(userID)).first()
+    userQuery = Sec.User.query.filter_by(id=int(userID)).with_entities(Sec.User.pictureLocation).first()
     pictureLocation = None
     if userQuery.pictureLocation is None:
         pictureLocation = '/static/img/user2.png'
@@ -183,7 +183,7 @@ def uuid_to_username(uuid):
         JID=uuid.split('@')[0]
     else:
         JID = uuid
-    userQuery = Sec.User.query.filter_by(uuid=JID).first()
+    userQuery = Sec.User.query.filter_by(uuid=JID).with_entities(Sec.User.username).first()
     if userQuery is not None:
         result = userQuery.username
     else:
