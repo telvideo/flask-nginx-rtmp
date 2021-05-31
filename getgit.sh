@@ -6,7 +6,7 @@ echo "OSP Stopped."
 
 echo "Save config.py"
 sudo cp /opt/osp/conf/config.py /opt
-sudo rm -rf /opt/osp
+sudo rm -r /opt/osp
 
 echo "Getting code from Gitlab..."
 
@@ -18,11 +18,13 @@ echo "Chowned."
 echo "Replace config.py"
 sudo cp /opt/config.py /opt/osp/conf/config.py
 
-echo "Do Afterboggsget.sh"
-bash /opt/osp/Afterboggsget.sh
+echo "Do aftergitget.sh"
+bash /opt/osp/aftergitget.sh
 
-echo "Restart OSP."
+echo "Restart OSP..."
 sudo systemctl restart osp.target 
-echo "Move possibly new boggsget to /opt"
-sudo mv /opt/osp/boggsget /opt 
-echo "Boggs get complete."
+echo "Move possibly new aftergitget to /opt"
+sudo mv /opt/osp/aftergitget.sh /opt 
+sudo rm /opt/osp/boggsget
+
+echo "getgit complete."

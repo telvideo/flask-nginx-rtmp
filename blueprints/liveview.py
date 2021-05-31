@@ -227,10 +227,28 @@ def view_page(loc):
     #        clipsList.sort(key=lambda x: x.views, reverse=True)
 
             subState = False
+
+#            chanSubQuery = subscriptions.channelSubs.query.filter_by(userID=current_user.id).all()
+            subslist = []
+
             if current_user.is_authenticated:
-                chanSubQuery = subscriptions.channelSubs.query.filter_by(channelID=requestedChannel.id, userID=current_user.id).first()
-                if chanSubQuery is not None:
-                    subState = True
+                chanSubQuery = subscriptions.channelSubs.query.filter_by(userID=current_user.id).\
+                    join(Channel.Channel, Channel.Channel.id == subscriptions.channelSubs.channelID ).\
+                    with_entities(Channel.Channel.imageLocation,Channel.Channel.id,Channel.Channel.channelName)
+
+                for chan in chanSubQuery:
+                    if chan.id == requestedChannel.id:
+                        subState = True
+                    aChan = {"imageLocation":chan.imageLocation,
+                            "channelName"  :chan.channelName,
+                            "id"           :chan.id}
+                    subslist.append(aChan)
+
+#            subState = False
+#            if current_user.is_authenticated:
+#                chanSubQuery = subscriptions.channelSubs.query.filter_by(channelID=requestedChannel.id, userID=current_user.id).first()
+#                if chanSubQuery is not None:
+#                    subState = True
 
 
           #  streamQuery = Stream.Stream.query.order_by(Stream.Stream.currentViewers).all()
@@ -258,21 +276,21 @@ def view_page(loc):
             streamList =  []
 
             for stre in streamQuery:
-
-                aStream = {"streamName":stre.streamName,
-                "currentViewers":stre.currentViewers,
-                "channelLoc":stre.channelLoc,
-                "pictureLocation":stre.pictureLocation,
-                "imageLocation":stre.imageLocation,
-                "NupVotes":stre.NupVotes,
-                "totalViewers":stre.totalViewers,
-                "username": stre.username,
-                "channelName":stre.channelName,
-                "verified":stre.verified}
-                streamList.append(aStream) 
-              #  print(stre)         
+                if stre.linkedChannel != requestedChannel.id:
+                    aStream = {"streamName":stre.streamName,
+                    "currentViewers":stre.currentViewers,
+                    "channelLoc":stre.channelLoc,
+                    "pictureLocation":stre.pictureLocation,
+                    "imageLocation":stre.imageLocation,
+                    "NupVotes":stre.NupVotes,
+                    "totalViewers":stre.totalViewers,
+                    "username": stre.username,
+                    "channelName":stre.channelName,
+                    "verified":stre.verified}
+                    streamList.append(aStream) 
+                #print(stre)         
             
-            return render_template(themes.checkOverride('channelplayer.html'), streamer=streamerQuery, streamList=streamList, stream=streamData, topics=topicList, streamURL=streamURL, channel=requestedChannel, clipsList=clipsList,
+            return render_template(themes.checkOverride('channelplayer.html'), subslist=subslist, streamer=streamerQuery, streamList=streamList, stream=streamData, topics=topicList, streamURL=streamURL, channel=requestedChannel, clipsList=clipsList,
                                    subState=subState, secureHash=secureHash, rtmpURI=rtmpURI, xmppserver=xmppserver, stickerList=stickerList, stickerSelectorList=stickerSelectorList, bannedWords=bannedWordArray)
         else:
             isAutoPlay = request.args.get("autoplay")
