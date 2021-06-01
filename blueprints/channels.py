@@ -6,6 +6,7 @@ from classes import Channel
 from classes import RecordedVideo
 from classes import Stream
 from classes import subscriptions
+from classes import Sec
 
 from functions import themes
 
@@ -16,13 +17,48 @@ def channels_page():
     #sysSettings = settings.settings.query.first()
     sysSettings = settings.getSettingsFromRedis()
     
-    if sysSettings.showEmptyTables:
-        channelList = Channel.Channel.query.all()
-    else:
-        channelList = []
-        for channel in Channel.Channel.query.all():
-            if len(channel.recordedVideo) > 0:
-                channelList.append(channel)
+#    if sysSettings.showEmptyTables:
+#        chanQuery = Channel.Channel.query.all()
+#    else:
+    chanQuery = Channel.Channel.query.join(Sec.User,Sec.User.id == Channel.Channel.owningUser).with_entities(Channel.Channel.topic,
+            Channel.Channel.protected,
+            Channel.Channel.Nsubscriptions,
+            Channel.Channel.views,
+            Channel.Channel.channelName,
+            Channel.Channel.imageLocation,
+            Sec.User.username,
+            Channel.Channel.id).order_by(Channel.Channel.channelName.desc()).all()
+      
+
+    streamSet = set()
+    streamQuery = Stream.Stream.query.with_entities(Stream.Stream.linkedChannel).all()
+    for aStream in streamQuery:
+        streamSet.add(aStream.linkedChannel) 
+
+    channelList = []
+
+    for chan in chanQuery:
+        if chan.id in streamSet:
+            isStreaming = True
+        else:
+            isStreaming = False
+            
+        aChan = {"protected":chan.protected,
+        "id":chan.id,
+        "Nsubscriptions":chan.Nsubscriptions,
+        "views":chan.views,
+        "imageLocation":chan.imageLocation,
+        "channelName":chan.channelName,
+        "topic":chan.topic,
+        "username":chan.username,
+        "isStreaming":isStreaming}
+#            "totalViewers":achan.totalViewers,
+#            "username": achan.username,
+#            "channelName":achan.channelName,
+#            "verified":achan.verified}
+        channelList.append(aChan) 
+
+
     return render_template(themes.checkOverride('channels.html'), channelList=channelList)
 
 @channels_bp.route('/<int:chanID>/')
