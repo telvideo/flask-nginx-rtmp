@@ -17,21 +17,21 @@ streamers_bp = Blueprint('streamers', __name__, url_prefix='/streamer')
 
 @streamers_bp.route('/')
 def streamers_page():
-    sysSettings = settings.settings.query.first()
+  #  sysSettings = settings.settings.query.first()
     streamerIDs = []
 
-    if sysSettings.showEmptyTables:
-        for channel in db.session.query(Channel.Channel.owningUser).distinct():
-            if channel.owningUser not in streamerIDs:
-                streamerIDs.append(channel.owningUser)
-    else:
-        openStreams = Stream.Stream.query.all()
-        for stream in openStreams:
-            if stream.channel.owningUser not in streamerIDs:
-                streamerIDs.append(stream.channel.owningUser)
-        for recordedVidInstance in db.session.query(RecordedVideo.RecordedVideo.owningUser).distinct():
-            if recordedVidInstance.owningUser not in streamerIDs:
-                streamerIDs.append(recordedVidInstance.owningUser)
+  #  if sysSettings.showEmptyTables:
+  #      for channel in db.session.query(Channel.Channel.owningUser).distinct():
+  #          if channel.owningUser not in streamerIDs:
+  #              streamerIDs.append(channel.owningUser)
+  #  else:
+    openStreams = Stream.Stream.query.all()
+    for stream in openStreams:
+        if stream.channel.owningUser not in streamerIDs:
+            streamerIDs.append(stream.channel.owningUser)
+    for recordedVidInstance in db.session.query(RecordedVideo.RecordedVideo.owningUser).distinct():
+        if recordedVidInstance.owningUser not in streamerIDs:
+            streamerIDs.append(recordedVidInstance.owningUser)
 
     streamerList = []
     for userID in streamerIDs:
