@@ -46,8 +46,8 @@
                     src="/static/img/video-placeholder.jpg" onerror="this.src='/static/img/video-placeholder.jpg';" {%
                     endif %} data-src="/stream-thumb/{{stream.channelLoc}}.png">
                     <span style = "font-size: 8px px-0 my-0">
-                        <span style="font-size:15px"></span>{{stream.streamName|limit_title}}</span>
-                        <span style="font-size:15px"></span>{{stream.username|limit_title}}</span>
+                        <div style="font-size:15px">{{stream.streamName|limit_title}}</div>
+                        <div style="font-size:15px">{{stream.username|limit_title}}</div>
                     </span>
                 </div>
             </a>
