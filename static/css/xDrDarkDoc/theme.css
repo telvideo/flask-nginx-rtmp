@@ -165,6 +165,12 @@ h5 {
   text-transform: uppercase;
 }
 
+h6 {
+  color: white;
+  font-family: "Bomber";
+  text-transform: uppercase;
+}
+
 a:link {
   color: var(--PDLBlue);
 }
