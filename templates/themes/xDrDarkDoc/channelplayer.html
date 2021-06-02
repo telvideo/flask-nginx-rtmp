@@ -36,7 +36,7 @@
 {% block body %}
 <div id="mySidenav" class="sidenav my-0 py-0" onmouseover="openNav();" onmouseout="closeNav();">
     {% if streamList != [] %}
-    <span class="my-0 py-0"><h4>Live</h4></span>
+    <span class="my-0 py-0"><h5>Live</h5></span>
         {% for stream in streamList %}
         <li class="row mx-0 my-0 py-0 px-0 text-nowrap">
             <a href="/view/{{stream.channelLoc}}/" class="mx-0 px-0 py-0 ">
@@ -56,14 +56,14 @@
     {% endif %}
 
     {% if subslist != [] %}
-    <span class="my-0 py-0"><h4>Following</h4></span>
+    <span class="my-0 py-0"><h5>Following</h5></span>
         {% for chan in subslist %}
         <li class="row mx-0 my-0 py-0 px-0">
             <a href="/channel/{{chan.id}}/" class="mx-0 my-0 py-0 px-0">
                 <div class="mx-0 px-0 my-0">
                     <img class="sidenavPic px-0 ml-0" src="/images/{{chan.imageLocation}}" onerror="this.src='/static/img/user2.png';">
                     <span style = "font-size: 8px px-0 my-0">
-                        <span class="text-nowrap mx-0 my-0 py-0 px-0" >{{chan.channelName}}</span><br>
+                        <span style="font-size:15px">{{chan.channelName|limit_title}}</span>
                     </span>
                 </div>
             </a>
