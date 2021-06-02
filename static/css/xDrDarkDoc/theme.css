@@ -108,20 +108,19 @@
 }
 
 @font-face {
-  font-family: "MBomber";
-  src: url("/static/fonts/bommeresort.ttf");
+  font-family: "Bomber";
+  src: url("/static/fonts/Bomber TV DF.otf");
 }
 
 
 body::-webkit-scrollbar {
   width: 0 !important;
   display: none !important; 
-
 }
 
 body {
-  /*font-family: "LT Emphasis"; */
-  font-family: "MBomber";
+  font-family: "LT Emphasis";
+  /* font-family: "Bomber" */;
 
   -ms-overflow-style: none;  
   scrollbar-width: none;
@@ -134,6 +133,11 @@ body {
 
   max-width: 100%;
   overflow-x: hidden;
+}
+
+h1 {
+  font-family: "Bomber";
+  text-transform: uppercase;
 }
 
   a:link {
