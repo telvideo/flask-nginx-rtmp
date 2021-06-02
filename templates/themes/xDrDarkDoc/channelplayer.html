@@ -45,20 +45,9 @@
                     onerror="this.src='/static/img/video-locked.jpg';" {% else %}
                     src="/static/img/video-placeholder.jpg" onerror="this.src='/static/img/video-placeholder.jpg';" {%
                     endif %} data-src="/stream-thumb/{{stream.channelLoc}}.png">
-                        
-                    <img class="sidenavPic" src="/images/{{stream.pictureLocation}}"
-                        onerror="this.src='/static/img/user2.png';">
-                    
-                    <img class="sidenavPic px-0" src="/images/{{stream.imageLocation}}"
-                        onerror="this.src='/static/img/user2.png';">
-                    <br>
                     <span style = "font-size: 8px px-0 my-0">
-                            <b> {{stream.currentViewers}}      <span style="font-size:6px"><i class="fas fa-eye"></i></span></b>  
-                            <b> {{stream.totalViewers}}        <span style="font-size:6px"><i class="fas fa-users"></i></span></b>  
-                            <b> {{stream.NupVotes}}            <span style="font-size:6px"><i class="fas fa-thumbs-up"></i></span></b>
-                            <span style="font-size:15px"> {{stream.username|limit_title}} {{stream.streamName}} </span>
-
-                        {#  <b> {{stream.channelName}}      #}
+                        <b> {{stream.currentViewers}} <span style="font-size:6px"><i class="fas fa-eye"></i></span></b>  
+                        <span style="font-size:15px"> {{stream.username|limit_title}} {{stream.streamName|limit_title}} </span>
                     </span>
                 </div>
             </a>
