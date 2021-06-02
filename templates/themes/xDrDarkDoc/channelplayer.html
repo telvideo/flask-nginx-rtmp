@@ -36,7 +36,7 @@
 {% block body %}
 <div id="mySidenav" class="sidenav my-0 py-0" onmouseover="openNav();" onmouseout="closeNav();">
     {% if streamList != [] %}
-    <span style="font-size:12px;color: white;" class ="my-0 py-0">LIVE</span>
+    <span class="my-0 py-0"><h2>Live</h2></span>
         {% for stream in streamList %}
         <li class="row mx-0 my-0 py-0 px-0 text-nowrap">
             <a href="/view/{{stream.channelLoc}}/" class="mx-0 px-0 py-0 ">
