@@ -54,11 +54,11 @@
         </li>
         {% endfor %}
     {% endif %}
-
+    <hr>
     {% if subslist != [] %}
     <span class="my-0 py-0"><h5>Following</h5></span>
         {% for chan in subslist %}
-        <li class="row mx-0 my-0 py-0 px-0">
+        <li class="row mx-0 my-0 py-0 px-0 text-nowrap">
             <a href="/channel/{{chan.id}}/" class="mx-0 my-0 py-0 px-0">
                 <div class="mx-0 px-0 my-0">
                     <img class="sidenavPic px-0 ml-0" src="/images/{{chan.imageLocation}}" onerror="this.src='/static/img/user2.png';">
