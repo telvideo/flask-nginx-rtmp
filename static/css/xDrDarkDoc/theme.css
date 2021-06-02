@@ -145,9 +145,9 @@ h2 {
   text-transform: uppercase;
 }
 
-  a:link {
-    color: var(--PDLBlue);
-  }
+a:link {
+  color: var(--PDLBlue);
+}
   a:visited {
     color: var(--PDLBlue);
   }
