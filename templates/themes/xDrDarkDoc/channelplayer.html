@@ -45,16 +45,16 @@
                     onerror="this.src='/static/img/video-locked.jpg';" {% else %}
                     src="/static/img/video-placeholder.jpg" onerror="this.src='/static/img/video-placeholder.jpg';" {%
                     endif %} data-src="/stream-thumb/{{stream.channelLoc}}.png">
-                    <span style = "font-size: 8px px-0 my-0 text-nowrap">
-                        <span style="font-size:15px">{{stream.streamName|limit_title}}</span><br>
-                        <span style="font-size:15px">{{stream.username|limit_title}}</span><br>
-                        <span style="font-size:6px">
+                    <span style = "font-size: 8px px-0 my-0">
+                        {{stream.streamName|limit_title}}<br>
+                        {{stream.username|limit_title}}<br>
+                        <div class="mx-0 px-0 my-0">
                             <b>
-                                {{stream.currentViewers}}<i class="fas fa-eye"></i>
-                                {{stream.totalViewers}}<i class="fas fa-users"></i>
-                                {{stream.NupVotes}}<i class="fas fa-thumbs-up"></i>
+                                <span style="font-size:15px"></span>{{stream.currentViewers}}<i class="fas fa-eye"></i></span>
+                                <span style="font-size:15px"></span>{{stream.totalViewers}}<i class="fas fa-users"></i></span>
+                                <span style="font-size:15px"></span>{{stream.NupVotes}}<i class="fas fa-thumbs-up"></i></span>
                             </b>
-                        </span>
+                        </div>
                     </span>
                 </div>
             </a>
