@@ -170,6 +170,10 @@ h6 {
   text-transform: uppercase;
 }
 
+h4:hover {
+  color: var(--PDLBlue);
+}
+
 .following-text {
   font-size: x-small;
   color: white;
@@ -275,7 +279,6 @@ a:link {
     /* height: calc(100vh - 285px ); */
     height: 40px !important;
   }
-
  
   .navbar-image{
     width: 40px !important ; 
