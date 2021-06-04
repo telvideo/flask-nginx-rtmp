@@ -46,31 +46,25 @@
     
     <div class="collapse navbar-collapse" id="navbarColor01">
       <ul class="navbar-nav ml-auto">
-        <form class="form-inline my-2 my-lg-0 mr-auto" style="height:14px;" action="/search" method="post">
-          <input class="form-control search" name="term" type="search" placeholder="&#xf002; Search..." aria-label="Search" style="height:16px;font-weight: 900;font-family: 'Font Awesome 5 Free', Arial, Sans-serif;width: 75%;" size="24">
-        </form>
+        {# <img class = "navbar-image" src="/static/img/Mascot_2_legs.png" alt="badge"> #}
 
-         {# <img class = "navbar-image" src="/static/img/Mascot_2_legs.png" alt="badge"> #}
+        <!-- <a class="navbar-brand" href="/channel"> -->
+          <!-- <img src="/static/img/Mascot_1.png" title = "CHANNELS" class="nav-link img-fluid navbar-image" > -->
+          <!-- <i class="fas fa-tv nav-link" title = "CHANNELS" style="display: inline;"><span><h4 style="display: inline;"> Channels</h4></span></i> -->
+        <!-- </a> -->
 
-         <a class="navbar-brand" href="/channel">
-          <img src="/static/img/Mascot_1.png" title = "CHANNELS" class="nav-link img-fluid navbar-image " >
-        </a>
-
-        <a class="navbar-brand" href="/topic">
-          <img src="/static/img/Mascot_3.png" title = "TOPICS" class="nav-link img-fluid navbar-image " >
-        </a>
-
-        <a class="navbar-brand" href="/streamer">
-          <img src="/static/img/Mascot_2_legs.png" title = "STREAMERS" class="nav-link img-fluid navbar-image " >
-        </a>
+        <!-- <a class="navbar-brand" href="/streamer"> -->
+          <!-- <img src="/static/img/Mascot_2_legs.png" title = "STREAMERS" class="nav-link img-fluid navbar-image " > -->
+          <!-- <i class="fas fa-users nav-link" title = "STREAMERS" style="display: inline;"><span><h4 style="display: inline;"> Streamers</h4></span></i> -->
+        <!-- </a> -->
 
         {% if current_user.is_authenticated == False %}
         <li class="nav-item">
-          <a class="nav-link" href="/login"><i class="fas fa-sign-in-alt"></i> LOGIN</a>
+          <h4><a class="nav-link" href="/login">LOGIN</a></h4>
         </li>
         {% if allowRegistration %}
         <li class="nav-item">
-          <a class="nav-link" href="/register"><i class="far fa-id-card"></i> REGISTER</a>
+          <h4><a class="nav-link" href="/register">REGISTER</a></h4>
         </li>
         {% endif %}
         {% else %}
@@ -79,7 +73,11 @@
         </li>
         <li class="nav-item dropdown pl-2 pr-1 d-none d-lg-block">
           <a class="nav-link zoom" title="NOTIFICATIONS" href="#" id="navbarDropdownNotificationLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-             {% if notifications|count > 0 %}<span class="badge badge-danger" id="notificationCountNav">{{notifications|count}}</span>{% endif %}
+             {% if notifications|count > 0 %}
+             <span class="badge badge-danger" id="notificationCountNav">{{notifications|count}}</span>
+             {% else %}
+             <span><i class="far fa-bell-slash"></i></span>
+             {% endif %}
           </a>
           <ul class="dropdown-menu notificationDropdownMenu shadow">
             <li class="head text-light bg-dark">

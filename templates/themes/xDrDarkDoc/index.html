@@ -36,12 +36,12 @@
   <!-- The slideshow -->
   <div class="carousel-inner index-streams-container-bg" style="padding-top: 8px;padding-bottom: 8px;">
     <div class="carousel-item active">
-      <center><a href="https://www.zazzle.com/store/prohibitedtv"><img src="/static/img/2.png" alt="Prohibited TV Merch" width="50%"></a></center>
+      <center><a href="https://www.zazzle.com/store/prohibitedtv"><img src="/static/img/2.png" alt="Prohibited TV Merch" width="40%"></a></center>
     </div>
 
     {% for stream in streamList %}
     <div class="carousel-item .icon-next">
-      <center><a href="/view/{{stream.channelLoc}}"><img class="shadow gif lazy" {% if stream.protected and sysSettings.protectionEnabled %} src="/static/img/video-locked.jpg" onerror="this.src='/static/img/video-locked.jpg';" {% else %} src="/static/img/video-placeholder.jpg" onerror="this.src='/static/img/video-placeholder.jpg';" {% endif %} data-src="/stream-thumb/{{stream.channelLoc}}.png" width="50%"></a></center>
+      <center><a href="/view/{{stream.channelLoc}}"><img class="shadow gif lazy" {% if stream.protected and sysSettings.protectionEnabled %} src="/static/img/video-locked.jpg" onerror="this.src='/static/img/video-locked.jpg';" {% else %} src="/static/img/video-placeholder.jpg" onerror="this.src='/static/img/video-placeholder.jpg';" {% endif %} data-src="/stream-thumb/{{stream.channelLoc}}.png" width="40%"></a></center>
       <div class="carousel-caption d-none d-md-block">
         <h5>{{stream.streamName}}</h5>      
       </div>
@@ -61,7 +61,26 @@
 
 <div class="container-fluid p-2" id="index-streams-container">
     <div class="row mx-4">
-        <div class="index-video-title"><h1>Live Now</h1></div>
+        <div class="index-video-title">
+          <span style="float:left;">
+            <a class="navbar-brand" href="/channel">
+              <!-- <img src="/static/img/Mascot_3.png" title = "TOPICS" class="nav-link img-fluid navbar-image " > -->
+              <span><h4 style="display: inline;">Channels</h4></span>
+            </a>
+            <a class="navbar-brand" href="/topic">
+              <!-- <img src="/static/img/Mascot_3.png" title = "TOPICS" class="nav-link img-fluid navbar-image " > -->
+              <span><h4 style="display: inline;padding-left: 20px;">Browse</h4></span>
+            </a>
+          </span>
+          <span style="float: right;">
+            <form class="form-inline my-2 my-lg-0 mr-auto" style="height:14px;" action="/search" method="post">
+              <input class="form-control search" name="term" type="search" placeholder="&#xf002; Search..." aria-label="Search" style="height:16px;font-weight: 900;font-family: 'Font Awesome 5 Free', Arial, Sans-serif;width: 75%;" size="24">
+            </form>
+          </span>
+        </div>
+        <div class="index-video-title" style="padding-top: 25px;">
+          <h1>Live Now</h1>
+        </div>
         {% if streamList == [] %}
         No Live Streams Online...
         {% endif %}
