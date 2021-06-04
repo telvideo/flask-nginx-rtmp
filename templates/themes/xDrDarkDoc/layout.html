@@ -60,11 +60,11 @@
 
         {% if current_user.is_authenticated == False %}
         <li class="nav-item">
-          <a class="nav-link" href="/login"><i class="fas fa-sign-in-alt"></i> LOGIN</a>
+          <h4><a class="nav-link" href="/login">LOGIN</a></h4>
         </li>
         {% if allowRegistration %}
         <li class="nav-item">
-          <a class="nav-link" href="/register"><i class="far fa-id-card"></i> REGISTER</a>
+          <h4><a class="nav-link" href="/register">REGISTER</a></h4>
         </li>
         {% endif %}
         {% else %}
@@ -73,7 +73,11 @@
         </li>
         <li class="nav-item dropdown pl-2 pr-1 d-none d-lg-block">
           <a class="nav-link zoom" title="NOTIFICATIONS" href="#" id="navbarDropdownNotificationLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-             {% if notifications|count > 0 %}<span class="badge badge-danger" id="notificationCountNav">{{notifications|count}}</span>{% endif %}
+             {% if notifications|count > 0 %}
+             <span class="badge badge-danger" id="notificationCountNav">{{notifications|count}}</span>
+             {% else %}
+             <span><i class="far fa-bell-slash"></i></span>
+             {% endif %}
           </a>
           <ul class="dropdown-menu notificationDropdownMenu shadow">
             <li class="head text-light bg-dark">
