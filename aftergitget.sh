@@ -18,4 +18,4 @@ echo "install pottery which is used to critical section startup"
 pip3 install pottery
 echo "Hope the pips worked! (lol)..."
 
-echo "Afterboggsget done..."
+echo "Aftergitgsget done."
