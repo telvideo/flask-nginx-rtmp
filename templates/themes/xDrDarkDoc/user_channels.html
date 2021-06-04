@@ -215,9 +215,9 @@
                                         <label for="rtmpServer-{{channel.id}}" class="col-form-label"><b>RTMP Server</b></label>
                                         <div class="input-group mb-3">
                                             <div class="input-group-prepend">
-                                                <button type="button" class="btn btn-primary" onclick="CopyAPI('rtmpKey')"><i class="fas fa-copy"></i></button>
+                                                <button type="button" class="btn btn-primary" onclick="CopyAPI('rtmpKey-{{channel.id}}')"><i class="fas fa-copy"></i></button>
                                             </div>
-                                            <input type="text" class="form-control" name="streamKey" id="rtmpKey" value="rtmp://signal.prohibited.tv/stream" required readonly aria-describedby="generateGUID required">
+                                            <input type="text" class="form-control" name="streamKey" id="rtmpKey-{{channel.id}}" value="rtmp://prohibited.tv/stream" required readonly aria-describedby="generateGUID required">
                                             <div class="input-group-append">
 
                                             </div>
