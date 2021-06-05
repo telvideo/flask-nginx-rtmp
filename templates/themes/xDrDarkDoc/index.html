@@ -92,7 +92,7 @@
               <a href="/view/{{stream.channelLoc}}/">
                 <div class="displayCard-thumbnail zoom">
                   <div class="video-badges">
-                    <span class="badge badge-danger mx-1"><i class="fas fa-video"></i> Live</span>
+                    <span class="badge badge-danger mx-1"><i class="fas fa-video"></i></span>
                     {% if stream.protected and sysSettings.protectionEnabled %}<span class="badge badge-warning mx-1"><i class="fas fa-user-lock"></i> Protected</span>{% endif %}
                   </div>
                   <img class="shadow gif lazy" {% if stream.protected and sysSettings.protectionEnabled %} src="/static/img/video-locked.jpg" onerror="this.src='/static/img/video-locked.jpg';" {% else %} src="/static/img/video-placeholder.jpg" onerror="this.src='/static/img/video-placeholder.jpg';" {% endif %} data-src="/stream-thumb/{{stream.channelLoc}}.png">
