@@ -1,10 +1,11 @@
 :root{
-  --tooltip-color: #12004b;
-
+  --tooltip-color: white;
+  
+  --PDBlack: black;
   --PDDBlue: #12004b;
   --PDgreen: #00ffb1;
   --PDBlue: #13497d;
-  --PDLBlue: #1e8edf;
+  --PDLBlue: #1e90ff;
   --background-image: url("/static/img/Mono_Dark_Background.png");
 }
 
@@ -134,10 +135,12 @@ body {
   overflow-x: hidden;
 }
 
+/* Heading formattings */
 h1 {
-  color: white;
+  color: var(--PDLBlue);
   font-family: "Bomber";
   text-transform: uppercase;
+  text-shadow: 2px 2px 4px var(--PDDBlue);
 }
 
 h2 {
