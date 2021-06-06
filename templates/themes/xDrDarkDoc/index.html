@@ -75,7 +75,7 @@
           </span>
           <span style="float: right;">
             <form class="form-inline my-2 my-lg-0 mr-auto" style="height:14px;" action="/search" method="post">
-              <input class="form-control search" name="term" type="search" placeholder="&#xf002; Search..." aria-label="Search" style="height:16px;font-weight: 900;font-family: 'Font Awesome 5 Free', Arial, Sans-serif;width: 75%;" size="24">
+              <input class="form-control search" name="term" type="search" placeholder="&#xf002; Search..." aria-label="Search" style="height:16px;font-weight: 900;font-family: 'Font Awesome 5 Free', Arial, Sans-serif;width: 85%;" size="24">
             </form>
           </span>
         </div>
@@ -87,7 +87,7 @@
         {% endif %}
     </div>
     <div class="row mx-1">
-        <ul id="streamList" class="itemList d-flex flex-wrap justify-content-start" style="width:100%"><!--Manually Defined Due to Mobile Strangeness-->
+        <ul id="streamList" class="itemList d-flex flex-wrap justify-content-start" style="width:100%;background-color: #555;"><!--Manually Defined Due to Mobile Strangeness-->
             {% for stream in streamList %}
             <li class="displayCard mx-4 my-3">
               <a href="/view/{{stream.channelLoc}}/">
@@ -111,7 +111,7 @@
                   <img class="rounded" src="/images/{{stream.pictureLocation}}" onerror="this.src='/static/img/user2.png';">
                   <div class="metadata">
                     <div class="card-cut-text name ml-2"><h5>{{stream.streamName|limit_title}}</h5></div>
-                    <div class="card-cut-text topic ml-2">{{stream.topic|get_topicName}}</div>
+                    <div class="topic ml-2" style="padding-top: 5px;font-size: large;">{{stream.topic|get_topicName}}</div>
                   </div>
                 </div>
               </a>
@@ -126,7 +126,7 @@
         <div class="index-video-title"><h1>Videos</h1></div>
     </div>
     <div class="row mx-1">
-        <ul id="recordedVideosList" class="itemList d-flex flex-wrap justify-content-start">
+        <ul id="recordedVideosList" class="itemList d-flex flex-wrap justify-content-start" style="background-color: #555;">
             {% for video in videoList %}
                 <li class="displayCard mx-4 my-3">
                   <a href="/play/{{video.id}}">
@@ -149,7 +149,7 @@
                       <img class="rounded" src="/images/{{video.pictureLocation}}" onerror="this.src='/static/img/user2.png';">
                       <div class="metadata">
                         <div class="card-cut-text name ml-2"><h5>{{video.channelName|limit_title}}</h5></div>
-                        <div class="card-cut-text topic ml-2">{{video.topic|get_topicName}}</div>
+                        <div class="topic ml-2" style="padding-top: 5px;font-size: large;">{{video.topic|get_topicName}}</div>
                         <span class="date" style="display:none;">{{video.videoDate|normalize_date}}</span>
                       </div>
                     </div>
@@ -165,7 +165,7 @@
         <div class="index-video-title"><h1>Clips</h1></div>
     </div>
     <div class="row mx-1">
-        <ul id="clipsList" class="itemList d-flex flex-wrap justify-content-start">
+        <ul id="clipsList" class="itemList d-flex flex-wrap justify-content-start" style="background-color: #555;">
             {% for clip in clipList %}
             <li class="displayCard mx-4 my-3">
               <a href="/clip/{{clip.id}}">
@@ -189,7 +189,7 @@
                   <img class="rounded" src="/images/{{clip.pictureLocation}}" onerror="this.src='/static/img/user2.png';">
                   <div class="metadata">
                     <div class="card-cut-text name ml-2"><h5>{{clip.clipName|limit_title}}</h5></div>
-                    <div class="card-cut-text topic ml-2">{{clip.topic|get_topicName}}</div>
+                    <div class="topic ml-2" style="padding-top: 5px;font-size: large;">{{clip.topic|get_topicName}}</div>
                     <span class="date" style="display:none;">{{clip.videoDate|normalize_date}}</span>
                   </div>
                 </div>
