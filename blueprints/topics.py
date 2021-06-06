@@ -13,25 +13,28 @@ topics_bp = Blueprint('topic', __name__, url_prefix='/topic')
 @topics_bp.route('/')
 def topic_page():
     #sysSettings = settings.settings.query.first()
-    sysSettings = settings.getSettingsFromRedis()
-    if sysSettings.showEmptyTables:
-        topicsList = topics.topics.query.all() 
-    else:
-        topicIDList = []
-        for streamInstance in db.session.query(Stream.Stream.topic).distinct():
-            topicIDList.append(streamInstance.topic)
-        for recordedVidInstance in db.session.query(RecordedVideo.RecordedVideo.topic).distinct():
-            if recordedVidInstance.topic not in topicIDList:
-                topicIDList.append(recordedVidInstance.topic)
 
-        topicsList = []
+#    sysSettings = settings.getSettingsFromRedis()
+#    if sysSettings.showEmptyTables:
+#        topicsList = topics.topics.query.all() 
+#    else:
+#        topicIDList = []
+#        for streamInstance in db.session.query(Stream.Stream.topic).distinct():
+#            topicIDList.append(streamInstance.topic)
+#        for recordedVidInstance in db.session.query(RecordedVideo.RecordedVideo.topic).distinct():
+#            if recordedVidInstance.topic not in topicIDList:
+#                topicIDList.append(recordedVidInstance.topic)
 
-        for item in topicIDList:
-            topicQuery = topics.topics.query.filter_by(id=item).first()
-            if topicQuery is not None:
-                topicsList.append(topicQuery)
+#        topicsList = []
 
-    topicsList.sort(key=lambda x: x.name.lower())
+#        for item in topicIDList:
+#            topicQuery = topics.topics.query.filter_by(id=item).first()
+#            if topicQuery is not None:
+#                topicsList.append(topicQuery)
+
+#   topicsList.sort(key=lambda x: x.name.lower())
+
+    topicsList = topics.topics.query.order_by(topics.topics.name).all() 
 
     return render_template(themes.checkOverride('topics.html'), topicsList=topicsList)
 

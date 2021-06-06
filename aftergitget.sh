@@ -10,6 +10,8 @@ sudo mysql -e "ALTER TABLE osp.userNotification ADD INDEX timeStamp (timestamp D
 sudo mysql -e "ALTER TABLE osp.Channel ADD COLUMN Nsubscriptions INT NULL DEFAULT 0 AFTER vanityURL"
 sudo mysql -e "ALTER TABLE osp.user ADD COLUMN verified INT NULL DEFAULT 0 AFTER xmppToken"
 sudo mysql -e "ALTER TABLE osp.videoComments ADD COLUMN NupVotes INT NULL DEFAULT 0 AFTER videoID"
+sudo mysql -e "ALTER TABLE osp.topics ADD INDEX name (name ASC) VISIBLE"
+
 apt install python-pip
 
 echo "install flask verion of redis... THIS IS NEW SH*T AND HAS MAYBE NOT WORKED RIGHT... Maybe it's already installed???  if you are doing something else silly with Redis which Mark does not know about then that's why this does not work or maybe you need something else installed first to make these pips work if they did not ...???"
