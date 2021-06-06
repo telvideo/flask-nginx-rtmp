@@ -13,7 +13,7 @@
 
 {% block body %}
 
-<div class="container-fluid" id="index-live-container">
+<div class="container-fluid" id="index-live-container" style="background-color: var(--PDSlateDark);">
     {% if sysSettings.serverMessage != "" and sysSettings.serverMessage != None %}
     <div class="jumbotron shadow mt-2 p-3">
         <div class="row p-2">
@@ -42,10 +42,11 @@
 
     {% for stream in streamList %}
     <div class="carousel-item .icon-next">
-      <center><a href="/view/{{stream.channelLoc}}"><img class="shadow gif lazy" {% if stream.protected and sysSettings.protectionEnabled %} src="/static/img/video-locked.jpg" onerror="this.src='/static/img/video-locked.jpg';" {% else %} src="/static/img/video-placeholder.jpg" onerror="this.src='/static/img/video-placeholder.jpg';" {% endif %} data-src="/stream-thumb/{{stream.channelLoc}}.png" width="40%"></a></center>
+      <center><a href="/view/{{stream.channelLoc}}"><img class="shadow gif lazy" {% if stream.protected and sysSettings.protectionEnabled %} src="/static/img/video-locked.jpg" onerror="this.src='/static/img/video-locked.jpg';" {% else %} src="/static/img/video-placeholder.jpg" onerror="this.src='/static/img/video-placeholder.jpg';" {% endif %} data-src="/stream-thumb/{{stream.channelLoc}}.png" width="40%"></center>
       <div class="carousel-caption d-none d-md-block">
-        <h5>{{stream.streamName}}</h5>      
+        <center><h4 style="background-color:rgba(0,0,0,0.5);width: 50%;">{{stream.streamName|limit_title}}</h4></center>
       </div>
+    </a>
     </div>
 
     {% endfor %}
@@ -60,7 +61,7 @@
   </a>
 </div>
 
-<div class="container-fluid p-2" id="index-streams-container">
+<div class="container-fluid p-2" id="index-streams-container" style="background-color: var(--PDSlateDark);">
     <div class="row mx-4">
         <div class="index-video-title">
           <span style="float:left;">
@@ -121,7 +122,7 @@
     </div>
 </div>
 <center><script data-cfasync="false" type="text/javascript" src="https://www.onclickperformance.com/a/display.php?r=4501895"></script></center>
-<div class="container-fluid p-2" id="index-videos-container">
+<div class="container-fluid p-2" id="index-videos-container" style="background-color: var(--PDSlateDark);">
     <div class="row mx-4">
         <div class="index-video-title"><h1>Videos</h1></div>
     </div>
@@ -160,7 +161,7 @@
     </div>
 </div>
 <center><script data-cfasync="false" type="text/javascript" src="https://www.onclickperformance.com/a/display.php?r=4501895"></script></center>
-<div class="container-fluid p-2" id="index-clips-container">
+<div class="container-fluid p-2" id="index-clips-container" style="background-color: var(--PDSlateDark);">
     <div class="row mx-4">
         <div class="index-video-title"><h1>Clips</h1></div>
     </div>
