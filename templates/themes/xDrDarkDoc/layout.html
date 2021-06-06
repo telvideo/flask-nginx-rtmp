@@ -82,7 +82,7 @@
           <ul class="dropdown-menu notificationDropdownMenu shadow">
             <li class="head text-light bg-dark">
               <div class="row">
-                <div class="col-lg-12 col-sm-12 col-12">
+                <div class="col-lg-12 col-sm-12 col-12 ">
                   <span>Notifications <span class="badge badge-light" id="notificationCountMenu">{{notifications|count}}</span></span>
                   <a href="javascript:void(0);" class="float-right text-light" onclick="clearAllNotifications(); return false;">Mark as read</a>
                 </div>
@@ -121,7 +121,7 @@
         </li>
         <li class="nav-item dropdown">
           <a class="nav-link profile-image dropdown-toggle" title={{current_user.username}} href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <img width="48" height="48" class="userphoto"  src="/images/{{current_user.pictureLocation}}" onerror="this.src='/static/img/user2.png';"><!--{{current_user.username}}-->
+            <img width="50" height="50" class="userphoto"  src="/images/{{current_user.pictureLocation}}" onerror="this.src='/static/img/user2.png';"><!--{{current_user.username}}-->
           </a>
           <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
             {% if current_user.has_role('Admin') %}
