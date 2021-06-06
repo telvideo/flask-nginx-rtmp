@@ -42,10 +42,11 @@
 
     {% for stream in streamList %}
     <div class="carousel-item .icon-next">
-      <center><a href="/view/{{stream.channelLoc}}"><img class="shadow gif lazy" {% if stream.protected and sysSettings.protectionEnabled %} src="/static/img/video-locked.jpg" onerror="this.src='/static/img/video-locked.jpg';" {% else %} src="/static/img/video-placeholder.jpg" onerror="this.src='/static/img/video-placeholder.jpg';" {% endif %} data-src="/stream-thumb/{{stream.channelLoc}}.png" width="40%"></a></center>
-      <div class="carousel-caption d-none d-md-block">
-        <h5>{{stream.streamName}}</h5>      
+      <center><a href="/view/{{stream.channelLoc}}"><img class="shadow gif lazy" {% if stream.protected and sysSettings.protectionEnabled %} src="/static/img/video-locked.jpg" onerror="this.src='/static/img/video-locked.jpg';" {% else %} src="/static/img/video-placeholder.jpg" onerror="this.src='/static/img/video-placeholder.jpg';" {% endif %} data-src="/stream-thumb/{{stream.channelLoc}}.png" width="40%"></center>
+      <div class="carousel-caption d-none d-md-block" style="background-color:rgba(0,0,0,0.5);">
+        <h4>{{stream.streamName|limit_title}}</h4>
       </div>
+    </a>
     </div>
 
     {% endfor %}
