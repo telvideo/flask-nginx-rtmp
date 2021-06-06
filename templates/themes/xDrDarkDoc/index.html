@@ -111,7 +111,7 @@
                   <img class="rounded" src="/images/{{stream.pictureLocation}}" onerror="this.src='/static/img/user2.png';">
                   <div class="metadata">
                     <div class="card-cut-text name ml-2"><h5>{{stream.streamName|limit_title}}</h5></div>
-                    <div class="card-cut-text topic ml-2">{{stream.topic|get_topicName}}</div>
+                    <div class="topic ml-2" style="padding-top: 5px;font-size: large;">{{stream.topic|get_topicName}}</div>
                   </div>
                 </div>
               </a>
@@ -149,7 +149,7 @@
                       <img class="rounded" src="/images/{{video.pictureLocation}}" onerror="this.src='/static/img/user2.png';">
                       <div class="metadata">
                         <div class="card-cut-text name ml-2"><h5>{{video.channelName|limit_title}}</h5></div>
-                        <div class="card-cut-text topic ml-2">{{video.topic|get_topicName}}</div>
+                        <div class="topic ml-2" style="padding-top: 5px;font-size: large;">{{video.topic|get_topicName}}</div>
                         <span class="date" style="display:none;">{{video.videoDate|normalize_date}}</span>
                       </div>
                     </div>
@@ -189,7 +189,7 @@
                   <img class="rounded" src="/images/{{clip.pictureLocation}}" onerror="this.src='/static/img/user2.png';">
                   <div class="metadata">
                     <div class="card-cut-text name ml-2"><h5>{{clip.clipName|limit_title}}</h5></div>
-                    <div class="card-cut-text topic ml-2">{{clip.topic|get_topicName}}</div>
+                    <div class="topic ml-2" style="padding-top: 5px;font-size: large;">{{clip.topic|get_topicName}}</div>
                     <span class="date" style="display:none;">{{clip.videoDate|normalize_date}}</span>
                   </div>
                 </div>
