@@ -60,11 +60,11 @@
 
         {% if current_user.is_authenticated == False %}
         <li class="nav-item">
-          <button class="bg-dark" style="border-radius: 12px;padding: 7px;"><a href="/login"><h6>LOGIN</h6></a></button>
+          <button class="bg-dark" style="border-radius: 12px;padding: 7px;border-style: none;"><a href="/login"><h6>LOGIN</h6></a></button>
         </li>
         {% if allowRegistration %}
         <li class="nav-item">
-          <button style="border-radius: 12px;padding: 7px;background-color: var(--PDLBlue);"><a href="/register"><h6>REGISTER</h6></a></button>
+          <button style="border-radius: 12px;border-style: none;padding: 7px;background-color: var(--PDLBlue);"><a href="/register"><h6>REGISTER</h6></a></button>
         </li>
         {% endif %}
         {% else %}
