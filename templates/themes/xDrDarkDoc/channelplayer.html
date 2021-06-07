@@ -39,7 +39,7 @@
     <h5>Live</h5>
         {% for stream in streamList %}
         <li class="row mx-0 my-0 py-0 px-0 text-nowrap">
-            <a href="/view/{{stream.channelLoc}}/" class="mx-0 px-0 py-0 my-0 pb-1">
+            <a href="/view/{{stream.channelLoc}}/" class="mx-0 px-0 py-0 pb-1">
                 <div class="mx-0 px-0 my-0">
                     <img class="profileBoxPic rounded gif lazy sidenavPic my-y py-0 " {% if channel.protected %} src="/static/img/video-locked.jpg" onerror="this.src='/static/img/video-locked.jpg';" {% else %} src="/static/img/video-placeholder.jpg" onerror="this.src='/static/img/video-placeholder.jpg';" {% endif %} data-src="/stream-thumb/{{stream.channelLoc}}.png">
                     <span style = "font-size: 8px px-0 my-0">
@@ -54,7 +54,7 @@
             </a>
         </li>
         {% endfor %}
-    <hr>
+        <hr>
     {% endif %}
     {% if subslist != [] %}
     <span class="my-0 py-0 following-text">Following</span>
@@ -82,16 +82,16 @@
 <div id="main" class="px-0 py-0 ">
     <div class="container-fluid pl-1 mr-1 py-0" id="tmain">
         <div class="row">
-            <div class="col-12">
+            <div class="col">
                 <div class="index-video-title">
                         <a href="/channel/{{channel.id}}">
-                            <span class="float-left" id="channelName">{{channel.channelName}}</span>
+                            <span class="float-left px-1" id="channelName">{{channel.channelName}}</span>
                         </a>
 
                         <!----    <img class="sidenavPic" src="/images/{{streamer.pictureLocation}}"
                             onerror="this.src='/static/img/user2.png';">
                         -->
-                            <img src="/images/{{streamer.pictureLocation}}" width="25" height="25" class="float-left" alt="">
+                            <img src="/images/{{streamer.pictureLocation}}" width="25" height="25" class="float-left py-1" alt="">
                           
                             {% if streamer.verified == 1 %}
                                 <img src="/static/img/verified-badge.png" width="25" height="25" class="float-left" alt="">
@@ -118,7 +118,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="{% if channel.chatEnabled == True %}col{% else %} col-12{% endif %}"
+            <div class="{% if channel.chatEnabled == True %}col{% else %} col-12{% endif %}
                 id="videoWindow">
                 <div class="videoPanel">
                     <div class="player">
@@ -270,9 +270,6 @@
                             <div class="chatCounts">
                                 <img width="30" src="/static/img/P_COIN.png" alt="PCoin" class="center">
                                 <!--    <img width="50" height="50" src="/static/img/Mascot_3.png" alt="Prosmile2" class="center"> -->
-                                <!-- <img width="50" height="50" src="/static/img/Mascot_2_legs.png" alt="Prosmile1"
-                                    class="center">
-                                -->
                                 <span class="float-right"><button type="button" class="btn btn-outline-primary"
                                         onclick="showOccupants();"><i class="fas fa-user-friends"></i> <span
                                             id="chatTotal"></span></button></span>
