@@ -188,7 +188,7 @@
                         -->
                             {% if channel.owningUser == current_user.id %}
                             <span class="float-left" style="margin-right: 10px">
-                                <button type="button" class="btn btn-primary ml-2" data-toggle="modal"
+                                <button type="button" class="ml-2 btn btn-primary" data-toggle="modal"
                                     title="Edit Stream" data-target="#editModal">
                                     <i class="fas fa-edit"></i>
                                 </button>
@@ -711,7 +711,7 @@
     var username = username.replace(/ /g, "_");
     var ChatContentWindow = document.getElementById("chatContentWindow");
     var ChatInputBar = document.getElementById('chatinput');
-    ChatInputBar.placeholder = "Send Message As " + username + "...";
+    ChatInputBar.placeholder = "Send a Message As " + username + "...";
 
     var stickerList = {{ stickerList | safe }}
 
