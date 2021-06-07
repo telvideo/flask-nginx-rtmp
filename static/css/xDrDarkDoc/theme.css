@@ -44,7 +44,7 @@
   width: 70px;
   position: fixed;
   z-index: 1;
-  top: 42px !important;
+  top: 52px !important;
   left: 0;
   color: var(--PDLBlue) !important;
   background-image: var(--background-image);
@@ -708,7 +708,7 @@ a:link {
 
         flex-flow: column;
         
-        height: calc(100vh - 75px ); 
+        height: calc(100vh - 85px ); 
         margin: 0px !important;
         padding: 0px !important;
 
@@ -903,8 +903,8 @@ a:link {
     overflow-y: auto;
 /*    max-height:80vh;*/
 
-    max-height:  calc(100vh - 75px ) !important;
-    height: calc(100vh - 75px ) !important;
+    max-height:  calc(100vh - 85px ) !important;
+    height: calc(100vh - 85px ) !important;
     
     scrollbar-width: none !important;
     
