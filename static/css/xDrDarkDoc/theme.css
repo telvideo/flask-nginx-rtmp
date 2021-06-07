@@ -708,7 +708,7 @@ a:link {
 
         flex-flow: column;
         
-        height: calc(100vh - 200px ) !important; 
+        height: calc(100vh - 100px ) !important; 
         margin: 0px !important;
         padding: 0px !important;
 
