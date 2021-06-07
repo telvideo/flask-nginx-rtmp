@@ -4,7 +4,7 @@ echo "-------------------------------------------------------"
 sudo systemctl stop osp.target 
 echo "OSP Stopped."
 
-echo "Save config.py"
+echo "Save config.py in /opt and delete OSP directory... "
 sudo cp /opt/osp/conf/config.py /opt
 sudo rm -r /opt/osp
 
@@ -25,7 +25,7 @@ echo "Restart OSP..."
 sudo systemctl restart osp.target 
 echo "Copy possibly new gitget to /opt"
 sudo cp /opt/osp/gitget.sh /opt 
-sudo rm /opt/osp/boggsget
-sudo rm /opt/osp/aftergitget.sh
+#sudo rm /opt/osp/boggsget
+#sudo rm /opt/osp/aftergitget.sh
 
 echo "getgitcomplete."
