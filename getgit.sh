@@ -18,13 +18,13 @@ echo "Chowned."
 echo "Replace config.py"
 sudo cp /opt/config.py /opt/osp/conf/config.py
 
-echo "Do aftergitget.sh"
-bash /opt/osp/aftergitget.sh
+echo "Do aftergetgit.sh"
+bash /opt/osp/aftergetgit.sh
 
 echo "Restart OSP..."
 sudo systemctl restart osp.target 
 echo "Copy possibly new gitget to /opt"
-sudo cp /opt/osp/gitget.sh /opt 
+sudo cp /opt/osp/getgit.sh /opt 
 #sudo rm /opt/osp/boggsget
 #sudo rm /opt/osp/aftergitget.sh
 
