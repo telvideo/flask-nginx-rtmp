@@ -54,7 +54,7 @@
             </a>
         </li>
         {% endfor %}
-        <hr>
+    <hr>
     {% endif %}
     {% if subslist != [] %}
     <span class="my-0 py-0 following-text">Following</span>
@@ -118,7 +118,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="{% if channel.chatEnabled == True %}col-lg{% else %} col-12{% endif %} col-xs-12 col-sm-12"
+            <div class="{% if channel.chatEnabled == True %}col{% else %} col-12{% endif %}"
                 id="videoWindow">
                 <div class="videoPanel">
                     <div class="player">
@@ -242,7 +242,7 @@
                 </div>
             </div>
             {% if channel.chatEnabled == True %}
-            <div id="chatside" class="col-lg-auto col-xs-12 col-sm-12">
+            <div id="chatside" class="col-3">
                 <div>
                     <div id="loader" class="chatloader">
                         <div class="chatloader-view">
@@ -268,13 +268,11 @@
                     <div id="chatPanel" class="chatPanel">
                         <div class="chatHeader">
                             <div class="chatCounts">
-                                <img width="50" src="/static/img/P_COIN.png" alt="PCoin" class="center">
+                                <img width="30" src="/static/img/P_COIN.png" alt="PCoin" class="center">
                                 <!--    <img width="50" height="50" src="/static/img/Mascot_3.png" alt="Prosmile2" class="center"> -->
-                                <img width="50" height="50" src="/static/img/Mascot_2_legs.png" alt="Prosmile1"
+                                <!-- <img width="50" height="50" src="/static/img/Mascot_2_legs.png" alt="Prosmile1"
                                     class="center">
-                                <img width="50" height="50" src="/static/img/P_COIN.png" alt="PCoin"
-                                    class="center">
-
+                                -->
                                 <span class="float-right"><button type="button" class="btn btn-outline-primary"
                                         onclick="showOccupants();"><i class="fas fa-user-friends"></i> <span
                                             id="chatTotal"></span></button></span>
