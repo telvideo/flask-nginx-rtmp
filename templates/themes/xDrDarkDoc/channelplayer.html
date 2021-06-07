@@ -34,7 +34,7 @@
 {% endblock %}
 
 {% block body %}
-<div id="mySidenav" class="sidenav mt-0 pt-0" onmouseover="openNav();" onmouseout="closeNav();">
+<div id="mySidenav" class="sidenav" onmouseover="openNav();" onmouseout="closeNav();">
     {% if streamList != [] %}
     <h5>Live</h5>
         {% for stream in streamList %}
@@ -118,8 +118,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="{% if channel.chatEnabled == True %}col{% else %} col-12{% endif %}
-                id="videoWindow">
+            <div class="{% if channel.chatEnabled == True %}col{% else %} col-12{% endif %} px-1 mx-0" id="videoWindow">
                 <div class="videoPanel">
                     <div class="player">
                         <div id="videoContainer">
