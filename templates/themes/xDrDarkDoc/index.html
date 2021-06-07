@@ -60,37 +60,35 @@
     <span class="carousel-control-next-icon"></span>
   </a>
 </div>
-
 <div class="container-fluid p-2" id="index-streams-container" style="background-color: var(--PDSlateDark);">
-    <div class="row mx-4">
+    <div class="row mx-2">
         <div class="index-video-title">
           <span style="float:left;">
+            <h1>Live Now</h1>
+          </span>            
+          <span style="float:right;">
             <a class="navbar-brand" href="/channel">
               <!-- <img src="/static/img/Mascot_3.png" title = "TOPICS" class="nav-link img-fluid navbar-image " > -->
               <span><h4 style="display: inline;">Channels</h4></span>
             </a>
             <a class="navbar-brand" href="/topic">
               <!-- <img src="/static/img/Mascot_3.png" title = "TOPICS" class="nav-link img-fluid navbar-image " > -->
-              <span><h4 style="display: inline;padding-left: 20px;">Browse</h4></span>
+              <span><h4 style="display: inline;padding-left: 15px;">Browse</h4></span>
             </a>
-          </span>
-          <span style="float: right;">
-            <form class="form-inline my-2 my-lg-0 mr-auto" style="height:14px;" action="/search" method="post">
-              <input class="form-control search" name="term" type="search" placeholder="&#xf002; Search..." aria-label="Search" style="height:16px;font-weight: 900;font-family: 'Font Awesome 5 Free', Arial, Sans-serif;width: 85%;" size="24">
+            <form class="form-inline my-2 my-lg-0 mr-auto px-3" style="height:14px;" action="/search" method="post">
+              <input class="form-control search" name="term" type="search" placeholder="&#xf002; Search..." aria-label="Search" style="height:16px;font-weight: 900;font-family: 'Font Awesome 5 Free', Arial, Sans-serif;width: 95%;" size="24">
             </form>
           </span>
-        </div>
-        <div class="index-video-title" style="padding-top: 25px;">
-          <h1>Live Now</h1>
         </div>
         {% if streamList == [] %}
         No Live Streams Online...
         {% endif %}
     </div>
+    
     <div class="row mx-1">
         <ul id="streamList" class="itemList d-flex flex-wrap justify-content-start" style="width:100%;"><!--Manually Defined Due to Mobile Strangeness-->
             {% for stream in streamList %}
-            <li class="displayCard mx-4 my-3">
+            <li class="displayCard mx-2 my-1">
               <a href="/view/{{stream.channelLoc}}/">
                 <div class="displayCard-thumbnail zoom">
                   <div class="video-badges">
@@ -123,13 +121,13 @@
 </div>
 <center><script data-cfasync="false" type="text/javascript" src="https://www.onclickperformance.com/a/display.php?r=4501895"></script></center>
 <div class="container-fluid p-2" id="index-videos-container" style="background-color: var(--PDSlateDark);">
-    <div class="row mx-4">
+    <div class="row mx-2">
         <div class="index-video-title"><h1>Videos</h1></div>
     </div>
     <div class="row mx-1">
         <ul id="recordedVideosList" class="itemList d-flex flex-wrap justify-content-start">
             {% for video in videoList %}
-                <li class="displayCard mx-4 my-3">
+                <li class="displayCard mx-2 my-1">
                   <a href="/play/{{video.id}}">
                     <div class="displayCard-thumbnail zoom">
                       <div class="video-badges">
@@ -162,13 +160,13 @@
 </div>
 <center><script data-cfasync="false" type="text/javascript" src="https://www.onclickperformance.com/a/display.php?r=4501895"></script></center>
 <div class="container-fluid p-2" id="index-clips-container" style="background-color: var(--PDSlateDark);">
-    <div class="row mx-4">
+    <div class="row mx-2">
         <div class="index-video-title"><h1>Clips</h1></div>
     </div>
     <div class="row mx-1">
         <ul id="clipsList" class="itemList d-flex flex-wrap justify-content-start">
             {% for clip in clipList %}
-            <li class="displayCard mx-4 my-3">
+            <li class="displayCard mx-2 my-1">
               <a href="/clip/{{clip.id}}">
                 <div class="displayCard-thumbnail zoom">
                   <div class="video-badges">
