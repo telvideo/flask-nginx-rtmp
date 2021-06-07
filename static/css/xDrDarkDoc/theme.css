@@ -708,7 +708,7 @@ a:link {
 
         flex-flow: column;
         
-        height: calc(100vh - 110px ) !important; 
+        height: calc(100vh - 95px ) !important; 
         margin: 0px !important;
         padding: 0px !important;
 
@@ -786,7 +786,7 @@ a:link {
 
           border-left: 1px solid;*/
          
-          width: 30%;
+          /*width: 30%;*/
       }
       
       .chatbox-popout {
