@@ -34,11 +34,17 @@ def view_vid_page(videoID):
 
     recordedVid = RecordedVideo.RecordedVideo.query.filter_by(id=videoID).first()
 
-## boggs needs to improve this
+    # incase there is no video / it was probably deleted 
+    if recordedVid == None:
+      return render_template(themes.checkOverride('notready.html'), video=recordedVid)
 
     chanQuery = Channel.Channel.query.filter_by(id=recordedVid.channelID).with_entities(Channel.Channel.protected, 
         Channel.Channel.channelName,
         Channel.Channel.Nsubscriptions).first()
+
+    #just incase the channel was deleted
+    if chanQuery == None:
+      return render_template(themes.checkOverride('notready.html'), video=recordedVid)
 
 #    chanQuery = Channel.Channel.query.filter_by(id=recordedVid.channelID).first()    
 
