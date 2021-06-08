@@ -99,17 +99,16 @@ def rtmp_stage2_user_auth_check(channelLoc, ipaddress, authorizedRTMP):
             else:
                 channelImage = (sysSettings.siteProtocol + sysSettings.siteAddress + "/images/" + requestedChannel.imageLocation)
 
-            webhookFunc.runWebhook(requestedChannel.id, 0, channelname=requestedChannel.channelName, channelurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/channel/" + str(requestedChannel.id)), channeltopic=requestedChannel.topic,
-                       channelimage=channelImage, streamer=templateFilters.get_userName(requestedChannel.owningUser), channeldescription=str(requestedChannel.description),
-                       streamname=authedStream.streamName, streamurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/view/" + requestedChannel.channelLoc), streamtopic=templateFilters.get_topicName(authedStream.topic),
-                       streamimage=(sysSettings.siteProtocol + sysSettings.siteAddress + "/stream-thumb/" + requestedChannel.channelLoc + ".png"))
-
-            #hard code in channels to not send notifications or emails.
+            #hard code in channels to not send notifications emails or do webhooks.
             if requestedChannel.id == 3 or requestedChannel.id == 73 or requestedChannel.id == 69:
-                #system.newLog(0, "No emails sent from channel start do to boggs hacking. ")
+                #system.newLog(0, "No emails sent from channel start due to boggs hacking. ")
                 #system.newLog(0, requestedChannel.id)
                 pass
             else:
+                webhookFunc.runWebhook(requestedChannel.id, 0, channelname=requestedChannel.channelName, channelurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/channel/" + str(requestedChannel.id)), channeltopic=requestedChannel.topic,
+                       channelimage=channelImage, streamer=templateFilters.get_userName(requestedChannel.owningUser), channeldescription=str(requestedChannel.description),
+                       streamname=authedStream.streamName, streamurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/view/" + requestedChannel.channelLoc), streamtopic=templateFilters.get_topicName(authedStream.topic),
+                       streamimage=(sysSettings.siteProtocol + sysSettings.siteAddress + "/stream-thumb/" + requestedChannel.channelLoc + ".png"))
 
                 subscriptionQuery = subscriptions.channelSubs.query.filter_by(channelID=requestedChannel.id).all()
                 for sub in subscriptionQuery:
