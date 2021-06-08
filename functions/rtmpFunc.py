@@ -104,22 +104,29 @@ def rtmp_stage2_user_auth_check(channelLoc, ipaddress, authorizedRTMP):
                        streamname=authedStream.streamName, streamurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/view/" + requestedChannel.channelLoc), streamtopic=templateFilters.get_topicName(authedStream.topic),
                        streamimage=(sysSettings.siteProtocol + sysSettings.siteAddress + "/stream-thumb/" + requestedChannel.channelLoc + ".png"))
 
-            subscriptionQuery = subscriptions.channelSubs.query.filter_by(channelID=requestedChannel.id).all()
-            for sub in subscriptionQuery:
-                # Create Notification for Channel Subs
-                newNotification = notifications.userNotification(templateFilters.get_userName(requestedChannel.owningUser) + " has started a live stream in " + requestedChannel.channelName, "/view/" + str(requestedChannel.channelLoc),
-                                                                 "/images/" + str(requestedChannel.owner.pictureLocation), sub.userID)
-                db.session.add(newNotification)
-            db.session.commit()
+            #hard code in channels to not send notifications or emails.
+            if requestedChannel.id == 3 or requestedChannel.id == 15 or requestedChannel.id == 90:
+                #system.newLog(0, "No emails sent from channel start do to boggs hacking. ")
+                #system.newLog(0, requestedChannel.id)
+                pass
+            else:
 
-            try:
-                subsFunc.processSubscriptions(requestedChannel.id,
-                                 sysSettings.siteName + " - " + requestedChannel.channelName + " has started a stream",
-                                 "<html><body><img src='" + sysSettings.siteProtocol + sysSettings.siteAddress + sysSettings.systemLogo + "'><p>Channel " + requestedChannel.channelName +
-                                 " has started a new video stream.</p><p>Click this link to watch<br><a href='" + sysSettings.siteProtocol + sysSettings.siteAddress + "/view/" + str(requestedChannel.channelLoc)
-                                 + "'>" + requestedChannel.channelName + "</a></p>")
-            except:
-                system.newLog(0, "Subscriptions Failed due to possible misconfiguration")
+                subscriptionQuery = subscriptions.channelSubs.query.filter_by(channelID=requestedChannel.id).all()
+                for sub in subscriptionQuery:
+                    # Create Notification for Channel Subs
+                    newNotification = notifications.userNotification(templateFilters.get_userName(requestedChannel.owningUser) + " has started a live stream in " + requestedChannel.channelName, "/view/" + str(requestedChannel.channelLoc),
+                                                                    "/images/" + str(requestedChannel.owner.pictureLocation), sub.userID)
+                    db.session.add(newNotification)
+                db.session.commit()
+
+                try:
+                    subsFunc.processSubscriptions(requestedChannel.id,
+                                    sysSettings.siteName + " - " + requestedChannel.channelName + " has started a stream",
+                                    "<html><body><img src='" + sysSettings.siteProtocol + sysSettings.siteAddress + sysSettings.systemLogo + "'><p>Channel " + requestedChannel.channelName +
+                                    " has started a new video stream.</p><p>Click this link to watch<br><a href='" + sysSettings.siteProtocol + sysSettings.siteAddress + "/view/" + str(requestedChannel.channelLoc)
+                                    + "'>" + requestedChannel.channelName + "</a></p>")
+                except:
+                    system.newLog(0, "Subscriptions Failed due to possible misconfiguration")
 
             returnMessage = {'time': str(currentTime), 'request': 'Stage2', 'success': True, 'channelLoc': requestedChannel.channelLoc, 'ipAddress': str(ipaddress), 'message': 'Success - Stream Authenticated & Initialized'}
             db.session.close()
