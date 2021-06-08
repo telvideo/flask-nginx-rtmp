@@ -11,11 +11,12 @@
   --background-image: url("/static/img/Mono_Dark_Background.png");
 }
 
-.btnTest{
+.btnSizer{
   /*background:url("/static/img/verified-badge.png") no-repeat left center; */
-  padding:1px;
-  height: 35px;
-  width:35px;
+  padding:0px;
+  height: 8vh !important;
+  width: 8vh !important;
+  font-size: 3vh;
 }  
 
 .verfiedIcon {
