@@ -36,7 +36,7 @@
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark sticky-top" style="padding-right: 0px;background-color: var(--PDSlate);">
+  <nav class="navbar navbar-expand-sm navbar-dark sticky-top" style="padding-right: 0px;background-color: var(--PDSlate);">
     <a class="navbar-brand" href="/">
       <img src="/static/img/ProFull.png" class="d-inline-block align-top navbar-brand" alt="">
     </a>
@@ -68,10 +68,8 @@
         </li>
         {% endif %}
         {% else %}
-        <li class="nav-item px-2 d-block d-lg-none">
-          <a class="nav-link zoom" href="/notifications"></i> NOTIFICATIONS {% if notifications|count > 0 %}<span id="notificationCountMobile" class="badge badge-danger">{{notifications|count}}</span>{% endif %}</a>
-        </li>
-        <li class="nav-item dropdown pl-2 pr-1 d-none d-lg-block">
+    
+        <li class="nav-item dropdown pl-2 pr-1 ">
           <a class="nav-link zoom" title="NOTIFICATIONS" href="#" id="navbarDropdownNotificationLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
              {% if notifications|count > 0 %}
              <span class="badge badge-danger" id="notificationCountNav">{{notifications|count}}</span>
@@ -120,10 +118,10 @@
           </ul>
         </li>
         <li class="nav-item dropdown">
-          <a class="nav-link profile-image dropdown-toggle" title={{current_user.username}} href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <a class="nav-link profile-image" title={{current_user.username}} href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <img width="50" height="50" class="userphoto"  src="/images/{{current_user.pictureLocation}}" onerror="this.src='/static/img/user2.png';"><!--{{current_user.username}}-->
           </a>
-          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+          <div class="dropdown-menu dropdown-menu-right " aria-labelledby="navbarDropdownMenuLink">
             {% if current_user.has_role('Admin') %}
             <a class="dropdown-item" href="/settings/admin"><i class="fas fa-server"></i> ADMIN</a>
             {% endif %}
