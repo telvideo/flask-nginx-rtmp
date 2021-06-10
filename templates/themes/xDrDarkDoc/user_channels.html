@@ -18,6 +18,14 @@
                 <div class="index-live-title"><h1>Your Channels</h1></div>
                 <span class="float-right"><button class="btn btn-success" data-toggle="modal" data-target="#newChannelModal"><i class="fas fa-plus"></i> Create Channel</button></span>
             </div>
+            
+            <label  class="col-form-label"><b>Prohibited RTMP Server</b></label>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <button type="button" class="btn btn-primary" onclick="CopyAPI('rtmpKey')"><i class="fas fa-copy"></i></button>
+                </div>
+                <input type="text" class="form-control" name="streamKey" id="rtmpKey" value="rtmp://prohibited.tv/stream" required readonly aria-describedby="generateGUID required">
+            </div>
 
         {% for channel in channels %}
         <div class="card bg-dark p-2 mx-2 mt-2">
@@ -28,6 +36,24 @@
                 </div>
                 <div class="col">
                     <h5>{{channel.channelName}}</h5>
+
+                    
+                    <div class="form-group">
+                      <label for="MstreamKey-{{channel.id}}" class="col-form-label"><b>Stream Key</b></label>
+                      <div class="input-group mb-3">
+                          <div class="input-group-prepend">
+                              <button type="button" class="btn btn-primary" onclick="CopyAPI('MstreamKey-{{channel.id}}')"><i class="fas fa-copy"></i></button>
+                          </div>
+                          <input type="text" class="form-control" name="streamKey" id="MstreamKey-{{channel.id}}" value="{{channel.streamKey}}" required readonly aria-describedby="generateGUID required">
+                          
+                          
+                      </div>
+                    </div>
+                 
+                     
+
+
+
                     <div class="row">
                         <div class="col-12 col-md-4">
                             <i class="fas fa-hashtag mr-2"></i> {{channel.topic|get_topicName}}
@@ -210,19 +236,8 @@
                                                 <button type="button" class="btn btn-warning" id="generateGUID-{{channel.id}}"><i class="fas fa-sync"></i></button>
                                             </div>
                                         </div>
-                                        
-                                        
-                                        <label for="rtmpServer-{{channel.id}}" class="col-form-label"><b>RTMP Server</b></label>
-                                        <div class="input-group mb-3">
-                                            <div class="input-group-prepend">
-                                                <button type="button" class="btn btn-primary" onclick="CopyAPI('rtmpKey-{{channel.id}}')"><i class="fas fa-copy"></i></button>
-                                            </div>
-                                            <input type="text" class="form-control" name="streamKey" id="rtmpKey-{{channel.id}}" value="rtmp://prohibited.tv/stream" required readonly aria-describedby="generateGUID required">
-                                            <div class="input-group-append">
-
-                                            </div>
-                                        </div>
                                       </div>
+
                                     <hr>
                                     <h4><b>Recording Options</b></h4>
                                     {% if sysSettings.allowRecording == False %} Recording Disabled at Server Level {% endif %}
@@ -513,8 +528,8 @@
                         <div>
                             <div class="row">
                                 <div class="col-12">
-                                    <input type="submit" class="btn btn-success" value="&#128393; Edit">
-                                    <button class="btn btn-danger" type="button" onclick="deleteChannelModal('{{channel.id}}')"><i class="far fa-trash-alt"> Delete</i></button>
+                                    <input type="submit" class="btn btn-success " value="Save Changes">
+                                    <button class="btn btn-danger px-2" type="button" onclick="deleteChannelModal('{{channel.id}}')"><i class="far fa-trash-alt"> Delete</i></button>
                                 </div>
                             </div>
                         </div>
