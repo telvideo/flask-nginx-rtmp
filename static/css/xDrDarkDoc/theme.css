@@ -141,7 +141,9 @@ body {
 
 /* Heading formattings */
 h1 {
-  color: var(--PDLBlue);
+  /*color: var(--PDLBlue);*/
+  color: white;
+
   font-family: "Bomber";
   text-transform: uppercase;
   text-shadow: 2px 2px 4px var(--PDDBlue);

@@ -74,7 +74,7 @@
     {% endif %}
 
     <!-- These adds fu*k up the vid player for mark (removes the tracking) idk why ? -->
- <script data-cfasync="false" type="text/javascript" src="https://www.onclickperformance.com/a/display.php?r=4468731"></script>
+    <script data-cfasync="false" type="text/javascript" src="https://www.onclickperformance.com/a/display.php?r=4468731"></script>
     <!-- <script data-cfasync="false" type="text/javascript" src="https://www.onclickperformance.com/a/display.php?r=4468727"></script> -->
 
 </div> <!--mySidenav -->
@@ -84,35 +84,38 @@
         <div class="row">
             <div class="col">
                 <div class="index-video-title">
-                        <a href="/channel/{{channel.id}}">
-                            <span class="float-left px-1" id="channelName">{{channel.channelName}}</span>
+                    <span style=" white-space: nowrap;">
+                        <a href="/streamer/{{channel.owningUser}}">
+                            <img src="/images/{{streamer.pictureLocation}}" class="rounded" width="32" height="32" onerror="this.src='/static/img/user2.png'">
                         </a>
 
-                        <!----    <img class="sidenavPic" src="/images/{{streamer.pictureLocation}}"
-                            onerror="this.src='/static/img/user2.png';">
-                        -->
-                            <img src="/images/{{streamer.pictureLocation}}" width="25" height="25" class="float-left py-1" alt="">
-                          
-                            {% if streamer.verified == 1 %}
-                                <img src="/static/img/verified-badge.png" width="25" height="25" class="float-left pt-1" alt="">
-                            {% endif %}
+                        <a href="/channel/{{channel.id}}">{{channel.channelName}}</a>
 
-                    <h6 style="display: inline; margin: 0px;"><span id="liveIndicatorBadge"
-                            class="float-left my-2 liveindicator badge badge-secondary"><b><i
-                                    class="fas fa-video-slash"></i><span class="d-none d-sm-none d-md-inline">
-                                    Offline</span></b></span> {% if channel.protected and sysSettings.protectionEnabled
-                        %}<span class="liveindicator badge badge-info float-left my-2"><i
-                                class="fas fa-user-lock"></i><span class="d-none d-sm-none d-md-inline">
-                                Protected</span></span></h6>{% endif %}
+                        {% if streamer.verified == 1 %}
+                            <img src="/static/img/verified-badge.png" width="30" height="30" class="pt-1" >
+                        {% endif %}
                         
-
-                        <span class="float-left px-1">
+                        <h6 style="display: inline; margin: 0px;"><span id="liveIndicatorBadge"
+                            class="mx-0 px-1 my-2 liveindicator badge badge-secondary"><b><i
+                                    class="fas fa-video-slash"></i><span class="d-none d-sm-none d-md-inline">
+                                    Offline</span></b></span> 
+                        {% if channel.protected and sysSettings.protectionEnabled %}
+                            <span class="mx-0 px-1 liveindicator badge badge-info my-2"><i class="fas fa-user-lock"></i><span class="d-none d-sm-none d-md-inline"> Protected</span></span></h6>
+                        {% endif %}
+                        
+                        <span class="px-0">
                             {% if current_user.is_authenticated %}
-                                <button id="chanSubStateButton" class="btn btn-sm {% if subState == True %} btn-outline-success {% else %} btn-success {% endif %}" onclick='toggleChannelSub("{{channel.id}}")'>{% if subState == True %}<i class="fas fa-star"></i><span class="d-none d-sm-none d-md-inline"> Unfollow</span>{% else %}<i class="far fa-star"></i><span class="d-none d-sm-none d-md-inline"> Follow</span>{% endif %}</button>
-                            {% else %}
+                                <button id="chanSubStateButton" class="btn btn-sm {% if subState == True %} btn-outline-success {% else %} btn-success {% endif %}" onclick='toggleChannelSub("{{channel.id}}")'>
+                                {% if subState == True %}
+                                    <i class="fas fa-star"></i><span class="d-none d-sm-none d-md-inline"> Unfollow</span>
+                                {% else %}
+                                    <i class="far fa-star"></i><span class="d-none d-sm-none d-md-inline"> Follow</span>
+                                {% endif %}</button>
+                                {% else %}
                                 <button class="btn btn-sm btn-outline-secondary disabled" disabled><i class="far fa-star"></i><span class="d-none d-sm-none d-md-"> Follow</span></button>
                             {% endif %}
-                            </span>
+                        </span>
+                    </span>
                 </div>
             </div>
         </div>
@@ -893,7 +896,7 @@
                     var nameDivHTML = '<b><i class="fas fa-video"></i> <span> ' + currentStreamName + '</span></b>';
                     var topicDivHTML = '<b><i class="fas fa-hashtag"></i> <a href="/topic/' + currentStreamTopic + '"><span>' + topicJSList[currentStreamTopic] + '</span></a></b>';
 
-                    onlineBadge.className = 'float-left my-2 liveindicator badge badge-danger';
+                    onlineBadge.className = 'my-1 mx-0 px-1 liveindicator badge badge-danger';
                     onlineBadge.innerHTML = '<i class="fas fa-video"></i><span class="d-none d-sm-none d-md-inline"> Live</span>';
 
                     nameDiv.innerHTML = nameDivHTML;
@@ -905,7 +908,7 @@
                 try {
                     videoJSObj.pause();
                     videoJSObj.reset();
-                    onlineBadge.className = 'float-left my-2 liveindicator badge badge-secondary';
+                    onlineBadge.className = 'my-1 mx-0 px-1 liveindicator badge badge-secondary';
                     onlineBadge.innerHTML = '<i class="fas fa-video-slash"></i><span class="d-none d-sm-none d-md-inline"> Offline</span>';
                     videoContainer.style.display = "none";
                     offlineWindow.style.display = "block";
