@@ -524,12 +524,11 @@ def do_before_request():
 
     tDate = datetime.datetime.utcnow()
 
-#    if isUs == False:
-    stri ="{} {} {} {}\n".format(isUs, tDate, requestIP,  name)
-
-    f = open("/var/www/dicks.txt", "a")
-    f.write(stri)
-    f.close()
+    if isUs == False:
+        stri ="{} {} {} {}\n".format(isUs, tDate, requestIP,  name)
+        f = open("/var/www/dicks.txt", "a")
+        f.write(stri)
+        f.close()
 
     if requestIP != "127.0.0.1":
         try:
