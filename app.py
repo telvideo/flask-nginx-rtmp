@@ -489,7 +489,7 @@ def do_before_request():
     if name.startswith("127.0.0.1") or name.startswith("localhost"):
         isUs = True
     else:
-        if name.startswith("www.prohibited.tv"): 
+        if name.startswith("prohibited.tv"): 
             isUs = True        
         else: 
             if name.startswith("socket_nodes/auth"):
@@ -523,6 +523,8 @@ def do_before_request():
         requestIP = request.environ['HTTP_X_FORWARDED_FOR']
 
     tDate = datetime.datetime.utcnow()
+
+#    if isUs == False:
     stri ="{} {} {} {}\n".format(isUs, tDate, requestIP,  name)
 
     f = open("/var/www/dicks.txt", "a")
