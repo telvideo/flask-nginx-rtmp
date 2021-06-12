@@ -10,13 +10,17 @@ errorhandler_bp = Blueprint('errors', __name__)
 @errorhandler_bp.app_errorhandler(404)
 def page_not_found(e):
     #sysSettings = settings.settings.query.first()
-    sysSettings = settings.getSettingsFromRedis()    
-    system.newLog(0, "404 Error - " + str(request.url))
-    return render_template(themes.checkOverride('404.html'), sysSetting=sysSettings, previous=request.referrer), 404
+    #sysSettings = settings.getSettingsFromRedis()    
+    system.newLog(0, "404 (420) Error - " + str(request.url))
+
+    return "420 Error. Did someone smoke that page?", 404
+    #return render_template(themes.checkOverride('404.html'), sysSetting=sysSettings, previous=request.referrer), 404
 
 @errorhandler_bp.app_errorhandler(500)
 def page_not_found(e):
     #sysSettings = settings.settings.query.first()
-    sysSettings = settings.getSettingsFromRedis()    
+    #sysSettings = settings.getSettingsFromRedis()    
     system.newLog(0,"500 Error - " + str(request.url))
-    return render_template(themes.checkOverride('500.html'), sysSetting=sysSettings, previous=request.referrer, error=e), 500
+    return "500 Error. Did someone smoke that page?", 500
+
+#    return render_template(themes.checkOverride('500.html'), previous=request.referrer, error=e), 500

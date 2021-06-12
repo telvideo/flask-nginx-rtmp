@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{sysSettings.siteName}} - 500 Error</title>
+    <title>500 Error</title>
 </head>
 <body>
 <style>
@@ -91,19 +91,15 @@
     }
 
 </style>
-    <div class="left-col">
-      <img src="/static/img/logo.png" style="width:96px;height:96px;display:block;margin:auto;padding-top:25px;">
-    </div>
-    <div class="center-col">
+
+<div class="center-col">
       <div class="center-content">
-        <div class="siteTitle">
-          <b>{{sysSettings.siteName}}</b>
-        </div>
+
         <div class="errorType">
           <b>500 Internal Server Error</b>
         </div>
         <div class="errorDescription">
-          <b>Something went wrong....</b><br><br>
+          <b>Something went really wrong....</b><br><br>
             The error was:<br>
             <div class="errorSubDescription">
                 {{error}}
@@ -112,9 +108,9 @@
         <div class="pageLink">
             <a href="#" onclick="history.back(-1)">Return to the previous page</a>
         </div>
-        <div class="tvImage">
+    <!---    <div class="tvImage">
           <img src="/static/img/error-tv.gif">
-        </div>
+        </div>  -->
       </div>
     </div>
 </body>

@@ -475,17 +475,65 @@ def user_registered_sighandler(app, user, confirm_token, form_data=None):
 
 @app.before_request
 def do_before_request():
+
+# **************************************************************************************************************
+# Boggs custom hack to dodge whatever is going on when it's not us making this request.. idk why it's not us?????????
+    name = str(request.url)
+
+    if name.startswith("https"): #trim https or http
+        name= name[8:]
+    else:
+        name= name[7:] #must be "http"
+       
+    isUs = False
+    if name.startswith("127.0.0.1") or name.startswith("localhost"):
+        isUs = True
+    else:
+        if name.startswith("www.prohibited.tv"): 
+            isUs = True        
+        else: 
+            if name.startswith("socket_nodes/auth"):
+                isUs = True
+            else:    
+                if name.startswith("discordapp.com"):
+                    isUs =True
+                else:
+                    if name.startswith("www.proboggs.com"): 
+                        isUs = True
+                    else:    
+                        if name.startswith("www.bobross.tv"): 
+                            isUs = True            
+                        else:    
+                            if name.startswith("134.122.12.99"): 
+                                isUs = True
+
+
+ #  print(name)
+  #  if isUs == False:
+  #      print(str({'69 lol error': 'smoked (prohibited)', 'reason': 420}))
+
+
+ #       return str({'69 lol error': 'smoked (prohibited)', 'reason': 420})
+
+
     # Check all IP Requests for banned IP Addresses
     if request.environ.get('HTTP_X_FORWARDED_FOR') is None:
         requestIP = request.environ['REMOTE_ADDR']
     else:
         requestIP = request.environ['HTTP_X_FORWARDED_FOR']
 
+    tDate = datetime.datetime.utcnow()
+    stri ="{} {} {} {}\n".format(isUs, tDate, requestIP,  name)
+
+    f = open("/var/www/dicks.txt", "a")
+    f.write(stri)
+    f.close()
+
     if requestIP != "127.0.0.1":
         try:
-            banQuery = banList.ipList.query.filter_by(ipAddress=requestIP).first()
-            if banQuery != None:
-                return str({'error': 'banned', 'reason': banQuery.reason})
+            #banQuery = banList.ipList.query.filter_by(ipAddress=requestIP).first()
+            #if banQuery != None:
+            #    return str({'error': 'banned', 'reason': banQuery.reason})
 
             # Apply Guest UUID in Session and Handle Object
             if current_user.is_authenticated is False:
@@ -493,14 +541,14 @@ def do_before_request():
                     session['guestUUID'] = str(uuid.uuid4())
                 GuestQuery = Sec.Guest.query.filter_by(UUID=session['guestUUID']).first()
                 if GuestQuery is not None:
-                    GuestQuery.last_active_at = datetime.datetime.utcnow()
+                    GuestQuery.last_active_at = tDate
                     GuestQuery.last_active_ip = requestIP
                     db.session.commit()
                 else:
                     # Check if a previous access from an IP Address was Used
                     GuestQuery = Sec.Guest.query.filter_by(last_active_ip=requestIP).first()
                     if GuestQuery is not None:
-                        GuestQuery.last_active_at = datetime.datetime.utcnow()
+                        GuestQuery.last_active_at = tDate
                         GuestQuery.UUID = session['guestUUID']
                         db.session.commit()
                     else:

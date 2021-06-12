@@ -74,8 +74,6 @@ def view_page(loc):
 
     Channel.Channel.vanityURL).first() 
 
-    streamerQuery = Sec.User.query.filter_by(id=requestedChannel.owningUser).\
-        with_entities(Sec.User.verified, Sec.User.pictureLocation).first()
         
     #####
     if requestedChannel is not None:
@@ -83,6 +81,9 @@ def view_page(loc):
             if not securityFunc.check_isValidChannelViewer(requestedChannel.id):
                 return render_template(themes.checkOverride('channelProtectionAuth.html'))
 
+        streamerQuery = Sec.User.query.filter_by(id=requestedChannel.owningUser).\
+            with_entities(Sec.User.verified, Sec.User.pictureLocation).first()
+    
         # Pull ejabberd Chat Options for Room
         #from app import ejabberd
         #chatOptions = ejabberd.get_room_options(requestedChannel.channelLoc, 'conference.' + sysSettings.siteAddress)

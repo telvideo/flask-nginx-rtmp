@@ -75,8 +75,15 @@ import redis
    
 print("fred")
 
-#fredSys=myfun()
 
+
+stri ="{} {}\n".format("videos_root",  "aClip.gifLocation")
+
+f = open("/opt/dicks.txt", "a")
+f.write(stri)
+f.close()
+
+exit()
 
 #myset = settings.getSettingsFromRedis()
 r = redis.Redis(host=config.redisHost, port=config.redisPort, decode_responses=True)
@@ -150,3 +157,4 @@ for vid in vidList:
 
 
 
+mysqldump -u doadmin -p -h prohibited-database-do-user-8018941-0.b.db.ondigitalocean.com -P 25060 --single-transaction --set-gtid-purged=OFF osp > /var/www/database_file.sql
