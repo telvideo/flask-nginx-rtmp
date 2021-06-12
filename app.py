@@ -486,26 +486,26 @@ def do_before_request():
         name= name[7:] #must be "http"
        
     isUs = False
-    if name.startswith("127.0.0.1") or name.startswith("localhost"):
+    if name.startswith("127.0.0.1"):
         isUs = True
     else:
         if name.startswith("prohibited.tv"): 
             isUs = True        
         else: 
-            if name.startswith("socket_nodes/auth"):
-                isUs = True
-            else:    
-                if name.startswith("discordapp.com"):
-                    isUs =True
-                else:
-                    if name.startswith("www.proboggs.com"): 
-                        isUs = True
-                    else:    
-                        if name.startswith("www.bobross.tv"): 
-                            isUs = True            
+            if name.startswith("www.prohibited.tv"): 
+                isUs = True        
+            else:
+                if name.startswith("socket_nodes/auth"):
+                    isUs = True
+                else:    
+                    if name.startswith("discordapp.com"):
+                        isUs =True
+                    else:
+                        if name.startswith("www.proboggs.com"): 
+                            isUs = True
                         else:    
-                            if name.startswith("134.122.12.99"): 
-                                isUs = True
+                            if name.startswith("www.bobross.tv"): 
+                                isUs = True            
 
 
  #  print(name)
