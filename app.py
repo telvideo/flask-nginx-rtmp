@@ -490,22 +490,19 @@ def do_before_request():
         isUs = True
     else:
         if name.startswith("prohibited.tv"): 
-            isUs = True        
-        else: 
-            if name.startswith("www.prohibited.tv"): 
-                isUs = True        
-            else:
-                if name.startswith("socket_nodes/auth"):
-                    isUs = True
-                else:    
-                    if name.startswith("discordapp.com"):
-                        isUs =True
-                    else:
-                        if name.startswith("www.proboggs.com"): 
-                            isUs = True
-                        else:    
-                            if name.startswith("www.bobross.tv"): 
-                                isUs = True            
+            isUs = True
+        else:
+            if name.startswith("socket_nodes/auth"):
+                isUs = True
+            else:    
+                if name.startswith("discordapp.com"):
+                    isUs =True
+                else:
+                    if name.startswith("www.proboggs.com"): 
+                        isUs = True
+                    else:    
+                        if name.startswith("www.bobross.tv"): 
+                            isUs = True            
 
 
  #  print(name)
