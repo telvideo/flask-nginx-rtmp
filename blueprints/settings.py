@@ -1160,14 +1160,15 @@ def settings_channels_page():
 
     user_channels = Channel.Channel.query.filter_by(owningUser=current_user.id).all()
 
-    activeRTMPQuery = settings.rtmpServer.query.filter_by(active=True).all()
-    activeRTMPList = []
-    for server in activeRTMPQuery:
-        address = server.address
-        if address == "127.0.0.1" or address == "localhost":
-            address = sysSettings.siteAddress
-        if address not in activeRTMPList:
-            activeRTMPList.append(address)
+ #   activeRTMPQuery = settings.rtmpServer.query.filter_by(active=True).all()
+ #   activeRTMPList = []
+ #   for server in activeRTMPQuery:
+ #       address = server.address
+ #       if address == "127.0.0.1" or address == "localhost":
+ #           address = sysSettings.siteAddress
+ #       if address not in activeRTMPList:
+ #           activeRTMPList.append(address)
+
 
     # Get xmpp room options
     from app import ejabberd
@@ -1268,7 +1269,7 @@ def settings_channels_page():
         user_channels_stats[channel.id] = statsViewsDay
 
     return render_template(themes.checkOverride('user_channels.html'), channels=user_channels, topics=topicList, channelRooms=channelRooms, channelMods=channelMods,
-                           viewStats=user_channels_stats, rtmpList=activeRTMPList)
+                           viewStats=user_channels_stats) #rtmpList=activeRTMPList
 
 
 @settings_bp.route('/channels/chat', methods=['POST', 'GET'])
