@@ -1169,7 +1169,6 @@ def settings_channels_page():
  #       if address not in activeRTMPList:
  #           activeRTMPList.append(address)
 
-
     # Get xmpp room options
     from app import ejabberd
     channelRooms = {}
@@ -1269,7 +1268,7 @@ def settings_channels_page():
         user_channels_stats[channel.id] = statsViewsDay
 
     return render_template(themes.checkOverride('user_channels.html'), channels=user_channels, topics=topicList, channelRooms=channelRooms, channelMods=channelMods,
-                           viewStats=user_channels_stats) #rtmpList=activeRTMPList
+                           viewStats=user_channels_stats) # rtmpList=activeRTMPList
 
 
 @settings_bp.route('/channels/chat', methods=['POST', 'GET'])
