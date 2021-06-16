@@ -34,19 +34,21 @@
 {% endblock %}
 
 {% block body %}
-<div id="mySidenav" class="sidenav" onmouseover="openNav();" onmouseout="closeNav();">
+
+<div id="mySidenav" class="sidenav my-0 py-0" onmouseover="openNav();" onmouseout="closeNav();">
+    
     {% if streamList != [] %}
-    <h5>Live</h5>
+    <div class="liveText ">LIVE</div>
         {% for stream in streamList %}
-        <li class="row mx-0 my-0 py-0 px-0 text-nowrap">
-            <a href="/view/{{stream.channelLoc}}/" class="mx-0 px-0 py-0 pb-1">
+        <li class="row m-0 p-0 text-nowrap my-0 py-0">
+            <a href="/view/{{stream.channelLoc}}/" class="my-0 py-0">
                 <div class="mx-0 px-0 my-0">
-                    <img class="profileBoxPic rounded gif lazy sidenavPic my-y py-0 " {% if channel.protected %} src="/static/img/video-locked.jpg" onerror="this.src='/static/img/video-locked.jpg';" {% else %} src="/static/img/video-placeholder.jpg" onerror="this.src='/static/img/video-placeholder.jpg';" {% endif %} data-src="/stream-thumb/{{stream.channelLoc}}.png">
-                    <span style = "font-size: 8px px-0 my-0">
-                        <b> {{stream.currentViewers}}      <span style="font-size:6px"><i class="fas fa-eye"></i></span></b>  
-                        <b> {{stream.totalViewers}}        <span style="font-size:6px"><i class="fas fa-users"></i></span></b>  
-                        <b> {{stream.NupVotes}}            <span style="font-size:6px"><i class="fas fa-thumbs-up"></i></span></b>
-                        <span style="font-size:15px"> {{stream.username|limit_title}} {{stream.streamName}} </span>
+                    <img class=" gif lazy livesidenavPic my-0 py-0 " {% if channel.protected %} src="/static/img/video-locked.jpg" onerror="this.src='/static/img/video-locked.jpg';" {% else %} src="/static/img/video-placeholder.jpg" onerror="this.src='/static/img/video-placeholder.jpg';" {% endif %} data-src="/stream-thumb/{{stream.channelLoc}}.png">
+                    <span style = "font-size: 1vw">
+                        <b> {{stream.currentViewers}}      <span style="font-size:0.5vw"><i class="fas fa-eye"></i></span></b>  
+                        <b> {{stream.totalViewers}}        <span style="font-size:0.5vw"><i class="fas fa-users"></i></span></b>  
+                        <b> {{stream.NupVotes}}            <span style="font-size:0.5vw"><i class="fas fa-thumbs-up"></i></span></b>
+                        <span style="font-size:1.5vw"> {{stream.username|limit_title}} {{stream.streamName}} </span>
 
                         {#  <b> {{stream.channelName|limit_title}} #}
                     </span>
@@ -54,19 +56,21 @@
             </a>
         </li>
         {% endfor %}
-        <hr>
+     
     {% endif %}
+
+    
     {% if subslist != [] %}
-    <span class="my-0 py-0 following-text">Following</span>
+     
+    <span class="following-text">FOLLOWING</span> 
         {% for chan in subslist %}
-        <li class="row mx-0 my-0 py-0 px-0 text-nowrap">
-            <a href="/channel/{{chan.id}}/" class="mx-0 my-0 py-0 px-0 pb-1">
-                <div class="mx-0 px-0 my-0">
-                    <img class="profileBoxPic sidenavPic rounded " src="/images/{{chan.imageLocation}}" onerror="this.src='/static/img/user2.png';">
-                    <span style = "font-size: 8px px-0 my-0">
-                        <span style="font-size:15px">{{chan.channelName|limit_title}}</span>
-                    </span>
-                </div>
+        <li class="row m-0 p-0 text-nowrap">
+            <a href="/channel/{{chan.id}}/" class="m-0 p-0 ">
+                    <img class="sidenavPic rounded " src="/images/{{chan.imageLocation}}" onerror="this.src='/static/img/user2.png';">
+                        <span style="font-size:1.5vw">{{chan.channelName|limit_title}}</span>
+                    
+                        
+                
             </a>
         </li>
         {% endfor %}
@@ -78,48 +82,48 @@
     <!-- <script data-cfasync="false" type="text/javascript" src="https://www.onclickperformance.com/a/display.php?r=4468727"></script> -->
 
 </div> <!--mySidenav -->
-
-<div id="main" class="px-0 py-0 ">
-    <div class="container-fluid pl-1 mr-1 py-0" id="tmain">
+<div id="main" >
+    <div class="container-fluid pl-0" id="tmain">
         <div class="row">
-            <div class="col">
-                <div class="index-video-title">
-                    <span style=" white-space: nowrap;">
+            <div class="col chanTopBar ">
+                    <span style=" white-space: nowrap;" class="index-video-title " >
+                        
                         <a href="/streamer/{{channel.owningUser}}">
-                            <img src="/images/{{streamer.pictureLocation}}" class="rounded" width="30" height="30" onerror="this.src='/static/img/user2.png'">
+                            <img src="/images/{{streamer.pictureLocation}}" class="rounded chanTopBarImage" onerror="this.src='/static/img/user2.png'">
                         </a>
 
                         <a href="/channel/{{channel.id}}">{{channel.channelName}}</a>
-
+                        
                         {% if streamer.verified == 1 %}
-                            <img src="/static/img/verified-badge.png" width="30" height="30"  >
+                            <img src="/static/img/verified-badge.png" class="chanTopBarImage"  >
                         {% endif %}
                         
-                        <h6 style="display: inline; margin: 0px;"><span id="liveIndicatorBadge"
-                            class="mx-0 px-1 my-2 liveindicator badge badge-secondary"><b><i
+                        <span id="liveIndicatorBadge"
+                            class="mx-0 px-1 liveindicator badge badge-secondary chan-liveBadge"><b><i
                                     class="fas fa-video-slash"></i><span class="d-none d-sm-none d-md-inline">
-                                    Offline</span></b></span> 
+                                    OfflHGine</span></b></span> 
+                      
                         {% if channel.protected and sysSettings.protectionEnabled %}
-                            <span class="mx-0 px-1 liveindicator badge badge-info my-1"><i class="fas fa-user-lock"></i><span class="d-none d-sm-none d-md-inline"> Protected</span></span></h6>
+                            <span class="mx-0 px-1 liveindicator badge badge-info "><i class="fas fa-user-lock"></i><span class="d-none d-sm-none d-md-inline"> Protected</span></span></h6>
                         {% endif %}
-                        
-                        <span class="px-0">
+
                             {% if current_user.is_authenticated %}
-                                <button id="chanSubStateButton" class="btn btn-sm {% if subState == True %} btn-outline-success {% else %} btn-success {% endif %}" onclick='toggleChannelSub("{{channel.id}}")'>
+                                <button id="chanSubStateButton" class="followingBadge btn btn-sm {% if subState == True %} btn-outline-success {% else %} btn-success {% endif %} " onclick='toggleChannelSub("{{channel.id}}")'>
                                 {% if subState == True %}
-                                    <i class="fas fa-star"></i><span class="d-none d-sm-none d-md-inline"> Unfollow</span>
+                                    <i class="followingBadge fas fa-star"></i><span class="d-none d-sm-none d-md-inline px-1"> Unfollow</span>
                                 {% else %}
-                                    <i class="far fa-star"></i><span class="d-none d-sm-none d-md-inline"> Follow</span>
+                                    <i class="followingBadge far fa-star"></i><span class="d-none d-sm-none d-md-inline px-1"> Follow</span>
                                 {% endif %}</button>
                                 {% else %}
-                                <button class="btn btn-sm btn-outline-secondary disabled" disabled><i class="far fa-star"></i><span class="d-none d-sm-none d-md-inline">Follow</span></button>
+                                    <button class="followingBadge btn btn-sm btn-outline-secondary disabled" disabled><i class="followingBadge far fa-star"></i><span class="d-none d-sm-none d-md-inline chan-liveBadge">Follow</span></button>
                             {% endif %}
-                        </span>
+                        
                     </span>
-                </div>
+           
             </div>
         </div>
-        <div class="row pl-3 ">
+
+        <div class="row  ml-0"> <!-- add padding here to add space between video and sidebar-->
             <div class="{% if channel.chatEnabled == True %}col{% else %} col-12{% endif %} px-0 mr-1" id="videoWindow">
                 <div class="videoPanel">
                     <div class="player">
@@ -143,30 +147,38 @@
                                 onerror="this.onerror=null;this.src='/static/img/video-placeholder.jpg';">
                         </div>
                     </div>
-                    <div class="row pl-1">
-                        <div class="video-buttons-row">
-                          <!--- 
-                            <span class="float-right  mr-3">
-                                <button id="give1Button" type="button" class="btn  btn-primary" title="Give 1 Boggs"
-                                    onclick="sendMessage()">1</button>
-                            </span>
 
-                            <span class="float-right">
-                                <button id="give10Button" type="button" class="btn  btn-primary"
-                                    title="Give 10 Boggs coins" onclick="sendMessage()">10</button>
-                            </span>
-                            
-                        <span class="float-right">
-                            <button id="give100Button" type="button" class="btn  btn-primary"
-                                onclick="sendMessage()">100</button>
-                        </span>
-
+                    <div class="row p-0 m-0">
+                        <div class="video-buttons-row chpText">
+                          
+                          <!---                         
                         <span class="float-right pl-1">
                             <button id="give1000Button" type="button" class="btn  btn-primary"
                                 onclick="sendMessage()">1000</button>
                         </span>
                         -->
-                            <span class="float-right mr-3" >
+                        {% if channel.owningUser == current_user.id %}
+                        <span class="float-left" >
+                            <button type="button" class="btn btn-primary btnSizer" data-toggle="modal"
+                                title="Edit Stream" data-target="#editModal">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </span>
+                        {% endif %}
+                        <span class="float-left pl-1">
+                            <span id="streamMetadataName" class="stream-title"><b><i
+                                        class="fas fa-video"></i>{% if
+                                    stream != None %}
+                                    {{stream.streamName|limit_title}} {% else %} No Stream
+                                    {% endif %}</b></span><br> 
+                            <span id="streamMetadataTopic"><b><i class="fas fa-hashtag"></i></b> <a
+                                    href="/topic/{{stream.topic}}/">{% if stream != None %}
+                                    {{stream.topic|get_topicName}} {% else %} {{channel.topic|get_topicName}}
+                                    {% endif %}</a></span>
+                            <i class="fas fa-clock mx-1"></i> <span id="streamTime"> 00:00:00</span>
+                        </span>
+
+                            <span class="float-right mr-0" >
                                 <!-- <button id="give1000Button" type="button" class="btn  btn-primary ml-1"
                                         onclick="sendMessage()">1000</button>
                                    -->
@@ -189,34 +201,14 @@
                              {#    {% endif %}  #}
                             </span>
                         -->
-                            {% if channel.owningUser == current_user.id %}
-                            <span class="float-left" style="margin-right: 10px">
-                                <button type="button" class="ml-2 btn btn-primary btnSizer" data-toggle="modal"
-                                    title="Edit Stream" data-target="#editModal">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                            </span>
-                            {% endif %}
-                            <span class="float-left">
-                                <span id="streamMetadataName" class="stream-title"><b><i
-                                            class="fas fa-video mr-2"></i>{% if
-                                        stream != None %}
-                                        {{stream.streamName|limit_title}} {% else %} No Stream
-                                        {% endif %}</b></span><br />
-                                <span id="streamMetadataTopic"><b><i class="fas fa-hashtag mr-2"></i></b> <a
-                                        href="/topic/{{stream.topic}}/">{% if stream != None %}
-                                        {{stream.topic|get_topicName}} {% else %} {{channel.topic|get_topicName}}
-                                        {% endif %}</a></span>
-                                <i class="fas fa-clock mx-2"></i> <span id="streamTime"> 00:00:00</span>
-                            </span>
+                          
                             <span class="float-right">
-                                <i class="fas fa-users mx-2"></i> {{channel.views}}
-                                <i class="fas fa-star mx-2"></i> {{channel.Nsubscriptions}}<br />
-                                <i class="fas fa-eye mx-2"></i> <span
-                                    id="currentViewers">{{channel.currentViewers}}</span>
+                                <i class="fas fa-users px-1"></i> {{channel.views}}
+                                <i class="fas fa-star px-1"></i> {{channel.Nsubscriptions}}<br />
+                                <i class="fas fa-eye px-1"></i> <span id="currentViewers">{{channel.currentViewers}}</span>
                             </span>
                              </span>
-                            <span class="float-right mx-1">
+                            <span class="float-right">
                                 <button id="upvoteButton" type="button" class="btn btn-primary pl-1 btnSizer"
                                     onclick="changeUpvote();" title="Like" {% if current_user.is_authenticated==false
                                     %} disabled aria-disabled="true" {% endif %}>
@@ -224,7 +216,7 @@
                                        {# {{stream.NupVotes}} #} </i>
                                 </button>
                             </span>
-                            <span class="float-right pl-1">
+                            <span class="float-right">
                                 <button id="shareButton" type="button" class="btn btn-primary btnSizer" data-toggle="modal"
                                     data-target="#shareModal" title="Share Stream" aria-pressed="false"
                                     autocomplete="off" href="#"><i class="fas fa-share-alt"></i>
@@ -283,21 +275,21 @@
                         </div>
                         <div id="chatContentWindow" class="chatContent">
                             <div id="modDisplay" class="modDisplayOverlay">
-                                <div class="membersList card my-2">
+                                <div class="membersList card my-1">
                                     <div class="card-header bg-primary"><b>Banned Users</b></div>
                                     <div id="OutcastList" class="card-body"></div>
                                 </div>
                             </div>
                             <div id="chatMembers" class="chatMembersOverlay">
-                                <div class="membersList card my-2">
+                                <div class="membersList card my-1">
                                     <div class="card-header bg-primary"><b>Moderator</b></div>
                                     <div id="ModeratorList" class="card-body"></div>
                                 </div>
-                                <div class="membersList card my-2">
+                                <div class="membersList card my-1">
                                     <div class="card-header bg-primary"><b>Participant</b></div>
                                     <div id="ParticipantList" class="card-body"></div>
                                 </div>
-                                <div class="membersList card my-2">
+                                <div class="membersList card my-1">
                                     <div class="card-header bg-primary"><b>Guest</b></div>
                                     <div id="VisitorList" class="card-body"></div>
                                 </div>
@@ -308,7 +300,7 @@
                             <div class="chatFooterTop"></div>
                             <div class="chatFooterInput">
                                 <div class="input-group">
-                                    <input id="chatinput" type="text" class="form-control btnSizer px-1" maxlength="420"
+                                    <input id="chatinput" type="text" class="form-control btnSizer" maxlength="420"
                                         autocomplete="off">
                                     <div class="input-group-append">
                                      <!--   <button type="button" class=" btn btn-success form-control btnSizer"
@@ -379,9 +371,9 @@
                         <!--<span class="chatImage float-left">
                             <img class="avatar rounded shadow" src="https://picsum.photos/48">
                           </span>-->
-                        <span class="chatInfo">
+                        <span class="chatInfo chatFont">
                             <span style="color:darkgreen" class="chatTimestamp float-right mr-1"></span>
-                            <span class="chatUsername"> </span> <span style="color:white" class="chatMessage"></span>
+                            <span class="chatUsername"> </span> <span style="color:white" class="chatMessage"> </span>
                             <!----                            <span class="chatTimestamp"></span><span class="chatUsername ml-1"></span>:
                             <span class="chatMessage ml-1"></span> -->
                         </span>
@@ -573,13 +565,13 @@
 
 <script>
     function openNav() {
-        document.getElementById("mySidenav").style.width = "221px";
-        document.getElementById("main").style.marginLeft = "221px";
+        document.getElementById("mySidenav").style.width = "20vw";
+        document.getElementById("main").style.marginLeft = "20vw";
     }
 
     function closeNav() {
-        document.getElementById("mySidenav").style.width = "70px";
-        document.getElementById("main").style.marginLeft = "70px";
+        document.getElementById("mySidenav").style.width = "5vw";
+        document.getElementById("main").style.marginLeft = "5vw";
     }
 </script>
 
@@ -900,7 +892,7 @@
                     var nameDivHTML = '<b><i class="fas fa-video"></i> <span> ' + currentStreamName + '</span></b>';
                     var topicDivHTML = '<b><i class="fas fa-hashtag"></i> <a href="/topic/' + currentStreamTopic + '"><span>' + topicJSList[currentStreamTopic] + '</span></a></b>';
 
-                    onlineBadge.className = 'my-1 mx-0 px-1 liveindicator badge badge-danger';
+                    onlineBadge.className = 'mx-0 px-1 liveindicator badge badge-danger chan-liveBadge';
                     onlineBadge.innerHTML = '<i class="fas fa-video"></i><span class="d-none d-sm-none d-md-inline"> Live</span>';
 
                     nameDiv.innerHTML = nameDivHTML;
@@ -912,7 +904,7 @@
                 try {
                     videoJSObj.pause();
                     videoJSObj.reset();
-                    onlineBadge.className = 'my-1 mx-0 px-1 liveindicator badge badge-secondary';
+                    onlineBadge.className = 'mx-0 px-1 liveindicator badge badge-secondary chan-liveBadge';
                     onlineBadge.innerHTML = '<i class="fas fa-video-slash"></i><span class="d-none d-sm-none d-md-inline"> Offline</span>';
                     videoContainer.style.display = "none";
                     offlineWindow.style.display = "block";
@@ -990,11 +982,11 @@
     socket.on('sendChanSubResults', function (msg) {
         var subButton = document.getElementById('chanSubStateButton');
         if (msg['state'] === true) {
-            subButton.innerHTML = "<i class='fas fa-star'></i><span class='d-none d-sm-none d-md-inline'> UnFollow</span>";
-            subButton.className = "btn btn-sm btn-outline-success";
+            subButton.innerHTML = "<i class='followingBadge fas fa-star'></i><span class='d-none d-sm-none d-md-inline'> UnFollow</span>";
+            subButton.className = "followingBadge btn btn-sm btn-outline-success";
         } else {
-            subButton.innerHTML = "<i class='far fa-star'></i><span class='d-none d-sm-none d-md-inline'> Follow</span>";
-            subButton.className = "btn btn-sm btn-success";
+            subButton.innerHTML = "<i class='followingBadge far fa-star'></i><span class='d-none d-sm-none d-md-inline'> Follow</span>";
+            subButton.className = "followingBadge btn btn-sm btn-success";
         }
       });
 
