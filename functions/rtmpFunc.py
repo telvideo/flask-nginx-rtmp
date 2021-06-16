@@ -100,7 +100,7 @@ def rtmp_stage2_user_auth_check(channelLoc, ipaddress, authorizedRTMP):
                 channelImage = (sysSettings.siteProtocol + sysSettings.siteAddress + "/images/" + requestedChannel.imageLocation)
 
             #hard code in channels to not send notifications emails or do webhooks.
-            if requestedChannel.id == 3 or requestedChannel.id == 73 or requestedChannel.id == 69:
+            if requestedChannel.id == 3 or requestedChannel.id == 73 or requestedChannel.id == 69 or requestedChannel.id == 15:
                 #system.newLog(0, "No emails sent from channel start due to boggs hacking. ")
                 #system.newLog(0, requestedChannel.id)
                 pass
