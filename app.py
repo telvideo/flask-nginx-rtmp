@@ -285,7 +285,7 @@ print({"level": "info", "message": "Initializing OAuth Info"})
 if redis_init_lock.locked(): 
     redis_init_lock.release() # let another process into the code we have been protecting
 
-r.delete('OSP_XMPP_INIT_HANDLER')
+#r.delete('OSP_XMPP_INIT_HANDLER')
 # Initialize oAuth
 from classes.shared import oauth
 from functions.oauth import fetch_token
