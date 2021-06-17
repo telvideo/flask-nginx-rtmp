@@ -779,7 +779,7 @@ a:link {
       height: 175px;
       object-fit: contain;
       overflow: hidden;
-      background-color: black;
+      /*background-color: black; */
       /*float: left;*/
   }
   
@@ -809,7 +809,7 @@ a:link {
       height: 155px;
       object-fit: contain;
       overflow: hidden;
-      background-color: black;
+      /*background-color: black; */
       float: left;
   }
   
@@ -840,7 +840,7 @@ a:link {
       height: 175px;
       object-fit: contain;
       overflow: hidden;
-      background-color: black;
+    /*  background-color: black;*/
       float: left;
   }
   
@@ -1059,7 +1059,7 @@ a:link {
       .profileBoxPic {
         width:40px;
         height:40px;
-        background-color: green;
+        /*background-color: green; */
         text-align: center;
       }
       
@@ -1243,14 +1243,8 @@ a:link {
     border-color: #1e90ff !important;
     border-bottom: 1px solid #1e90ff !important;
   }
-  .channel-img {
-      width:100%;
-      object-fit: contain;
-      max-height:150px;
-      overflow:hidden;
-      background-color:black;
-  }
-  
+ 
+    
   .spinner-overlay {
     position: absolute;
     background: transparent;
