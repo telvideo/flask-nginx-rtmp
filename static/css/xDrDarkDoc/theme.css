@@ -365,17 +365,15 @@ a:link {
     padding: 0px !important;
     margin: 0px !important;
 
-    padding-right: 2px !important;
-    padding-left: 2px !important;
+    padding-right: 0.8vw !important;
+    /*padding-left: 2vw !important;*/
 
-    font-size: 5vh !important;
-    
+    font-size: 4.8vh !important;
     
   
     border-radius: 2vh;
     border-style: none;
     
-    background-color: var(--PDDBlue);
     
     /* height: calc(100vh - 285px ); */
 /*    height: 50px !important; */
@@ -389,12 +387,16 @@ a:link {
     text-align: center;
     white-space: nowrap;
     
-    color: var(--PDgreen) !important;
+    color: var(--PDLBlue) !important;
     
+    transition: 0.15s;
+
   }
  
   .navbar-reg:hover {
     color:  white !important; /*var(--PDLblue) !important; **/
+    text-shadow: 0 0 20px #9dceff, 0 0 30px #5badff, 0 0 40px #3399ff, 0 0 50px #1e90ff;
+
   }
 
   
@@ -1675,3 +1677,8 @@ a:link {
       }
   
   }
+
+
+
+/* Niko Code */
+

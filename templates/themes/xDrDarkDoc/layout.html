@@ -35,9 +35,15 @@
 </head>
 
 <body>
-  <nav class="navbar navbar-expand navbar-dark sticky-top mx-0 px-0 my-0 py-0" style="background-color: var(--PDSlate);">
+  <nav class="navbar navbar-expand navbar-dark sticky-top mx-0 px-0 my-0 py-0 NCBaseBlur" style="background-color: #414141;">
     <a class="navbar-brand" href="/">
-      <img src="/static/img/ProFull.png" class="align-top navbar-brand" alt="">
+      
+      <img src="{{sysSettings.systemLogo}}" class="align-top navbar-brand" alt="">
+
+      <span class="d-none d-sm-none d-md-inline chan-liveBadge">
+        <img src="/static/img/ProFull.png" class="align-top navbar-brand" alt=""> 
+      </span>
+
     </a>
     
       <ul class="navbar-nav ml-auto">
