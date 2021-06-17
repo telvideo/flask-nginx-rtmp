@@ -32,7 +32,8 @@ def main_page():
 
     #sysSettings = settings.settings.query.first()
     sysSettings = settings.getSettingsFromRedis()
-
+ 
+   
 
     #activeStreams = Stream.Stream.query.order_by(Stream.Stream.currentViewers).all()
 
@@ -72,6 +73,20 @@ def main_page():
         "channelName":stre.channelName,
         "topic":stre.topic}
         streamList.append(aStream) 
+#
+     
+    recentQuery = RecordedVideo.RecordedVideo.query.filter_by(pending=False, published=True) \
+        .join(Channel.Channel, RecordedVideo.RecordedVideo.channelID == Channel.Channel.id) \
+        .join(Sec.User, RecordedVideo.RecordedVideo.owningUser == Sec.User.id) \
+        .with_entities(RecordedVideo.RecordedVideo.id, RecordedVideo.RecordedVideo.owningUser,
+                        RecordedVideo.RecordedVideo.views, RecordedVideo.RecordedVideo.length,
+                        RecordedVideo.RecordedVideo.thumbnailLocation, RecordedVideo.RecordedVideo.channelName,
+                        RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, RecordedVideo.RecordedVideo.NupVotes,
+                        Sec.User.pictureLocation, Channel.Channel.protected,
+                        Channel.Channel.channelName.label('ChanName')) \
+        .order_by(RecordedVideo.RecordedVideo.videoDate.desc()).limit(5)
+
+#
 
     recordedQuery = None
     clipQuery = None
@@ -128,14 +143,14 @@ def main_page():
             .join(Channel.Channel, RecordedVideo.RecordedVideo.channelID == Channel.Channel.id)\
             .join(Sec.User, RecordedVideo.RecordedVideo.owningUser == Sec.User.id)\
             .with_entities(RecordedVideo.RecordedVideo.NupVotes, RecordedVideo.RecordedVideo.id, RecordedVideo.RecordedVideo.owningUser, RecordedVideo.RecordedVideo.views, RecordedVideo.RecordedVideo.length, RecordedVideo.RecordedVideo.thumbnailLocation, RecordedVideo.RecordedVideo.channelName, RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, Sec.User.pictureLocation, Channel.Channel.protected, Channel.Channel.channelName.label('ChanName'))\
-            .order_by(func.random()).limit(16)
+            .order_by(func.random()).limit(10)
 
         clipQuery = RecordedVideo.Clips.query.filter_by(published=True)\
             .join(RecordedVideo.RecordedVideo, RecordedVideo.Clips.parentVideo == RecordedVideo.RecordedVideo.id)\
             .join(Channel.Channel, Channel.Channel.id==RecordedVideo.RecordedVideo.channelID)\
             .join(Sec.User, Sec.User.id == Channel.Channel.owningUser)\
             .with_entities(RecordedVideo.Clips.NupVotes, RecordedVideo.Clips.id, RecordedVideo.Clips.thumbnailLocation, Channel.Channel.owningUser, RecordedVideo.Clips.views, RecordedVideo.Clips.length, RecordedVideo.Clips.clipName, Channel.Channel.protected, Channel.Channel.channelName, RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, Sec.User.pictureLocation)\
-            .order_by(func.random()).limit(16)
+            .order_by(func.random()).limit(5)
     # Fall Through - Sort by Views
     else:
         if sysSettings.sortMainBy == 0:
@@ -163,7 +178,7 @@ def main_page():
                                 Sec.User.pictureLocation) \
                 .order_by(RecordedVideo.Clips.views.desc()).limit(16)
 
-    return render_template(themes.checkOverride('index.html'), streamList=streamList, videoList=recordedQuery, clipList=clipQuery)
+    return render_template(themes.checkOverride('index.html'), streamList=streamList, videoList=recordedQuery, clipList=clipQuery, recentQuery = recentQuery)
 
 @root_bp.route('/search', methods=["POST"])
 def search_page():
