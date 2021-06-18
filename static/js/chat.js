@@ -186,19 +186,6 @@ function enterRoom(room) {
 }
 
 
-function replaceURLs(message) {
-  if(!message) return;
- 
-  var urlRegex = /(((https?:\/\/)|(www\.))[^\s]+)/g;
-  return message.replace(urlRegex, function (url) {
-    var hyperlink = url;
-    if (!hyperlink.match('^https?:\/\/')) {
-      hyperlink = 'http://' + hyperlink;
-    }
-    return '<a href="' + hyperlink + '" target="_blank" rel="noopener noreferrer">' + url + '</a>'
-  });
-}
-
 // Function for Sending Chat Input
 function sendMessage() {
     var chatInput = document.getElementById('chatinput');
@@ -206,14 +193,6 @@ function sendMessage() {
     if (message.length > 420) {
         message = message.slice(0,420);
     }
-   // message = encodeURIComponent(message);
-   // message = replaceURLs(message);
-   // message = message + "FRED";
-    
-
-    //var uri = "my test.asp?name=ståle&car=saab";
-    //var res = encodeURI(message);
-    //message = res;
     
     if (message != '') {
         var o = {to: ROOMNAME + '@' + ROOM_SERVICE, type: 'groupchat'};
@@ -373,6 +352,24 @@ function process_stickers(msg) {
   return msg;
 }
 
+// Make links clickable in chat, taken from https://stackoverflow.com/questions/49634850/javascript-convert-plain-text-links-to-clickable-links
+function linkify(inputText) {
+    var replacedText, replacePattern1, replacePattern2, replacePattern3;
+
+    //URLs starting with http://, https://, or ftp://
+    replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+    replacedText = inputText.replace(replacePattern1, '<a href="$1" target="_blank">$1</a>');
+
+    //URLs starting with "www." (without // before it, or it'd re-link the ones done above).
+    replacePattern2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
+    replacedText = replacedText.replace(replacePattern2, '$1<a href="http://$2" target="_blank">$2</a>');
+
+    //Change email addresses to mailto:: links.
+    replacePattern3 = /(([a-zA-Z0-9\-\_\.])+@[a-zA-Z\_]+?(\.[a-zA-Z]{2,6})+)/gim;
+    replacedText = replacedText.replace(replacePattern3, '<a href="mailto:$1">$1</a>');
+
+    return replacedText;
+}
 
 // Function to Handle New Messages
 function onMessage(msg) {
@@ -412,6 +409,8 @@ function onMessage(msg) {
 
           var msg = format_msg(msg)
           msg = process_stickers(msg);
+
+          msg = linkify(msg)
 
           tempNode.querySelector("span.chatMessage").innerHTML = msg;
           tempNode.style.display = "block";
