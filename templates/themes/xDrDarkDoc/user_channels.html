@@ -275,6 +275,19 @@
                                       <div class="col-6">
                                           <input type="checkbox" data-toggle="toggle" data-size="small" id="chatSelect" name="chatSelect" {% if channel.chatEnabled == True %} checked {% endif %}>
                                       </div>
+
+
+                                    <div class="col-6">
+                                        <label for="chatSelect" class="col-form-label"><b>Chat links </b></label>
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="checkbox" data-toggle="toggle" data-size="small" id="chatLinksSelect" name="chatLinksSelect" {% if channel.chatLinks == True %} checked {% endif %}>
+                                    </div>
+
+
+
+
+
                                       <div class="col-12">
                                           <label for="xmppToken" class="col-form-label"><b>Protected Channel XMPP Token </b></label><br>
                                           <div class="input-group">
@@ -935,6 +948,15 @@
                     <div class="col-6">
                         <input type="checkbox" data-toggle="toggle" id="chatSelect" name="chatSelect" >
                     </div>
+                </div>
+
+                <div class="form-group row">
+                  <div class="col-6">
+                      <label for="chatSelect" class="col-form-label"><b>Chat Links </b></label>
+                  </div>
+                  <div class="col-6">
+                      <input type="checkbox" data-toggle="toggle" id="chatLinksSelect" name="chatLinksSelect" >
+                  </div>
                 </div>
 
                 <div class="form-group row">

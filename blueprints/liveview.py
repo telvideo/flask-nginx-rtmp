@@ -46,6 +46,7 @@ def view_page(loc):
     Channel.Channel.currentViewers,
  #   Channel.Channel.record,
     Channel.Channel.chatEnabled,
+    Channel.Channel.chatLinks,
     Channel.Channel.chatBG,
     Channel.Channel.chatTextColor,
     Channel.Channel.chatAnimation,

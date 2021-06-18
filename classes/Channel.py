@@ -15,6 +15,7 @@ class Channel(db.Model):
     currentViewers = db.Column(db.Integer)
     record = db.Column(db.Boolean)
     chatEnabled = db.Column(db.Boolean)
+    chatLinks =  db.Column(db.Boolean)
     chatBG = db.Column(db.String(255))
     chatTextColor = db.Column(db.String(10))
     chatAnimation = db.Column(db.String(255))
@@ -52,6 +53,7 @@ class Channel(db.Model):
         self.record = record
         self.allowComments = allowComments
         self.chatEnabled = chatEnabled
+        self.chatLinks = True
         self.chatBG = "Standard"
         self.chatTextColor = "#FFFFFF"
         self.chatAnimation = "slide-in-left"

@@ -11,6 +11,7 @@ sudo mysql -e "ALTER TABLE osp.Channel ADD COLUMN Nsubscriptions INT NULL DEFAUL
 sudo mysql -e "ALTER TABLE osp.user ADD COLUMN verified INT NULL DEFAULT 0 AFTER xmppToken"
 sudo mysql -e "ALTER TABLE osp.videoComments ADD COLUMN NupVotes INT NULL DEFAULT 0 AFTER videoID"
 sudo mysql -e "ALTER TABLE osp.topics ADD INDEX name (name ASC) VISIBLE"
+sudo mysql -e "ALTER TABLE osp.Channel ADD COLUMN chatLinks TINYINT(1) NULL DEFAULT 1 AFTER Nsubscriptions"
 
 apt install python3-pip
 

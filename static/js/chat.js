@@ -410,7 +410,11 @@ function onMessage(msg) {
           var msg = format_msg(msg)
           msg = process_stickers(msg);
 
-          msg = linkify(msg)
+          const CdoLinks = document.getElementById("dochatLinks").getAttribute("name"); 
+
+          if (CdoLinks == "True"){
+            msg = linkify(msg)
+          }
 
           tempNode.querySelector("span.chatMessage").innerHTML = msg;
           tempNode.style.display = "block";

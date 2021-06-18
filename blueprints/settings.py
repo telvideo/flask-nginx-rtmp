@@ -1030,6 +1030,10 @@ def settings_channels_page():
         if 'chatSelect' in request.form:
             chatEnabled = True
 
+        chatLinks = False
+        if 'chatLinksSelect' in request.form:
+            chatLinks = True
+
         allowComments = False
 
         if 'allowComments' in request.form:
@@ -1046,7 +1050,7 @@ def settings_channels_page():
 
             newChannel = Channel.Channel(current_user.id, newUUID, channelName, topic, record, chatEnabled,
                                          allowComments, description)
-
+            newChannel.chatLinks = chatLinks
             if 'photo' in request.files:
                 file = request.files['photo']
                 if file.filename != '':
@@ -1092,6 +1096,7 @@ def settings_channels_page():
                 requestedChannel.protected = protection
                 requestedChannel.defaultStreamName = defaultstreamName
                 requestedChannel.autoPublish = autoPublish
+                requestedChannel.chatLinks = chatLinks
                 #requestedChannel.rtmpRestream = rtmpRestream
                 #requestedChannel.rtmpRestreamDestination = rtmpRestreamDestination
 
