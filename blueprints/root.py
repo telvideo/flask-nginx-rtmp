@@ -75,7 +75,7 @@ def main_page():
         streamList.append(aStream) 
 #
      
-    recentQuery = RecordedVideo.RecordedVideo.query.filter_by(pending=False, published=True) \
+    recentQuery = RecordedVideo.RecordedVideo.query.filter_by(pending=False, published=True).filter(RecordedVideo.RecordedVideo.length > 120.0 ) \
         .join(Channel.Channel, RecordedVideo.RecordedVideo.channelID == Channel.Channel.id) \
         .join(Sec.User, RecordedVideo.RecordedVideo.owningUser == Sec.User.id) \
         .with_entities(RecordedVideo.RecordedVideo.id, RecordedVideo.RecordedVideo.owningUser,
