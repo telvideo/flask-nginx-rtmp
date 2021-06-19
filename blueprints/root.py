@@ -56,7 +56,7 @@ def main_page():
                 Sec.User.username,
                 Channel.Channel.channelName,
                 Channel.Channel.protected
-                ).order_by(Stream.Stream.currentViewers).all()
+                ).order_by(Stream.Stream.currentViewers.desc()).all()
             ###
 
     streamList =  []

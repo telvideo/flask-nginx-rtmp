@@ -12,6 +12,10 @@ sudo mysql -e "ALTER TABLE osp.user ADD COLUMN verified INT NULL DEFAULT 0 AFTER
 sudo mysql -e "ALTER TABLE osp.videoComments ADD COLUMN NupVotes INT NULL DEFAULT 0 AFTER videoID"
 sudo mysql -e "ALTER TABLE osp.topics ADD INDEX name (name ASC) VISIBLE"
 sudo mysql -e "ALTER TABLE osp.Channel ADD COLUMN chatLinks TINYINT(1) NULL DEFAULT 1 AFTER Nsubscriptions"
+sudo mysql -e "ALTER TABLE osp.Stream ADD INDEX currentViewers (currentViewers DESC) VISIBLE"
+sudo mysql -e "ALTER TABLE osp.Stream DROP INDEX NupVotes, ADD INDEX NupVotes (NupVotes DESC) VISIBLE"
+sudo mysql -e "ALTER TABLE osp.RecordedVideo ADD INDEX date (videoDate DESC) VISIBLE"
+sudo mysql -e "ALTER TABLE osp.RecordedVideo DROP INDEX NupVotes , ADD INDEX NupVotes (NupVotes DESC) VISIBLE"
 
 apt install python3-pip
 

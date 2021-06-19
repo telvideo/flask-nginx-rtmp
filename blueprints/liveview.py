@@ -272,7 +272,8 @@ def view_page(loc):
                 Channel.Channel.imageLocation,
                 Sec.User.username,
                 Channel.Channel.channelName
-                ).order_by(Stream.Stream.currentViewers).all()
+                ).order_by(Stream.Stream.currentViewers.desc()).all()
+
             ###
         
             streamList =  []
