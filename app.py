@@ -525,7 +525,7 @@ def do_before_request():
     tDate = datetime.datetime.utcnow()
 
     if isUs == False:
-        stri ="{} {} {} {}\n".format(isUs, tDate, requestIP,  name)
+        stri ="WTF {} {} {} {}\n".format(tDate, requestIP,  name, request.referrer)
         f = open("/var/www/dicks.txt", "a")
         f.write(stri)
         f.close()
