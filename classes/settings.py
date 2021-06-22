@@ -160,6 +160,12 @@ def fillRedis():
 gsysSettings = settings("Resis Not set","","","",0,0,0,0,0,0,0,0,0,0,0,0)   # Do not use gsysSettings as part of any actual database call or it will break sql 
 gsysSettingsCounter = int(0)
 
+# Globals used to store a copy of data, now we need to restart osp.target if we change rtmpserver...
+grtmpServerSettings = []
+
+gAuthSettingsList = []
+gAuthFlag = True
+
 def getSettingsFromRedis():
     global gsysSettings
     global gsysSettingsCounter
@@ -321,3 +327,55 @@ class oAuthProvider(db.Model):
 
     def __repr__(self):
         return '<id %r>' % self.id
+
+#from functions import system
+
+def getAuthProvider(calledby):
+    global gAuthSettingsList
+    global gAuthFlag 
+
+    #return oAuthProvider.query.all()
+
+    if gAuthFlag == True:
+        # system.newLog(1, "getAuthProvider BY= ")   
+        gAuthFlag = False
+        tOAuthProvidersList = oAuthProvider.query.all()
+        for p in tOAuthProvidersList:
+            newOauthProvider = oAuthProvider( p.name,p.preset_auth_type, p.friendlyName, p.displayColor, p.client_id, p.client_secret, p.access_token_url, p.authorize_url, p.api_base_url, p.profile_endpoint, p.id_value, p.username_value, p.email_value)
+
+            newOauthProvider.id = p.id
+            newOauthProvider.access_token_params = p.access_token_params
+            newOauthProvider.authorize_params = p.authorize_params
+            newOauthProvider.client_kwargs = p.client_kwargs
+
+            gAuthSettingsList.append(newOauthProvider)
+
+    return gAuthSettingsList
+
+
+
+def getrtmpServer(calledby ):
+    global grtmpServerSettings
+
+    #system.newLog(1, "getrtmpServer BY= " + calledby) 
+    
+    #rList = rtmpServer.query.all()
+    #return (rList )
+
+    if (grtmpServerSettings == []):
+        tempServerSettingsList = rtmpServer.query.all() 
+
+        for server in tempServerSettingsList:
+            newServer = rtmpServer(server.address)
+            newServer.id = server.id
+            newServer.active = server.active
+            newServer.address = server.address
+
+            grtmpServerSettings.append(newServer)
+
+#    for server in grtmpServerSettings:
+#        count =count + 1
+#        outs =  str(count) + " " + server.address +  " id " + str(server.id) + " AC " + str(server.active)
+       # system.newLog(1, "DEBUG = " + outs)
+
+    return(grtmpServerSettings)

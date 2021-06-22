@@ -1192,7 +1192,7 @@
                                   <td><input type="checkbox" value="{{channel.id}}"></td>
                                   <td><img src="/images/{{channel.imageLocation}}" style="width:128px;height:71px;object-fit:cover;" onerror="this.src='/static/img/video-placeholder.jpg';"></td>
                                   <td><a href="/channel/{{channel.id}}/">{{channel.channelName}}</a></td>
-                                  <td><a href="/profile/{{channel.owningUser|get_userName}}">{{channel.owningUser|get_userName}}</a></td>
+                                  <td><a href="/profile/{{channel.username}}">{{channel.username}}</a></td>
                                   <td><a href="/topic/{{channel.topic}}/">{{channel.topic|get_topicName}}</a></td>
                                   <td>{{channel.channelLoc}}</td>
                                   <td>{{channel.views}}</td>
@@ -1357,7 +1357,7 @@
                                             <b>Length</b>
                                         </th>
                                         <th>
-                                            <b>Topic</b>
+                                            <b>File Path</b>
                                         </th>
                                         <th>
                                             <b>Disk</b>
@@ -1374,7 +1374,7 @@
                                                 {{vid.videoDate|normalize_date}}
                                             </td>
                                             <td>
-                                                {{vid.owningUser|get_userName}}
+                                                {{vid.username}}
                                             </td>
                                             <td>
                                                 <a href="/play/{{vid.id}}"><span id="vidName-{{vid.id}}">{{vid.channelName}}</span></a>
@@ -1386,7 +1386,7 @@
                                                 <i class="far fa-clock mr-1"></i>{{vid.length|hms_format}}
                                             </td>
                                             <td>
-                                                {{vid.topic}}
+                                                {{vid.videoLocation}}
                                             </td>
                                             {% if vid.id in missingSet %} 
                                               <td>

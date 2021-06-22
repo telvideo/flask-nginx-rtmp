@@ -92,30 +92,33 @@ def rtmp_stage2_user_auth_check(channelLoc, ipaddress, authorizedRTMP):
 
             authedStream.currentViewers = int(xmpp.getChannelCounts(requestedChannel.channelLoc))
             authedStream.totalViewers = int(xmpp.getChannelCounts(requestedChannel.channelLoc))
-           
+            
             if requestedChannel.imageLocation is None:
                 channelImage = (sysSettings.siteProtocol + sysSettings.siteAddress + "/static/img/video-placeholder.jpg")
             else:
                 channelImage = (sysSettings.siteProtocol + sysSettings.siteAddress + "/images/" + requestedChannel.imageLocation)
-            
             db.session.commit()
+                
+            #only send out notifications, webhooks and emails once every 600 seconds or 10 mins
+            timeDiff = currentTime - requestedChannel.notificationsLastSentTime
+            if requestedChannel.autoPublish is True and timeDiff.total_seconds() > 600 :
 
-            #hard code in channels to not send notifications emails or do webhooks.
-            if requestedChannel.id == 3 or requestedChannel.id == 73 or requestedChannel.id == 69 or requestedChannel.id == 15 or requestedChannel.id == 4:
-                #system.newLog(0, "No emails sent from channel start due to boggs hacking. ")
-                #system.newLog(0, requestedChannel.id)
-                pass
-            else:
+                requestedChannel.notificationsLastSentTime = currentTime
+
+                theStreamerName = templateFilters.get_userName(requestedChannel.owningUser)
+
                 webhookFunc.runWebhook(requestedChannel.id, 0, channelname=requestedChannel.channelName, channelurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/channel/" + str(requestedChannel.id)), channeltopic=requestedChannel.topic,
-                       channelimage=channelImage, streamer=templateFilters.get_userName(requestedChannel.owningUser), channeldescription=str(requestedChannel.description),
+                       channelimage=channelImage, streamer=theStreamerName, channeldescription=str(requestedChannel.description),
                        streamname=authedStream.streamName, streamurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/view/" + requestedChannel.channelLoc), streamtopic=templateFilters.get_topicName(authedStream.topic),
                        streamimage=(sysSettings.siteProtocol + sysSettings.siteAddress + "/stream-thumb/" + requestedChannel.channelLoc + ".png"))
 
                 subscriptionQuery = subscriptions.channelSubs.query.filter_by(channelID=requestedChannel.id).all()
+
+                tpictureLocation = str(requestedChannel.owner.pictureLocation)
                 for sub in subscriptionQuery:
                     # Create Notification for Channel Subs
-                    newNotification = notifications.userNotification(templateFilters.get_userName(requestedChannel.owningUser) + " has started a live stream in " + requestedChannel.channelName, "/view/" + str(requestedChannel.channelLoc),
-                                                                    "/images/" + str(requestedChannel.owner.pictureLocation), sub.userID)
+                    newNotification = notifications.userNotification(theStreamerName + " has started a live stream in " + requestedChannel.channelName, "/view/" + str(requestedChannel.channelLoc),
+                                                                    "/images/" + tpictureLocation, sub.userID)
                     db.session.add(newNotification)
                 db.session.commit()
 
@@ -288,7 +291,13 @@ def rtmp_rec_Complete_handler(channelLoc, path):
         else:
             channelImage = (sysSettings.siteProtocol + sysSettings.siteAddress + "/images/" + requestedChannel.imageLocation)
 
-        if requestedChannel.autoPublish is True:
+
+        #only send out notifications, webhooks and emails once every 600 seconds or 10 mins         
+        timeDiff = currentTime - requestedChannel.notificationsLastSentTime
+        if requestedChannel.autoPublish is True and timeDiff.total_seconds() > 600 :    
+            
+            requestedChannel.notificationsLastSentTime = currentTime
+
             webhookFunc.runWebhook(requestedChannel.id, 6, channelname=requestedChannel.channelName,
                    channelurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/channel/" + str(requestedChannel.id)),
                    channeltopic=templateFilters.get_topicName(requestedChannel.topic),
@@ -298,11 +307,12 @@ def rtmp_rec_Complete_handler(channelLoc, path):
                    videourl=(sysSettings.siteProtocol + sysSettings.siteAddress + '/play/' + str(pendingVideo.id)),
                    videothumbnail=(sysSettings.siteProtocol + sysSettings.siteAddress + '/videos/' + str(pendingVideo.thumbnailLocation)))
 
+            tpictureLocation = str(requestedChannel.owner.pictureLocation)
             subscriptionQuery = subscriptions.channelSubs.query.filter_by(channelID=requestedChannel.id).all()
             for sub in subscriptionQuery:
                 # Create Notification for Channel Subs
                 newNotification = notifications.userNotification(templateFilters.get_userName(requestedChannel.owningUser) + " has posted a new video to " + requestedChannel.channelName + " titled " + pendingVideo.channelName, '/play/' + str(pendingVideo.id),
-                                                                 "/images/" + str(requestedChannel.owner.pictureLocation), sub.userID)
+                                                                 "/images/" + tpictureLocation, sub.userID)
                 db.session.add(newNotification)
             db.session.commit()
 

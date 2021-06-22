@@ -16,6 +16,7 @@ sudo mysql -e "ALTER TABLE osp.Stream ADD INDEX currentViewers (currentViewers D
 sudo mysql -e "ALTER TABLE osp.Stream DROP INDEX NupVotes, ADD INDEX NupVotes (NupVotes DESC) VISIBLE"
 sudo mysql -e "ALTER TABLE osp.RecordedVideo ADD INDEX date (videoDate DESC) VISIBLE"
 sudo mysql -e "ALTER TABLE osp.RecordedVideo DROP INDEX NupVotes , ADD INDEX NupVotes (NupVotes DESC) VISIBLE"
+sudo mysql -e "ALTER TABLE osp.Channel ADD COLUMN notificationsLastSentTime DATETIME NULL DEFAULT '2021-02-28 07:19:38' AFTER chatLinks"
 
 apt install python3-pip
 

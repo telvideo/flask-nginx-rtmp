@@ -357,11 +357,36 @@ def admin_page():
 
         appDBVer = dbVersion.dbVersion.query.first().version
         userList = Sec.User.query.all()
+
+#        userList = Sec.User.query.join(Sec.roles_users,Sec.User.id == Sec.roles_users.user_id ).with_entities(Sec.User.id,
+#            Sec.User.pictureLocation,
+#            Sec.User.username,
+#            Sec.User.authType,
+#            Sec.User.oAuthProvider,
+#            Sec.User.active,
+#            Sec.User.verified,
+#            Sec.User.roles).all()
+
         roleList = Sec.Role.query.all()
-        channelList = Channel.Channel.query.all()
+        #channelList = Channel.Channel.query.all()
+        channelList = Channel.Channel.query.join(Sec.User, Channel.Channel.owningUser == Sec.User.id).with_entities(Channel.Channel.id,
+            Channel.Channel.imageLocation,
+            Channel.Channel.owningUser,
+            Channel.Channel.channelLoc,
+            Channel.Channel.views,
+            Channel.Channel.topic,
+            Channel.Channel.chatEnabled,
+            Channel.Channel.record,
+            Channel.Channel.allowComments,
+            Channel.Channel.protected,
+            Sec.User.username).all()
+
         streamList = Stream.Stream.query.all()
         topicsList = topics.topics.query.order_by(topics.topics.name.asc())
-        rtmpServers = settings.rtmpServer.query.all()
+
+        #rtmpServers = settings.rtmpServer.query.all()
+        rtmpServers = settings.getrtmpServer("settings.py admin_page():")
+
         edgeNodes = settings.edgeStreamer.query.all()
 
         defaultRoles = {}
@@ -417,12 +442,14 @@ def admin_page():
         logsList = logs.logs.query.order_by(logs.logs.timestamp.desc()).limit(250)
         #vidList  =  RecordedVideo.RecordedVideo.query.order_by(RecordedVideo.RecordedVideo.videoDate.asc())#.limit(250)
         
-        vidList  =  RecordedVideo.RecordedVideo.query.with_entities(RecordedVideo.RecordedVideo.id, RecordedVideo.RecordedVideo.owningUser,
-                               RecordedVideo.RecordedVideo.views, RecordedVideo.RecordedVideo.length,
-                               RecordedVideo.RecordedVideo.channelName,
-                               RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate,
-                               RecordedVideo.RecordedVideo.videoLocation)
-         
+        vidList  =  RecordedVideo.RecordedVideo.query.join(Sec.User, RecordedVideo.RecordedVideo.owningUser == Sec.User.id)\
+            .with_entities(RecordedVideo.RecordedVideo.id, RecordedVideo.RecordedVideo.owningUser,
+                RecordedVideo.RecordedVideo.views, RecordedVideo.RecordedVideo.length,
+                RecordedVideo.RecordedVideo.channelName,
+                RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate,
+                RecordedVideo.RecordedVideo.videoLocation,
+                Sec.User.username)
+
         missingSet = set()
 
         videos_root = globalvars.videoRoot + 'videos/'

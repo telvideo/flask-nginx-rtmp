@@ -421,7 +421,9 @@ def inject_recaptchaEnabled():
 @app.context_processor
 def inject_oAuthProviders():
 
-    SystemOAuthProviders = db.session.query(settings.oAuthProvider).all()
+    #SystemOAuthProviders = db.session.query(settings.oAuthProvider).all()
+    SystemOAuthProviders = settings.getAuthProvider("inject_oAuthProviders")
+
     #SystemOAuthProviders = db.session.query(settings.oAuthProvider).with_entities(settings.oAuthProvider.preset_auth_type, settings.oAuthProvider.friendlyName).all()
 
     return dict(SystemOAuthProviders=SystemOAuthProviders)
@@ -480,7 +482,11 @@ def do_before_request():
 # Boggs custom hack to dodge whatever is going on when it's not us making this request.. idk why it's not us?????????
     name = str(request.url)
 
-    if name.startswith("https"): #trim https or http
+    if "icon" in name:
+        fred =123
+
+
+    if name.startswith("https"):  #trim https or http
         name= name[8:]
     else:
         name= name[7:] #must be "http"

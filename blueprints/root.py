@@ -84,7 +84,7 @@ def main_page():
                         RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, RecordedVideo.RecordedVideo.NupVotes,
                         Sec.User.pictureLocation, Channel.Channel.protected,
                         Channel.Channel.channelName.label('ChanName')) \
-        .order_by(RecordedVideo.RecordedVideo.videoDate.desc()).limit(5)
+        .order_by(RecordedVideo.RecordedVideo.videoDate.desc()).limit(10)
 
 #
 
@@ -269,7 +269,7 @@ def vanityURL_username_link(username):
 # Link to Channels Via Vanity URLs
 @root_bp.route('/c/<vanityURL>')
 def vanityURL_channel_link(vanityURL):
-    channelQuery = Channel.Channel.query.filter_by(vanityURL=vanityURL).first()
+    channelQuery = Channel.Channel.query.filter_by(vanityURL=vanityURL).first()  #change channels
     if channelQuery is not None:
         return redirect(url_for('channel.channel_view_page',chanID=channelQuery.id))
     flash('Invalid Link URL','error')
@@ -286,6 +286,8 @@ def vanityURL_live_link(vanityURL):
 
 @root_bp.route('/auth', methods=["POST","GET"])
 def auth_check():
+    return 'OK' ## Boggs hack (not for Deamos).
+
     #sysSettings = settings.settings.query.with_entities(settings.settings.protectionEnabled).first()
     sysSettings = settings.getSettingsFromRedis()
 
@@ -315,14 +317,20 @@ def rtmp_check():
     channelID = ""
     if 'X-Channel-ID' in request.headers:
         channelID = request.headers['X-Channel-ID']
-        channelQuery = Channel.Channel.query.filter_by(channelLoc=channelID).first()
+        channelQuery = Channel.Channel.query.filter_by(channelLoc=channelID).with_entities(Channel.Channel.stream).first()
+        
         if channelQuery is not None:
             streamList = channelQuery.stream
             if streamList != []:
                 streamEntry = streamList[0]
                 if streamEntry.rtmpServer is not None:
                     rtmpServerID = streamEntry.rtmpServer
-                    rtmpServer = settings.rtmpServer.query.filter_by(id=rtmpServerID).first()
+
+                    #rtmpServer = settings.rtmpServer.query.filter_by(id=rtmpServerID).first()
+                    RTMPServersList = settings.getrtmpServer("root.py rtmp_check():")
+                    rtmpServer = RTMPServersList[0]
+
+
                     resp = Response("OK")
                     resp.headers['X_UpstreamHost'] = rtmpServer.address
                     return resp

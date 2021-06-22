@@ -33,6 +33,7 @@ class Channel(db.Model):
     xmppToken = db.Column(db.String(64))
     vanityURL = db.Column(db.String(1024))
     Nsubscriptions = db.Column(db.Integer)
+    notificationsLastSentTime = db.Column(db.DateTime())
     stream = db.relationship('Stream', backref='channel', cascade="all, delete-orphan", lazy="joined")
     recordedVideo = db.relationship('RecordedVideo', backref='channel', cascade="all, delete-orphan", lazy="joined")
     upvotes = db.relationship('channelUpvotes', backref='stream', cascade="all, delete-orphan", lazy="joined")
