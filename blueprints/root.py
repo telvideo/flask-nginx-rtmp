@@ -260,7 +260,7 @@ def static_from_root_sw():
 # Link to Profile Via Username
 @root_bp.route('/u/<username>')
 def vanityURL_username_link(username):
-    userQuery = Sec.User.query.filter_by(username=username).first()
+    userQuery = Sec.User.query.with_entities(Sec.User.username).filter_by(username=username).first()
     if userQuery is not None:
         return redirect(url_for('profile.profile_view_page',username=username))
     flash("Invalid Username","error")
@@ -269,7 +269,7 @@ def vanityURL_username_link(username):
 # Link to Channels Via Vanity URLs
 @root_bp.route('/c/<vanityURL>')
 def vanityURL_channel_link(vanityURL):
-    channelQuery = Channel.Channel.query.filter_by(vanityURL=vanityURL).first()  #change channels
+    channelQuery = Channel.Channel.query.with_entities(Channel.Channel.id).filter_by(vanityURL=vanityURL).first()  #change channels
     if channelQuery is not None:
         return redirect(url_for('channel.channel_view_page',chanID=channelQuery.id))
     flash('Invalid Link URL','error')
@@ -278,7 +278,7 @@ def vanityURL_channel_link(vanityURL):
 # Link to a Channel's Live Page Via Vanity URLs
 @root_bp.route('/c/<vanityURL>/live')
 def vanityURL_live_link(vanityURL):
-    channelQuery = Channel.Channel.query.filter_by(vanityURL=vanityURL).first()
+    channelQuery = Channel.Channel.query.with_entities(Channel.Channel.channelLoc).filter_by(vanityURL=vanityURL).first()
     if channelQuery is not None:
         return redirect(url_for('liveview.view_page',loc=channelQuery.channelLoc))
     flash('Invalid Link URL','error')

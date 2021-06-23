@@ -82,8 +82,9 @@ def view_page(loc):
             if not securityFunc.check_isValidChannelViewer(requestedChannel.id):
                 return render_template(themes.checkOverride('channelProtectionAuth.html'))
 
-        streamerQuery = Sec.User.query.filter_by(id=requestedChannel.owningUser).\
-            with_entities(Sec.User.verified, Sec.User.pictureLocation).first()
+        streamerQuery = Sec.User.query.filter_by(id=requestedChannel.owningUser).with_entities(Sec.User.verified, 
+#            Sec.User.pictureLocation,
+            Sec.User.donationURL).first()
     
         # Pull ejabberd Chat Options for Room
         #from app import ejabberd
