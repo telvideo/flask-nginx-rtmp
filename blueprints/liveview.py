@@ -83,7 +83,7 @@ def view_page(loc):
                 return render_template(themes.checkOverride('channelProtectionAuth.html'))
 
         streamerQuery = Sec.User.query.filter_by(id=requestedChannel.owningUser).with_entities(Sec.User.verified, 
-#            Sec.User.pictureLocation,
+            Sec.User.pictureLocation,
             Sec.User.donationURL).first()
     
         # Pull ejabberd Chat Options for Room
