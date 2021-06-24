@@ -1132,11 +1132,13 @@ def settings_channels_page():
                     requestedVanityURL = request.form['vanityURL']
                     requestedVanityURL = re.sub('[^A-Za-z0-9]+', '', requestedVanityURL)
                     if requestedVanityURL != '':
-                        existingChannnelQuery = Channel.Channel.query.filter_by(vanityURL=requestedVanityURL).first()
+                        existingChannnelQuery = Channel.Channel.query.filter_by(
+                            vanityURL=requestedVanityURL).filter(Channel.Channel.id != requestedChannel.id ).first()
+
                         if existingChannnelQuery is None:
                             vanityURL = requestedVanityURL
                         else:
-                            flash("Short link not saved. Link with same name exists!", "error")
+                            flash("ERROR! Short link not saved. Link with same name exists!", "ERROR")
 
                 requestedChannel.vanityURL = vanityURL
 
