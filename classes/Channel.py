@@ -69,6 +69,8 @@ class Channel(db.Model):
         self.rtmpRestreamDestination = ""
         self.xmppToken = str(os.urandom(32).hex())
         self.vanityURL = None
+        self.Nsubscriptions = 0
+        self.notificationsLastSentTime = "2020-01-01 00:00:00"
 
     def __repr__(self):
         return '<id %r>' % self.id
@@ -95,7 +97,9 @@ class Channel(db.Model):
             'recordedVideoIDs': [obj.id for obj in self.recordedVideo],
             'upvotes': self.get_upvotes(),
             'protected': self.protected,
-            'vanityURL': self.vanityURL
+            'vanityURL': self.vanityURL,
+            'Nsubscriptions': self.Nsubscriptions,            
+            'notificationsLastSentTime': self.notificationsLastSentTime
         }
 
     def authed_serialize(self):
