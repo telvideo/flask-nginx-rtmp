@@ -363,6 +363,8 @@ def getrtmpServer(calledby ):
     #return (rList )
 
     if (grtmpServerSettings == []):
+        #system.newLog(1, "getrtmpServer Inside ************************* = " + calledby) 
+
         tempServerSettingsList = rtmpServer.query.all() 
 
         for server in tempServerSettingsList:
