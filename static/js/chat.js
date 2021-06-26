@@ -247,9 +247,11 @@ function room_pres_handler(a, b, c) {
       } else if (status.includes("301")) {
           msg = Strophe.getResourceFromJid(from) + " was banned from the room.";
       } else {
-          msg = Strophe.getResourceFromJid(from) + " has left the room.";
+          msg = "" //Strophe.getResourceFromJid(from) + " has left the room.";
       }
-      serverMessage(msg);
+      if (msg != "") {
+        serverMessage(msg);
+      }
   //} else if (presenceType == 'online') {
   //    msg = Strophe.getResourceFromJid(from) + " joined the room.";
   //    serverMessage(msg);
