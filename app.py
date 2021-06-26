@@ -268,7 +268,7 @@ if r.get('OSP_XMPP_INIT_HANDLER') is None:
     print({"level": "info", "message": "Performing XMPP Sanity Checks"})
     from functions import xmpp
     try:
-        results = True #xmpp.sanityCheck()
+        results = xmpp.sanityCheck()
     except Exception as e:
         print({"level": "error", "message": "XMPP Sanity Check Failed - " + str(e)})
         r.delete('OSP_XMPP_INIT_HANDLER')
