@@ -64,7 +64,7 @@
             {% endif %}
           </span>
           <span class="d-none d-md-inline float-right index-video-views">
-            {% if video.channel.protected and sysSettings.protectionEnabled %}
+            {% if video.channelProtected and sysSettings.protectionEnabled %}
                 <span class="badge badge-warning mx-4">
                     <i class="fas fa-user-lock"></i><span class="d-none d-sm-none d-md-inline"> Protected</span>
                 </span>
@@ -101,22 +101,22 @@
         <div class="metadata-panel col-12 shadow channel-metadata-container">
             <span class="subscriptionContainer">
                 {% if current_user.is_authenticated %}
-                <button id="chanSubStateButton" class="btn btn-sm {% if subState == True %} btn-success {% else %} btn-outline-success {% endif %}" onclick='toggleChannelSub("{{video.channel.id}}")'>{% if subState == True %}<i class="fas fa-star"></i><span class="d-none d-sm-none d-md-inline"> Unsubscribe</span>{% else %}<i class="far fa-star"></i><span class="d-none d-sm-none d-md-inline"> Subscribe</span>{% endif %}</button>
+                <button id="chanSubStateButton" class="btn btn-sm {% if subState == True %} btn-success {% else %} btn-outline-success {% endif %}" onclick='toggleChannelSub("{{video.channelID}}")'>{% if subState == True %}<i class="fas fa-star"></i><span class="d-none d-sm-none d-md-inline"> Unsubscribe</span>{% else %}<i class="far fa-star"></i><span class="d-none d-sm-none d-md-inline"> Subscribe</span>{% endif %}</button>
                 {% else %}
                 <button class="btn btn-sm btn-outline-secondary disabled" disabled><i class="far fa-star"></i><span class="d-none d-sm-none d-md-inline"> Subscribe</span></button>
                 {% endif %}
             </span>
             <div class="channel-metadata float-left">
-                <img class="userPhoto shadow" src="/images/{{video.channel.owner.pictureLocation}}" alt="UserPicture" onerror="this.src='/static/img/user2.png';">
-            </div>
+          {#      <img class="userPhoto shadow" src="/images/{{video.channel.owner.pictureLocation}}" alt="UserPicture" onerror="this.src='/static/img/user2.png';">
+          #}  </div>
             <span>
-                <div class="index-channel-name"><b><a href="/channel/{{video.channel.id}}/">{{video.channel.channelName}}</a></b></div>
-                <div class="index-channel-user"><b>{{ video.channel.owner.username }}</b></div>
-            </span>
+                <div class="index-channel-name"><b><a href="/channel/{{video.channelID}}/">{{video.channelName.channelName}}</a></b></div>
+        {#        <div class="index-channel-user"><b>{{ video.channel.owner.username }}</b></div>
+        #}    </span>
         </div>
         <div class="metadata-subpanel shadow">
-            <div class="channeldescription"><p>{{video.channel.description|markdown}}</p></div>
-        </div>
+        {#    <div class="channeldescription"><p>{{video.channel.description|markdown}}</p></div>
+       #} </div>
       </div>
     </div>
     <div id="right_column" class="comments_column col-xl-3 col-lg-5 col-sm-12 col-xs-12">
@@ -147,7 +147,7 @@
                       {% else %} <button type="button" id="commentUpvoteButton-{{comment.id}}" type="button" class="btn btn-outline-success shadow" onclick="changeUpvote('comment',{{comment.id}});"> <i id="commentUpvoteIcon-{{comment.id}}"
                           class="far fa-thumbs-up"></i>
                         {% endif %}
-                        <span id="upvoteTotalComments-{{comment.id}}">{{comment.upvotes|length}}</span></button>
+                        <span id="upvoteTotalComments-{{comment.id}}">{{comment.NupVotes}}</span></button>
                       {% if video.owningUser == current_user.id or current_user.has_role('Admin') or comment.userID == current_user.id %}
                       <a href="/play/{{video.id}}/comment?action=delete&commentID={{comment.id}}" class="btn btn-danger shadow"><i class="fas fa-trash-alt"></i></a>
                       {% endif %}

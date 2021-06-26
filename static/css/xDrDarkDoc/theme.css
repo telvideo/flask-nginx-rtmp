@@ -713,6 +713,12 @@ a:link {
       padding-top: 10px !important;
       padding-bottom: 10px !important;
   }
+  .pro-carousel-discord {
+    /*    height: 400px !important; 
+      */  height: calc(100vh /2)  !important;
+          padding-top: 10px !important;
+          padding-bottom: 10px !important;
+      }
 
   .index-live-title {
       font-size:1.35em;

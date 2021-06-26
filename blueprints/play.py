@@ -66,7 +66,7 @@ def view_vid_page(videoID):
         "channelID":recordedVid.channelID,
 
         "channelProtected":chanQuery.protected,
-        "channelName":chanQuery.channelName,
+    #    "channelName":chanQuery.channelName,
         "nChannelSubs":chanQuery.Nsubscriptions,
         
 

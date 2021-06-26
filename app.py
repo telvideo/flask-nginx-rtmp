@@ -268,7 +268,7 @@ if r.get('OSP_XMPP_INIT_HANDLER') is None:
     print({"level": "info", "message": "Performing XMPP Sanity Checks"})
     from functions import xmpp
     try:
-        results = xmpp.sanityCheck()
+        results = True #xmpp.sanityCheck()
     except Exception as e:
         print({"level": "error", "message": "XMPP Sanity Check Failed - " + str(e)})
         r.delete('OSP_XMPP_INIT_HANDLER')
@@ -579,7 +579,7 @@ try:
 except:
     pass
 if __name__ == '__main__':
-    app.jinja_env.auto_reload = False
-    app.config['TEMPLATES_AUTO_RELOAD'] = False
+    app.jinja_env.auto_reload = True
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
     socketio.run(app, debug=config.debugMode)
     

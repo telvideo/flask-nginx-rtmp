@@ -982,4 +982,10 @@ body {
 
 }
 
+.verfiedIcon {
+    width: 30px !important ; 
+    height: 30px !important;
+    padding:0px !important;
+    margin:0px !important;
+}
 

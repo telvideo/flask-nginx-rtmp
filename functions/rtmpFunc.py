@@ -212,7 +212,7 @@ def rtmp_user_deauth_check(key, ipaddress):
                     newVideoUpvote = upvotes.videoUpvotes(upvote.userID, pendingVideo.id)
                     db.session.add(newVideoUpvote)
 
-                pendingVideo.NupVotes = len(streamUpvotes) #copy over from stream
+                pendingVideo.NupVotes = stream.NupVotes #copy over from stream
                 db.session.commit()
 
             topicName = "Unknown"
@@ -221,7 +221,7 @@ def rtmp_user_deauth_check(key, ipaddress):
                 topicName = topicQuery.name
 
             newStreamHistory = logs.streamHistory(stream.uuid, stream.channel.owningUser, stream.channel.owner.username, stream.linkedChannel, stream.channel.channelName, stream.streamName,
-                                                  stream.startTimestamp, endTimestamp, stream.totalViewers, stream.get_upvotes(), wasRecorded, stream.topic, topicName, recordingID)
+                                                  stream.startTimestamp, endTimestamp, stream.totalViewers, stream.NupVotes, wasRecorded, stream.topic, topicName, recordingID)
             db.session.add(newStreamHistory)
             db.session.commit()
 

@@ -33,7 +33,7 @@
   <div class="row">
     <div class="col-lg col-xs-12 col-sm-12">
       <div class="index-video-title ml-1 my-1">
-        <span class="float-left" id="channelName"><h3>{{video.channelName}}</h3></span>{% if video.ChannelProtected and sysSettings.protectionEnabled %}<h6 style="display: inline; margin: 0px;"><span class="liveindicator badge badge-info float-left m-2"><i class="fas fa-user-lock"></i>
+        <span class="float-left" id="channelName"><h3>{{video.channelName}}</h3></span>{% if video.channelProtected and sysSettings.protectionEnabled %}<h6 style="display: inline; margin: 0px;"><span class="liveindicator badge badge-info float-left m-2"><i class="fas fa-user-lock"></i>
             <span class="d-none d-sm-none d-md-inline">Protected</span></span></h6>{% endif %}
       </div>
     </div>
@@ -135,7 +135,7 @@
                   {% if check_isCommentUpvoted(comment.id) %}<button id="commentUpvoteButton-{{comment.id}}" type="button" class="btn btn-success" onclick="changeUpvote('comment',{{comment.id}});"> <i id="commentUpvoteIcon-{{comment.id}}" class="fas fa-thumbs-up"></i>
                     {% else %} <button type="button" id="commentUpvoteButton-{{comment.id}}" type="button" class="btn btn-outline-success" onclick="changeUpvote('comment',{{comment.id}});"> <i id="commentUpvoteIcon-{{comment.id}}" class="far fa-thumbs-up"></i>
                       {% endif %}
-                      <span id="upvoteTotalComments-{{comment.id}}"> {# {{comment.upvotes|length}} #} {{comment.NupVotes}}</span></button>
+                      <span id="upvoteTotalComments-{{comment.id}}">{{comment.NupVotes}}</span></button>
                     {% if video.owningUser == current_user.id or current_user.has_role('Admin') or comment.userID == current_user.id %}
                     <button type="button" data-id="{{comment.id}}" class="deleteComment btn btn-danger shadow" data-toggle="modal" data-target="#deleteCommentModal">
                       <i class="fas fa-trash-alt"></i>

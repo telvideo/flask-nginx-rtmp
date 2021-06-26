@@ -26,7 +26,9 @@ def channels_page():
             Channel.Channel.views,
             Channel.Channel.channelName,
             Channel.Channel.imageLocation,
+            Channel.Channel.owningUser,
             Sec.User.username,
+            Sec.User.pictureLocation,
             Channel.Channel.id).order_by(Channel.Channel.channelName.desc()).all()
       
 
@@ -45,13 +47,15 @@ def channels_page():
             
         aChan = {"protected":chan.protected,
         "id":chan.id,
+        "owningUser":chan.owningUser,
         "Nsubscriptions":chan.Nsubscriptions,
         "views":chan.views,
         "imageLocation":chan.imageLocation,
         "channelName":chan.channelName,
         "topic":chan.topic,
         "username":chan.username,
-        "isStreaming":isStreaming}
+        "isStreaming":isStreaming,
+        "pictureLocation":chan.pictureLocation}
 #            "totalViewers":achan.totalViewers,
 #            "username": achan.username,
 #            "channelName":achan.channelName,
@@ -69,11 +73,10 @@ def channel_view_page(chanID):
     if channelData is not None:
 
         openStreams = Stream.Stream.query.filter_by(linkedChannel=chanID).all()
-        recordedVids = RecordedVideo.RecordedVideo.query.filter_by(channelID=chanID, pending=False, published=True).all()
+        recordedVids = RecordedVideo.RecordedVideo.query.filter_by(channelID=chanID, pending=False, published=True).order_by(
+            RecordedVideo.RecordedVideo. videoDate.desc()).all()
 
-        # Sort Video to Show Newest First
-        recordedVids.sort(key=lambda x: x.videoDate, reverse=True)
-
+       
         clipsList = []
         for vid in recordedVids:
             for clip in vid.clips:

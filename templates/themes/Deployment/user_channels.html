@@ -35,7 +35,7 @@
                             <i class="fas fa-users"></i> {{channel.views}}
                         </div>
                         <div class="col-12 col-md-4">
-                            <i class="fas fa-star"></i> {{channel.subscriptions|length}}
+                            <i class="fas fa-star"></i> {{channel.Nsubscriptions}}
                         </div>
                     </div>
                 </div>
@@ -87,7 +87,7 @@
                             <span id="vidDescription-{{video.id}}" class="d-none">{{video.description}}</span>
                             <span id="vidAllowComments-{{video.id}}" class="d-none">{{video.allowComments}}</span>
                             <h5><i class="fas fa-users"></i> {{video.views}}</h5>
-                            <h5><i class="far fa-thumbs-up"></i> {{video.upvotes|length}}</h5>
+                            <h5><i class="far fa-thumbs-up"></i> {{video.NupVotes}}</h5>
                             <h5><i class="far fa-comment-alt"></i> {{video.comments|length}}</h5>
                             <div class="form-group row">
                                 <div class="col-6">
@@ -130,7 +130,7 @@
                             <h5><i class="far fa-clock mr-1"></i>{{clip.length|hms_format}}</h5>
                             <span id="clipDescription-{{clip.id}}" class="d-none">{{clip.description}}</span>
                             <h5><i class="fas fa-users"></i> {{clip.views}}</h5>
-                            <h5><i class="far fa-thumbs-up"></i> {{clip.upvotes|length}}</h5>
+                            <h5><i class="far fa-thumbs-up"></i> {{clip.NupVotes}}</h5>
                             <div class="form-group row">
                                 <div class="col-6">
                                     <label for="clipPublished-{{clip.id}}" class="col-form-label"><b>Published? </b></label>
