@@ -98,8 +98,7 @@ class Channel(db.Model):
             'upvotes': self.get_upvotes(),
             'protected': self.protected,
             'vanityURL': self.vanityURL,
-            'Nsubscriptions': self.Nsubscriptions,            
-            'notificationsLastSentTime': self.notificationsLastSentTime
+            'Nsubscriptions': self.Nsubscriptions
         }
 
     def authed_serialize(self):
