@@ -34,13 +34,13 @@ def newRestream(message):
                 db.session.close()
                 return abort(401)
 
-            if count > 0 and userQuery.verified==0:            
-                system.newLog(1, "Restream config: " + theUserName + " tried to add = " + url) 
+            if count >= 2 and userQuery.verified==0:            
+                system.newLog(1, "Restream config: non verified " + theUserName + " tried to add = " + url) 
                 db.session.commit()
                 db.session.close()
                 return abort(401)
 
-            if count >= 8:  # sets max restreams a verified user can have
+            if count >= 5:  # sets max restreams a verified user can have
                 system.newLog(1, "Restream config: " + theUserName + " tried to add too many restreams = " + url) 
                 db.session.commit()
                 db.session.close()
