@@ -7,7 +7,8 @@ from classes import upvotes
 from classes import notifications
 from classes import RecordedVideo
 from classes import comments
-
+from classes import Stream
+#from functions import system
 
 @socketio.on('getUpvoteTotal')
 def handle_upvote_total_request(streamData):
@@ -22,16 +23,20 @@ def handle_upvote_total_request(streamData):
 
     if vidType == 'stream':
         loc = str(loc)
-        channelQuery = Channel.Channel.query.filter_by(channelLoc=loc).first()
-        if channelQuery.stream:
-            stream = channelQuery.stream[0]
-#            totalQuery = upvotes.streamUpvotes.query.filter_by(streamID=stream.id).count()
 
-            totalQuery = stream.NupVotes  #Boggs
-            try:
-                myVoteQuery = upvotes.streamUpvotes.query.filter_by(userID=current_user.id, streamID=stream.id).first()
-            except:
-                pass
+        #system.newLog(1, "Before :" + loc)
+   
+        theStream = Stream.Stream.query.join(Channel.Channel, Channel.Channel.id == Stream.Stream.linkedChannel) \
+            .with_entities(Stream.Stream.id, Stream.Stream.NupVotes) \
+            .filter_by(Channel.Channel.channelLoc==loc).first()
+
+        #system.newLog(1, "Aftr :" +loc )
+
+        try:
+            totalQuery = theStream.NupVotes
+            myVoteQuery = upvotes.streamUpvotes.query.filter_by(userID=current_user.id, streamID=theStream.id).with_entities(upvotes.streamUpvotes.id).first()
+        except:
+            pass
 
     elif vidType == 'video':
         loc = int(loc)

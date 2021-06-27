@@ -41,5 +41,5 @@ class api_1_Rtmp(Resource):
         rtmpList = settings.getrtmpServer("server_ns.py api_1_Rtmp(Resource)")
 
         
-        #db.session.commit()
+        db.session.commit()
         return {'results': [ob.serialize() for ob in rtmpList]}

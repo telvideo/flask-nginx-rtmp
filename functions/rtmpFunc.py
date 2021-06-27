@@ -187,10 +187,20 @@ def rtmp_user_deauth_check(key, ipaddress):
     currentTime = datetime.datetime.utcnow()
 
     authedStream = Stream.Stream.query.filter_by(streamKey=key).all()
-
-    channelRequest = Channel.Channel.query.filter_by(streamKey=key).first()
+    
+    #system.newLog(0, "NEW CODE Before")
 
     if authedStream is not []:
+        channelRequest = Channel.Channel.query.with_entities(
+            Channel.Channel.id,
+            Channel.Channel.imageLocation,
+            Channel.Channel.channelName,
+            Channel.Channel.topic,
+            Channel.Channel.description,
+            Channel.Channel.owningUser,
+            Channel.Channel.channelLoc).filter_by(streamKey=key).first()
+
+       
         for stream in authedStream:
             streamUpvotes = upvotes.streamUpvotes.query.filter_by(streamID=stream.id).all()
             pendingVideo = RecordedVideo.RecordedVideo.query.filter_by(channelID=channelRequest.id, videoLocation="", originalStreamID=stream.id).first()
@@ -215,10 +225,13 @@ def rtmp_user_deauth_check(key, ipaddress):
                 pendingVideo.NupVotes = stream.NupVotes #copy over from stream
                 db.session.commit()
 
-            topicName = "Unknown"
-            topicQuery = topics.topics.query.filter_by(id=stream.topic).first()
-            if topicQuery is not None:
-                topicName = topicQuery.name
+            #system.newLog(0, "NEW CODE Middle.")        
+#            topicName = "Unknown"
+
+            topicName = templateFilters.get_topicName(stream.topic)
+#            topicQuery = topics.topics.query.filter_by(id=stream.topic).first()
+#            if topicQuery is not None:
+#                topicName = topicQuery.name
 
             newStreamHistory = logs.streamHistory(stream.uuid, stream.channel.owningUser, stream.channel.owner.username, stream.linkedChannel, stream.channel.channelName, stream.streamName,
                                                   stream.startTimestamp, endTimestamp, stream.totalViewers, stream.NupVotes, wasRecorded, stream.topic, topicName, recordingID)
@@ -242,10 +255,13 @@ def rtmp_user_deauth_check(key, ipaddress):
                        channeldescription=str(channelRequest.description),
                        streamname=stream.streamName,
                        streamurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/view/" + channelRequest.channelLoc),
-                       streamtopic=templateFilters.get_topicName(stream.topic),
+                       streamtopic=topicName,
                        streamimage=(sysSettings.siteProtocol + sysSettings.siteAddress + "/stream-thumb/" + str(channelRequest.channelLoc) + ".png"))
         returnMessage = {'time': str(currentTime), 'request': 'StreamClose', 'success': True, 'channelLoc': channelRequest.channelLoc, 'ipAddress': str(ipaddress), 'message': 'Success - Stream Closed'}
         db.session.close()
+
+        #system.newLog(0, "NEW CODE DONE!!")
+
         return returnMessage
     else:
         returnMessage = {'time': str(currentTime), 'request': 'StreamClose', 'success': False, 'channelLoc': None, 'ipAddress': str(ipaddress), 'message': 'Failed - No Stream Listed Under Key'}
@@ -260,6 +276,16 @@ def rtmp_rec_Complete_handler(channelLoc, path):
     currentTime = datetime.datetime.utcnow()
 
     requestedChannel = Channel.Channel.query.filter_by(channelLoc=channelLoc).first()
+
+#    requestedChannel = Channel.Channel.query.with_entities(
+#            Channel.Channel.id,
+#            Channel.Channel.imageLocation,
+#            Channel.Channel.channelName,
+#            Channel.Channel.topic,
+#            Channel.Channel.description,
+#            Channel.Channel.channelLoc).filter_by(streamKey=key).first()
+
+
 
     if requestedChannel is not None:
 
@@ -320,11 +346,12 @@ def rtmp_rec_Complete_handler(channelLoc, path):
                              "<html><body><img src='" + sysSettings.siteProtocol + sysSettings.siteAddress + sysSettings.systemLogo + "'><p>Channel " + requestedChannel.channelName + " has posted a new video titled <u>" + pendingVideo.channelName +
                              "</u> to the channel.</p><p>Click this link to watch<br><a href='" + sysSettings.siteProtocol + sysSettings.siteAddress + "/play/" + str(pendingVideo.id) + "'>" + pendingVideo.channelName + "</a></p>")
 
-        while not os.path.exists(fullVidPath):
+        db.session.close()
+        while not os.path.exists(fullVidPath): # WTF is this???
             time.sleep(1)
 
         returnMessage = {'time': str(currentTime), 'request': 'RecordingClose', 'success': True, 'channelLoc': requestedChannel.channelLoc, 'ipAddress': None, 'message': 'Success - Recorded Video Processing Complete'}
-        db.session.close()
+        
         return returnMessage
     else:
         returnMessage = {'time': str(currentTime), 'request': 'RecordingClose', 'success': False, 'channelLoc': channelLoc, 'ipAddress': None, 'message': 'Failed - Requested Channel Does Not Exist'}

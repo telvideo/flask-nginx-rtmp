@@ -52,14 +52,18 @@ def check_isValidChannelViewer(channelID):
             session['inviteCodes'] = []
     return False
 
+#from functions import system
+
 @limiter.limit("100/second")
 def check_isUserValidRTMPViewer(userID,channelID):
+
+    #system.newLog(1, "Before :")
     userQuery = Sec.User.query.filter_by(id=userID).with_entities(Sec.User.id).first()
     if userQuery is not None:
         channelQuery = Channel.Channel.query.filter_by(id=channelID).with_entities(Channel.Channel.owningUser).first()
         if channelQuery is not None:
             if channelQuery.owningUser is userQuery.id:
-                #db.session.close()
+                db.session.close()
                 return True
             else:
                 inviteQuery = invites.invitedViewer.query.filter_by(userID=userQuery.id, channelID=channelID).all()

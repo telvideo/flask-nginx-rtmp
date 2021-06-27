@@ -158,3 +158,21 @@ for vid in vidList:
 
 
 mysqldump -u doadmin -p -h prohibited-database-do-user-8018941-0.b.db.ondigitalocean.com -P 25060 --single-transaction --set-gtid-purged=OFF osp > /var/www/database_file.sql
+
+
+
+
+ if vidType == 'stream':
+       # loc = str(loc)
+        #channelQuery = Channel.Channel.query.filter_by(channelLoc=loc).first()
+        if True: #channelQuery.stream:
+           # stream = channelQuery.stream[0]
+#            totalQuery = upvotes.streamUpvotes.query.filter_by(streamID=stream.id).count()
+
+            #system.newLog(1, "STREAM:" + str(stream.id))
+            system.newLog(1, "STREAM:" + str(Nloc))
+           
+            totalQuery = stream.NupVotes  #Boggs
+            try:
+                myVoteQuery = upvotes.streamUpvotes.query.filter_by(userID=current_user.id, streamID=Nloc).first()
+            except:
