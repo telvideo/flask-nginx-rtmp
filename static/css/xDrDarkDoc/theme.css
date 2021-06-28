@@ -61,10 +61,23 @@
 .btnSizer{
   /*background:url("/static/img/verified-badge.png") no-repeat left center; */
   padding:0px;
+  margin: 0px;
+
   height: 8vh !important;
   width: 8vh !important;
-  font-size: 2vh;
+  font-size: 2.2vh;
 }  
+.MoneySizer{
+  /*background:url("/static/img/verified-badge.png") no-repeat left center; */
+  padding:0px;
+  margin: 0px;
+  height: 8vh !important;
+  width: 8vh !important;
+  vertical-align: middle;    
+
+  font-size: 5vh;
+}  
+
 
 .liveText{
   font-size: 2.1vw !important;

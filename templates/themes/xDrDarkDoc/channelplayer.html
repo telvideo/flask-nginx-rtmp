@@ -153,10 +153,11 @@
                 
                         {% if streamer.donationURL != None %}
 
-                        <a href={{streamer.donationURL}} class="float-right btn btn-primary btnSizer" target="_blank">                        
-                            <img class="btnSizer" src="/static/img/P_COIN.png" alt="Donate" title="Donate to {{channel.channelName}}">                       
+                        <a href={{streamer.donationURL}} class="float-right" target="_blank">                        
+                            <button id="give1000Button" title="Donate to {{channel.channelName}}" type="button" 
+                            class="btn  MoneySizer btn-primary">$</button>
                         </a>
-
+                        
                         {% endif %}
                         
                         {% if channel.owningUser == current_user.id %}
@@ -305,12 +306,13 @@
                                     <input id="chatinput" type="text" class="form-control btnSizer" maxlength="420"
                                         autocomplete="off">
                                     <div class="input-group-append">
-                                     <!--   <button type="button" class=" btn btn-success form-control btnSizer"
+                                           <button type="button" class=" btn btn-success MoneySizer"
                                             id="openEmojiButton"><i class="far fa-smile"></i></button>
-                                     -->
+                                     <!---
                                         <button type="button" class=" btn form-control btnSizer" id="openEmojiButton"> 
                                             <img class="btnSizer" src="/static/img/Mascot_1.png" alt="Emoji">
                                         </button>
+                                    -->
                                         <!---<button type="button" class=" btn btn-primary form-control" id="sendChat"
                                        onclick="sendMessage();"><i class="fas fa-paper-plane"></i></button>
 -->
