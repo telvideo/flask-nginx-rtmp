@@ -14,14 +14,14 @@
   --NotificationRatio:25;
 /*  --TopBarHeight:calc(100vh / var(--TopBarRatio));*/ 
 
-  --TopBarHeight:calc(7vh);
-  --chanTopBarHeight:calc(5vh);
+  --TopBarHeight:7vh;
+  --chanTopBarHeight:5vh;
 
   --TopAddon:calc(var(--TopBarHeight) + 39px );
 
   --VideoTopAddon:calc(var(--TopBarHeight) + var(--chanTopBarHeight) + 1vh );
 
-  --ChatTextSize: 2vh;
+  --ChatTextSize: 1.4vw;
 
   --sideBarWidth: 5vw;
 }
@@ -49,13 +49,13 @@
 
 .chpText{
   padding:0px;
-  font-size: 3vh;
+  font-size: 2vw;
 }
 
 .chpDescText{
   padding:0px;
   margin: 0px;
-  font-size: 3vh;
+  font-size: 4.5vw;
 }
 
 .btnSizer{
@@ -63,35 +63,35 @@
   padding:0px;
   margin: 0px;
 
-  height: 8vh !important;
-  width: 8vh !important;
-  font-size: 2.2vh;
+  height: 4vw !important;
+  width: 4vw !important;
+  font-size: 1.4vw;
 }  
 .MoneySizer{
   /*background:url("/static/img/verified-badge.png") no-repeat left center; */
   padding:0px;
   margin: 0px;
-  height: 8vh !important;
-  width: 8vh !important;
-  vertical-align: middle;    
+  height: 4vw !important;
+  width: 4vw !important;
 
-  font-size: 5vh;
+  
+  font-size: 2.5vw;
 }  
 
 
 .liveText{
   font-size: 2.1vw !important;
-  font-size: x-small;
+ /* font-size: x-small;*/
   color: white;
   font-family: "Bomber";
   padding:0px !important;
   margin:0px !important;
   border: 0 !important ;
  /* background-color: hotpink !important; */
-  line-height: 3.3vh;
-  padding-top: 0.2vw !important;
-  padding-bottom: 0.2vw !important;
-
+ /* line-height: 3.3vw;
+ /* padding-top: 0.2vh !important;
+  padding-bottom: 0.2vh !important;
+*/
 }
 
 
@@ -162,9 +162,10 @@
 
 .sidenav a {
 /*  padding: 8px 8px 8px 32px; */
-
+  padding: 0px;
+  margin: 0px;
   text-decoration: none;
-  font-size: 2vh;
+/*  font-size: 3vw; */
   color: var(--PDBBlue) !important;
   display: block;
   transition: 0.5s;
@@ -381,10 +382,10 @@ a:link {
     padding-right: 0.8vw !important;
     /*padding-left: 2vw !important;*/
 
-    font-size: 4.8vh !important;
+    font-size: 3.0vw !important;
     
   
-    border-radius: 2vh;
+    border-radius: 2vw;
     border-style: none;
     
     
@@ -1014,7 +1015,7 @@ a:link {
       }
       
       .chatPanel .chatFooter .chatFooterTop {
-        height: 0.5vh;
+        height: 0.5vw;
       }
       
       .chatMembersOverlay {
@@ -1124,7 +1125,7 @@ a:link {
   
   .channeldescription p{
       white-space: pre-wrap;
-      font-size: 2.5vh;
+      font-size: 1.9vw;
       /*line-height: 1.2;
       */
       
