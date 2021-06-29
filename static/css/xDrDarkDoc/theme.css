@@ -21,7 +21,7 @@
 
   --VideoTopAddon:calc(var(--TopBarHeight) + var(--chanTopBarHeight) + 1vh );
 
-  --ChatTextSize: 1.4vw;
+  --ChatTextSize: 1.2vw;
 
   --sideBarWidth: 5vw;
 }
