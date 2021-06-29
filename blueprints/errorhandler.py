@@ -18,7 +18,7 @@ def page_not_found(e):
 
     stri ="420 {} {} {} \n".format(tDate, request.referrer, request.url)
 
-    f = open("/var/www/dicks.txt", "a")
+    f = open("/var/www/420dicks.txt", "a")
     f.write(stri)
     f.close()
 
