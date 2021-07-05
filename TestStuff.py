@@ -154,7 +154,6 @@ for vid in vidList:
 
 
 
-#mysqldump -u doadmin -p -h prohibited-database-do-user-8018941-0.b.db.ondigitalocean.com -P 25060 --single-transaction --set-gtid-purged=OFF osp > /var/www/database_file.sql
 
 
 

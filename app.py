@@ -480,46 +480,44 @@ def do_before_request():
 
 # **************************************************************************************************************
 # Boggs custom hack to dodge whatever is going on when it's not us making this request.. idk why it's not us?????????
-    name = str(request.url)
-
-    if "icon" in name:
-        fred =123
+#    name = str(request.url)
 
 
-    if name.startswith("https"):  #trim https or http
-        name= name[8:]
-    else:
-        name= name[7:] #must be "http"
+
+#   if name.startswith("https"):  #trim https or http
+#        name= name[8:]
+#    else:
+#        name= name[7:] #must be "http"
        
-    isUs = False
-    if name.startswith("127.0.0.1"):
-        isUs = True
-    else:
-        if name.startswith("prohibited.tv"): 
-            isUs = True        
-        else: 
-            if name.startswith("signal.prohibited.tv"): 
-                isUs = True        
-            else:
-                if name.startswith("socket_nodes/auth"):
-                    isUs = True
-                else:    
-                    if name.startswith("discordapp.com"):
-                        isUs =True
-                    else:
-                        if name.startswith("www.proboggs.com"): 
-                            isUs = True
-                        else:    
-                            if name.startswith("www.bobross.tv"): 
-                                isUs = True            
+#    isUs = False
+#    if name.startswith("127.0.0.1"):
+#        isUs = True
+#    else:
+#        if name.startswith("yoursite.tv"): 
+#            isUs = True        
+#        else: 
+#            if name.startswith("signal.yoursite.tv"): 
+#                isUs = True        
+#            else:
+#                if name.startswith("socket_nodes/auth"):
+#                    isUs = True
+#                else:    
+#                    if name.startswith("discordapp.com"):
+#                        isUs =True
+#                    else:
+#                        if name.startswith("www.proboggs.com"): 
+#                            isUs = True
+#                        else:    
+#                            if name.startswith("www.bobross.tv"): 
+ #                               isUs = True            
 
 
  #  print(name)
   #  if isUs == False:
-  #      print(str({'69 lol error': 'smoked (prohibited)', 'reason': 420}))
+  #      print(str({'69 lol error': 'smoked (gone)', 'reason': 420}))
 
 
- #       return str({'69 lol error': 'smoked (prohibited)', 'reason': 420})
+ #       return str({'69 lol error': 'smoked (gone)', 'reason': 420})
 
 
     # Check all IP Requests for banned IP Addresses
@@ -530,11 +528,11 @@ def do_before_request():
 
     tDate = datetime.datetime.utcnow()
 
-    if isUs == False:
-        stri ="WTF {} {} {} {}\n".format(tDate, requestIP,  name, request.referrer)
-        f = open("/var/www/dicks.txt", "a")
-        f.write(stri)
-        f.close()
+#    if isUs == False:
+#        stri ="WTF {} {} {} {}\n".format(tDate, requestIP,  name, request.referrer)
+#        f = open("/var/www/dicks.txt", "a")
+#        f.write(stri)
+#        f.close()
 
     if requestIP != "127.0.0.1":
         try:

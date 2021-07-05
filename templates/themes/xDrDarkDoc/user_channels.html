@@ -19,12 +19,12 @@
                 <span class="float-right"><button class="btn btn-success" data-toggle="modal" data-target="#newChannelModal"><i class="fas fa-plus"></i> Create Channel</button></span>
             </div>
             
-            <label  class="col-form-label"><b>Prohibited RTMP Server</b></label>
+            <label  class="col-form-label"><b> RTMP Server</b></label>
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
                     <button type="button" class="btn btn-primary" onclick="CopyAPI('rtmpKey')"><i class="fas fa-copy"></i></button>
                 </div>
-                <input type="text" class="form-control" name="streamKey" id="rtmpKey" value="rtmp://signal.prohibited.tv/stream" required readonly aria-describedby="generateGUID required">
+                <input type="text" class="form-control" name="streamKey" id="rtmpKey" value="rtmp://your address/stream" required readonly aria-describedby="generateGUID required">
             </div>
 
         {% for channel in channels %}
