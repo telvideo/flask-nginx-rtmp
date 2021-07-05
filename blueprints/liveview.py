@@ -231,13 +231,6 @@ def view_page(loc):
                             "id"           :chan.id}
                     subslist.append(aChan)
 
-#            subState = False
-#            if current_user.is_authenticated:
-#                chanSubQuery = subscriptions.channelSubs.query.filter_by(channelID=requestedChannel.id, userID=current_user.id).first()
-#                if chanSubQuery is not None:
-#                    subState = True
-
-
           #  streamQuery = Stream.Stream.query.order_by(Stream.Stream.currentViewers).all()
             streamQuery = Stream.Stream.query.join(Channel.Channel, Channel.Channel.id == Stream.Stream.linkedChannel) \
             .join(Sec.User, Sec.User.id == Channel.Channel.owningUser).with_entities(Stream.Stream.id,
@@ -258,11 +251,8 @@ def view_page(loc):
                 Sec.User.username,
                 Channel.Channel.channelName
                 ).order_by(Stream.Stream.currentViewers.desc()).all()
-
-            ###
         
             streamList =  []
-
             for stre in streamQuery:
                 if stre.linkedChannel != requestedChannel.id:
                     aStream = {"streamName":stre.streamName,
