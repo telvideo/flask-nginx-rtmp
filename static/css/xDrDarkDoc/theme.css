@@ -8,11 +8,7 @@
   --PDLBlue: #1e90ff;
   --PDSlate: #414141;
   --PDSlateDark: #303030;
-  /*--background-image: url("/static/img/Mono_Dark_Background.png"); */
-
-  --TopBarRatio: 14;
-  --NotificationRatio:25;
-/*  --TopBarHeight:calc(100vh / var(--TopBarRatio));*/ 
+  --background-image: url("/static/img/logo.png"); 
 
   --TopBarHeight:7vh;
   --chanTopBarHeight:5vh;

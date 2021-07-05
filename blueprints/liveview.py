@@ -31,51 +31,35 @@ def view_page(loc):
     if ejabberdServer != "127.0.0.1" and ejabberdServer != "localhost":
         xmppserver = ejabberdServer
 
+    if sysSettings.systemTheme != "xDrDarkDoc":
+        requestedChannel = Channel.Channel.query.filter_by(channelLoc=loc).first()
+    else:
+        requestedChannel = Channel.Channel.query.filter_by(channelLoc=loc).with_entities(Channel.Channel.id,
+        Channel.Channel.owningUser,
+        Channel.Channel.streamKey,
+        Channel.Channel.channelName,
+        Channel.Channel.channelLoc,
+        Channel.Channel.topic,
+        Channel.Channel.views,
+        Channel.Channel.currentViewers,
+        Channel.Channel.chatEnabled,
+        Channel.Channel.chatLinks,
+        Channel.Channel.chatBG,
+        Channel.Channel.chatTextColor,
+        Channel.Channel.chatAnimation,
+        Channel.Channel.imageLocation,
+        Channel.Channel.offlineImageLocation,
+        Channel.Channel.description,
+        Channel.Channel.allowComments,
+        Channel.Channel.protected,
+        Channel.Channel.channelMuted,
+        Channel.Channel.showChatJoinLeaveNotification,
+        Channel.Channel.xmppToken,
+        Channel.Channel.Nsubscriptions,
+        Channel.Channel.vanityURL).first() 
+        
     #requestedChannel = Channel.Channel.query.filter_by(channelLoc=loc).first()
 
-    requestedChannel = Channel.Channel.query.filter_by(channelLoc=loc).with_entities(Channel.Channel.id,
-
-    #.join(subscriptions.channelSubs,subscriptions.channelSubs.channelID == Channel.Channel.id)
-    #    # .join(RecordedVideo.RecordedVideo, RecordedVideo.RecordedVideo.channelID == Channel.Channel.id)\
-    Channel.Channel.owningUser,
-    Channel.Channel.streamKey,
-    Channel.Channel.channelName,
-    Channel.Channel.channelLoc,
-    Channel.Channel.topic,
-    Channel.Channel.views,
-    Channel.Channel.currentViewers,
- #   Channel.Channel.record,
-    Channel.Channel.chatEnabled,
-    Channel.Channel.chatLinks,
-    Channel.Channel.chatBG,
-    Channel.Channel.chatTextColor,
-    Channel.Channel.chatAnimation,
-    Channel.Channel.imageLocation,
-    Channel.Channel.offlineImageLocation,
-    Channel.Channel.description,
-    Channel.Channel.allowComments,
-    Channel.Channel.protected,
-    Channel.Channel.channelMuted,
-    Channel.Channel.showChatJoinLeaveNotification,
-#    Channel.Channel.defaultStreamName,
-#    Channel.Channel.autoPublish,
-#    Channel.Channel.rtmpRestream,
-#    Channel.Channel.rtmpRestreamDestination,
-    Channel.Channel.xmppToken,
-  # subscriptions.channelSubs,
-#    Channel.Channel.stream,
-#    Channel.Channel.recordedVideo,
-#    Channel.Channel.upvotes,
-#    Channel.Channel.inviteCodes,
-#    Channel.Channel.invitedViewers,
-    Channel.Channel.Nsubscriptions,
-#    Channel.Channel.webhooks,
-#    Channel.Channel.restreamDestinations,
-#    Channel.Channel.chatStickers,
-
-    Channel.Channel.vanityURL).first() 
-
-        
     #####
     if requestedChannel is not None:
         if requestedChannel.protected and sysSettings.protectionEnabled:
@@ -102,8 +86,7 @@ def view_page(loc):
 
         # Stream URL Generation
         streamURL = ''
-#BOGGS We are not using this now...     edgeQuery = settings.edgeStreamer.query.filter_by(active=True).all()
-        edgeQuery = []
+        edgeQuery = settings.edgeStreamer.query.filter_by(active=True).all()
         
         if sysSettings.proxyFQDN != None:
             if sysSettings.adaptiveStreaming is True:
@@ -223,15 +206,16 @@ def view_page(loc):
                 rtmpURI = 'rtmp://' + sysSettings.siteAddress + ":1935/" + endpoint + "/" + requestedChannel.channelLoc
 
             clipsList = []
-    #        for vid in requestedChannel.recordedVideo:
-    #            for clip in vid.clips:
-    #                if clip.published is True:
-    #                    clipsList.append(clip)
-    #        clipsList.sort(key=lambda x: x.views, reverse=True)
+            if sysSettings.systemTheme != "xDrDarkDoc":
+                for vid in requestedChannel.recordedVideo:
+                    for clip in vid.clips:
+                        if clip.published is True:
+                            clipsList.append(clip)
+                clipsList.sort(key=lambda x: x.views, reverse=True)
 
             subState = False
 
-#            chanSubQuery = subscriptions.channelSubs.query.filter_by(userID=current_user.id).all()
+#           chanSubQuery = subscriptions.channelSubs.query.filter_by(userID=current_user.id).all()
             subslist = []
 
             if current_user.is_authenticated:
