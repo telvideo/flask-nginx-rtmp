@@ -8,7 +8,7 @@
   --PDLBlue: #1e90ff;
   --PDSlate: #414141;
   --PDSlateDark: #303030;
-  --background-image: url("/static/img/logo.png"); 
+  --background-image: url("/static/img/DarkBack.jpg"); 
 
   --TopBarHeight:7vh;
   --chanTopBarHeight:5vh;
@@ -133,6 +133,11 @@
   left: 0;
   color: var(--PDLBlue) !important;
   background-image: var(--background-image);
+
+  background-repeat: no-repeat;
+  background-attachment:fixed;
+  background-size: 20% 100%;
+
   overflow-x: hidden;
   transition: 0.5s;
   padding-top: 0px;
