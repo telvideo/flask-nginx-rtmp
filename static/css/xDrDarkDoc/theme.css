@@ -74,7 +74,7 @@
   font-size: 2.1vw !important;
  /* font-size: x-small;*/
   color: white;
-  font-family: "Bomber";
+  font-family: "LT Emphasis";
   padding:0px !important;
   margin:0px !important;
   border: 0 !important ;
@@ -90,7 +90,7 @@
   font-size: 0.75vw !important;
   
   color: white;
-  font-family: "Bomber";
+  font-family: "LT Emphasis";
   padding:0px !important;
   margin:0px !important;
   border: 0 !important ;
@@ -200,11 +200,6 @@
   src: url("/static/fonts/LT Emphasis.ttf");
 }
 
-@font-face {
-  font-family: "Bomber";
-  src: url("/static/fonts/Bomber TV DF.otf");
-}
-
 
 body::-webkit-scrollbar {
   width: 0 !important;
@@ -213,8 +208,8 @@ body::-webkit-scrollbar {
 
 body {
   font-family: "LT Emphasis";
-  /* font-family: "Bomber" */;
 
+  
   -ms-overflow-style: none;  
   scrollbar-width: none;
 
@@ -235,39 +230,39 @@ h1 {
   /*color: var(--PDLBlue);*/
   color: white;
 
-  font-family: "Bomber";
+  font-family: "LT Emphasis";
   text-transform: uppercase;
   text-shadow: 2px 2px 4px var(--PDDBlue);
 }
 
 h2 {
   color: white;
-  font-family: "Bomber";
+  font-family: "LT Emphasis";
   text-transform: uppercase;
 }
 
 h3 {
   color: white;
-  font-family: "Bomber";
+  font-family: "LT Emphasis";
   text-transform: uppercase;
 }
 
 h4 {
   color: white;
-  font-family: "Bomber";
+  font-family: "LT Emphasis";
   text-transform: uppercase;
 }
 
 h5 {
   color: white;
-  font-family: "Bomber";
+  font-family: "LT Emphasis";
   text-transform: uppercase;
 
 }
 
 h6 {
   color: white;
-  font-family: "Bomber";
+  font-family: "LT Emphasis";
   text-transform: uppercase;
 }
 
@@ -389,7 +384,7 @@ a:link {
 /*    height: 50px !important; */
     height: calc(var(--TopBarHeight) - 1px ); 
 
-    font-family: "Bomber";
+    font-family: "LT Emphasis";
     text-transform: uppercase;
     
     vertical-align: middle;    
@@ -450,7 +445,7 @@ a:link {
     display: inline-block;
     background-color: red;
     color: white !important;
-    font-family: "Bomber";
+    font-family: "LT Emphasis";
     min-width: 3vw;
     
     text-align: center;
@@ -472,7 +467,7 @@ a:link {
 
     
     color: white;
-    font-family: "Bomber";
+    font-family: "LT Emphasis";
     min-width: 3vw;
     
     text-align: center;
@@ -528,7 +523,7 @@ a:link {
     
     font-size: 3vh !important;
     
-    font-family: "Bomber";
+    font-family: "LT Emphasis";
     text-transform: uppercase;
     
     vertical-align: middle;    
@@ -744,7 +739,7 @@ a:link {
   }
   
   .index-video-title {
-    font-family: "Bomber";
+    font-family: "LT Emphasis";
     text-transform: uppercase;
 /*    font-family: ; */
     font-size:1.35em;
