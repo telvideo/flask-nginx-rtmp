@@ -430,8 +430,9 @@ def inject_oAuthProviders():
 
 @app.context_processor
 def inject_sysSettings():
-    #sysSettings = db.session.query(settings.settings).first()
-    sysSettings = settings.getSettingsFromRedis()
+    sysSettings = db.session.query(settings.settings).first()
+    
+    #sysSettings = settings.getSettingsFromRedis()
 
     allowRegistration = config.allowRegistration
     return dict(sysSettings=sysSettings, allowRegistration=allowRegistration)
