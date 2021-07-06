@@ -18,16 +18,15 @@ from functions import themes
 from functions import system
 from functions import securityFunc
 
-GlobalfirstRunCheck = False
+from globals import globalvars
 
 root_bp = Blueprint('root', __name__)
 @root_bp.route('/')
 def main_page():
-    global GlobalfirstRunCheck 
 
-    if GlobalfirstRunCheck is False:
-        GlobalfirstRunCheck = system.check_existing_settings()
-        if GlobalfirstRunCheck is False:
+    if globalvars.GlobalfirstRunCheck is False:
+        globalvars.GlobalfirstRunCheck = system.check_existing_settings()
+        if globalvars.GlobalfirstRunCheck is False:
             return render_template('/firstrun.html')
 
     #sysSettings = settings.settings.query.first()
