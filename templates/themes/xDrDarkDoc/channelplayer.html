@@ -36,49 +36,7 @@
 {% block body %}
 <!-- dochatLinks is grabbed by chat.js -->
 <label id="dochatLinks" name="{{channel.chatLinks}}" style="display: none;"></label>
-<div id="mySidenav" class="sidenav my-0 py-0" onmouseover="openNav();" onmouseout="closeNav();">
-    {% if streamList != [] %}
-    <div class="liveText ">LIVE</div>
-        {% for stream in streamList %}
-        <li class="row m-0 p-0 text-nowrap my-0 py-0">
-            <a href="/view/{{stream.channelLoc}}/" class="my-0 py-0">
-                <div class="mx-0 px-0 my-0">
-                    <img class=" gif lazy livesidenavPic my-0 py-0 " {% if channel.protected %} src="/static/img/video-locked.jpg" onerror="this.src='/static/img/video-locked.jpg';" {% else %} src="/static/img/video-placeholder.jpg" onerror="this.src='/static/img/video-placeholder.jpg';" {% endif %} data-src="/stream-thumb/{{stream.channelLoc}}.png">
-                    <span style = "font-size: 1.2vw">
-                        <b> {{stream.currentViewers}}      <span style="font-size:0.8vw"><i class="fas fa-eye"></i></span></b>  
-                   <!---     <b> {{stream.totalViewers}}        <span style="font-size:0.5vw"><i class="fas fa-users"></i></span></b>  
-                        <b> {{stream.NupVotes}}            <span style="font-size:0.5vw"><i class="fas fa-thumbs-up"></i></span></b>
-                   -->    <span style="font-size:1.5vw"> {{stream.username|limit_title}} <!-- {{stream.streamName}} --> </span>
 
-                        {#  <b> {{stream.channelName|limit_title}} #}
-                    </span>
-                </div>
-            </a>
-        </li>
-        {% endfor %}
-     
-    {% endif %}
-
-    
-    {% if subslist != [] %}
-     
-    <span class="following-text">FOLLOWING</span> 
-        {% for chan in subslist %}
-        <li class="row m-0 p-0 text-nowrap">
-            <a href="/channel/{{chan.id}}/" class="m-0 p-0 ">
-                    <img class="sidenavPic rounded " src="/images/{{chan.imageLocation}}" onerror="this.src='/static/img/user2.png';">
-                        <span style="font-size:1.5vw">{{chan.channelName|limit_title}}</span>
-                    
-                        
-                
-            </a>
-        </li>
-        {% endfor %}
-        <br>
-    {% endif %}
-
-</div> <!--mySidenav -->
-<div id="main" >
     <div class="container-fluid pl-0" id="tmain">
         <div class="row">
             <div class="col chanTopBar ">
@@ -170,10 +128,13 @@
                                     stream != None %}
                                     {{stream.streamName|limit_title}} {% else %} No Stream
                                     {% endif %}</b></span><br> 
-                            <span id="streamMetadataTopic"><b><i class="fas fa-hashtag"></i></b> <a
-                                    href="/topic/{{stream.topic}}/">{% if stream != None %}
-                                    {{stream.topic|get_topicName}} {% else %} {{channel.topic|get_topicName}}
-                                    {% endif %}</a></span>
+                            <span id="streamMetadataTopic"><b><i class="fas fa-hashtag"></i></b> 
+                                {% if stream != None %} 
+                                    <a href="/topic/{{stream.topic}}/"> {{stream.topic|get_topicName}}</a> 
+                                {% else %} 
+                                    <a href="/topic/{{channel.topic}}/"> {{channel.topic|get_topicName}}</a>
+                                {% endif %}
+                            </span>
                             <i class="fas fa-clock mx-1"></i> <span id="streamTime"> 00:00:00</span>
                         </span>
 
@@ -562,18 +523,6 @@
 {% endblock %}
 
 {% block scripts %}
-
-<script>
-    function openNav() {
-        document.getElementById("mySidenav").style.width = "20vw";
-        document.getElementById("main").style.marginLeft = "20vw";
-    }
-
-    function closeNav() {
-        document.getElementById("mySidenav").style.width = "5vw";
-        document.getElementById("main").style.marginLeft = "5vw";
-    }
-</script>
 
 <script>
     var player = videojs('video', {

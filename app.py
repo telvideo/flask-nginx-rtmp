@@ -455,6 +455,42 @@ def inject_topics():
     topicQuery = topics.topics.query.with_entities(topics.topics.id, topics.topics.name).all()
     return dict(uploadTopics=topicQuery)
 
+@app.context_processor
+def inject_sideBar():
+
+    # chanSubQuery = subscriptions.channelSubs.query.filter_by(userID=current_user.id).all()
+    chanSubQuery = []
+
+    if current_user.is_authenticated:
+        chanSubQuery = subscriptions.channelSubs.query.filter_by(userID=current_user.id).\
+            join(Channel.Channel, Channel.Channel.id == subscriptions.channelSubs.channelID ).\
+            with_entities(Channel.Channel.imageLocation,Channel.Channel.id,Channel.Channel.channelName)
+
+    
+    #  streamQuery = Stream.Stream.query.order_by(Stream.Stream.currentViewers).all()
+    streamQuery = Stream.Stream.query.join(Channel.Channel, Channel.Channel.id == Stream.Stream.linkedChannel) \
+    .join(Sec.User, Sec.User.id == Channel.Channel.owningUser).with_entities(Stream.Stream.id,
+#        Stream.Stream.uuid,
+#        Stream.Stream.startTimestamp,
+        Stream.Stream.linkedChannel,
+#        Stream.Stream.streamKey,
+#        Stream.Stream.streamName,
+#        Stream.Stream.topic,
+        Stream.Stream.currentViewers,
+        Stream.Stream.totalViewers,
+#        Stream.Stream.rtmpServer,
+        Stream.Stream.NupVotes,
+        Channel.Channel.channelLoc,
+#        Sec.User.pictureLocation,
+#        Sec.User.verified,
+#        Channel.Channel.imageLocation,
+        Sec.User.username,
+#        Channel.Channel.channelName
+        ).order_by(Stream.Stream.currentViewers.desc()).all()
+
+   
+    return dict(sideBarStreamList=streamQuery,sideBarSubslist = chanSubQuery )
+
 print({"level": "info", "message": "Initializing Flask Signal Handlers"})
 #----------------------------------------------------------------------------#
 # Flask Signal Handlers.

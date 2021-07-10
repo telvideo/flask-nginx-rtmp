@@ -8,8 +8,8 @@
   --PDLBlue: #1e90ff;
   --PDSlate: #414141;
   --PDSlateDark: #303030;
-  --background-image: url("/static/img/DarkBack.jpg"); 
-
+  --background-image:  url("/static/img/DarkBack.jpg"); 
+  --sidebarBackground: url("/static/img/dark2.jpg");
   --TopBarHeight:7vh;
   --chanTopBarHeight:5vh;
 
@@ -132,7 +132,9 @@
   top: calc( var(--TopBarHeight) + 1) !important;
   left: 0;
   color: var(--PDLBlue) !important;
-  background-image: var(--background-image);
+/*  background-image: var(--background-image); */
+  background-image: var(--sidebarBackground  );
+
 
   background-repeat: no-repeat;
   background-attachment:fixed;

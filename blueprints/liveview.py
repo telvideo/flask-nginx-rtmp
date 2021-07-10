@@ -44,9 +44,9 @@ def view_page(loc):
         Channel.Channel.currentViewers,
         Channel.Channel.chatEnabled,
         Channel.Channel.chatLinks,
-        Channel.Channel.chatBG,
-        Channel.Channel.chatTextColor,
-        Channel.Channel.chatAnimation,
+       # Channel.Channel.chatBG,
+       # Channel.Channel.chatTextColor,
+       # Channel.Channel.chatAnimation,
         Channel.Channel.imageLocation,
         Channel.Channel.offlineImageLocation,
         Channel.Channel.description,
@@ -60,7 +60,6 @@ def view_page(loc):
         
     #requestedChannel = Channel.Channel.query.filter_by(channelLoc=loc).first()
 
-    #####
     if requestedChannel is not None:
         if requestedChannel.protected and sysSettings.protectionEnabled:
             if not securityFunc.check_isValidChannelViewer(requestedChannel.id):
@@ -179,10 +178,7 @@ def view_page(loc):
             else:
                 flash("Chat is Not Enabled For This Stream","error")
 
-        isEmbedded = request.args.get("embedded")
-
-        #requestedChannel = Channel.Channel.query.filter_by(channelLoc=loc).first()
-                
+        isEmbedded = request.args.get("embedded")                
         if isEmbedded is None or isEmbedded == "False" or isEmbedded == "false":
 
             secureHash = None
@@ -214,61 +210,12 @@ def view_page(loc):
                 clipsList.sort(key=lambda x: x.views, reverse=True)
 
             subState = False
-
-#           chanSubQuery = subscriptions.channelSubs.query.filter_by(userID=current_user.id).all()
-            subslist = []
-
             if current_user.is_authenticated:
-                chanSubQuery = subscriptions.channelSubs.query.filter_by(userID=current_user.id).\
-                    join(Channel.Channel, Channel.Channel.id == subscriptions.channelSubs.channelID ).\
-                    with_entities(Channel.Channel.imageLocation,Channel.Channel.id,Channel.Channel.channelName)
-
-                for chan in chanSubQuery:
-                    if chan.id == requestedChannel.id:
-                        subState = True
-                    aChan = {"imageLocation":chan.imageLocation,
-                            "channelName"  :chan.channelName,
-                            "id"           :chan.id}
-                    subslist.append(aChan)
-
-          #  streamQuery = Stream.Stream.query.order_by(Stream.Stream.currentViewers).all()
-            streamQuery = Stream.Stream.query.join(Channel.Channel, Channel.Channel.id == Stream.Stream.linkedChannel) \
-            .join(Sec.User, Sec.User.id == Channel.Channel.owningUser).with_entities(Stream.Stream.id,
-#                Stream.Stream.uuid,
-#                Stream.Stream.startTimestamp,
-                Stream.Stream.linkedChannel,
-#                Stream.Stream.streamKey,
-                Stream.Stream.streamName,
-#                Stream.Stream.topic,
-                Stream.Stream.currentViewers,
-                Stream.Stream.totalViewers,
-#                Stream.Stream.rtmpServer,
-                Stream.Stream.NupVotes,
-                Channel.Channel.channelLoc,
-                Sec.User.pictureLocation,
-                Sec.User.verified,
-                Channel.Channel.imageLocation,
-                Sec.User.username,
-                Channel.Channel.channelName
-                ).order_by(Stream.Stream.currentViewers.desc()).all()
-        
-            streamList =  []
-            for stre in streamQuery:
-                if stre.linkedChannel != requestedChannel.id:
-                    aStream = {"streamName":stre.streamName,
-                    "currentViewers":stre.currentViewers,
-                    "channelLoc":stre.channelLoc,
-                    "pictureLocation":stre.pictureLocation,
-                    "imageLocation":stre.imageLocation,
-                    "NupVotes":stre.NupVotes,
-                    "totalViewers":stre.totalViewers,
-                    "username": stre.username,
-                    "channelName":stre.channelName,
-                    "verified":stre.verified}
-                    streamList.append(aStream) 
-                #print(stre)         
+                chanSubQuery = subscriptions.channelSubs.query.with_entities(subscriptions.channelSubs.id).filter_by(channelID=requestedChannel.id, userID=current_user.id).first()
+                if chanSubQuery is not None:
+                    subState = True      
             
-            return render_template(themes.checkOverride('channelplayer.html'), subslist=subslist, streamer=streamerQuery, streamList=streamList, stream=streamData, topics=topicList, streamURL=streamURL, channel=requestedChannel, clipsList=clipsList,
+            return render_template(themes.checkOverride('channelplayer.html'),  streamer=streamerQuery, stream=streamData, topics=topicList, streamURL=streamURL, channel=requestedChannel, clipsList=clipsList,
                                    subState=subState, secureHash=secureHash, rtmpURI=rtmpURI, xmppserver=xmppserver, stickerList=stickerList, stickerSelectorList=stickerSelectorList, bannedWords=bannedWordArray)
         else:
             isAutoPlay = request.args.get("autoplay")
