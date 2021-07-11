@@ -457,7 +457,6 @@ def inject_topics():
 
 @app.context_processor
 def inject_sideBar():
-
     # chanSubQuery = subscriptions.channelSubs.query.filter_by(userID=current_user.id).all()
     chanSubQuery = []
 
@@ -487,7 +486,6 @@ def inject_sideBar():
         Sec.User.username,
 #        Channel.Channel.channelName
         ).order_by(Stream.Stream.currentViewers.desc()).all()
-
    
     return dict(sideBarStreamList=streamQuery,sideBarSubslist = chanSubQuery )
 

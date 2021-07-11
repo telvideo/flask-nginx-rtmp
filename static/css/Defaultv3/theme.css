@@ -1,18 +1,12 @@
 :root {
     --navbar-width: 300px;
     --navbar-icon-fontsize: 18px;
-/*    --background-image-light: url("/static/img/Mono_Light_Background.png");
-    --background-image: url("/static/img/Mono_Dark_Background.png"); */
-    
 }
 
 body {
     color: white;
     font-family: Segoe UI,Frutiger,Frutiger Linotype,Dejavu Sans,Helvetica Neue,Arial,sans-serif;
     background-color: #474747;
-/*    background-image: var(--background-image-light); */
-/*    background-image: var(--background-image); */
-
 }
 
 .dropzone {
@@ -48,10 +42,7 @@ body {
     overflow: hidden;
     white-space: nowrap;
     z-index: 99;
-    transition: width 0.50s ease 0s;
-    background-image: var(--background-image);
-/*    background-image: var(--background-image-light); */
-
+    transition: width 0.25s ease 0s;
 }
 
 .osp-navbar a {
@@ -472,4 +463,3 @@ body {
     padding:0px !important;
     margin:0px !important;
 }
-  

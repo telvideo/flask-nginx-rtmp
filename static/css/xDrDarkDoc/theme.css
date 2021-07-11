@@ -13,8 +13,6 @@
   --TopBarHeight:7vh;
   --chanTopBarHeight:5vh;
 
-  --TopAddon:calc(var(--TopBarHeight) + 39px );
-
   --VideoTopAddon:calc(var(--TopBarHeight) + var(--chanTopBarHeight) + 1vh );
 
   --ChatTextSize: 1.2vw;
@@ -26,11 +24,6 @@
   display: none;
   flex-flow: column;
   
-  /*height: calc(100vh - 85px ) !important; */
-  /*  height: calc(100vh -  var(--TopAddon)) !important;  */
-
-/*  height: calc(100vh - var(--VideoTopAddon)) !important; 
-*/
   height:86vh;
   
   margin: 0px !important;
