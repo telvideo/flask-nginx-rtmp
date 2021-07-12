@@ -895,6 +895,8 @@
                                   <th><i class="fas fa-portrait"></i> Image</th>
                                   <th><i class="fas fa-user"></i> Username</th>
                                   <th><i class="fas fa-at"></i> Email</th>
+                                  <th><i class="fas fa-at"></i> Donation URL</th>
+                                  
                                   <th><i class="fas fa-passport"></i> Auth Type</th>
                                   <th><i class="fas fa-file-contract"></i> Provider</th>
                                   <th><i class="fas fa-user-clock"></i> Active</th>
@@ -910,6 +912,10 @@
                                   <td><img class="rounded" src="/images/{{user.pictureLocation}}" style="width:48px;height:48px;" onerror="this.src='/static/img/user2.png';"></td>
                                   <td><a href="/profile/{{user.username}}" >{{user.username}}</a></td>
                                   <td>{{user.email}}</td>
+
+                                  <td><input type="text" placeholder={{user.donationURL}}></td>
+                                    
+                                  
                                   <td><span class="badge badge-primary">{% if user.authType == 0 %}Local{% elif user.authType == 1 %}oAuth{% endif %}</span></td>
                                   <td>{% if user.authType == 1 %}<span class="badge badge-primary">{{user.oAuthProvider}}</span>{% endif %}</td>
                                   <td>{% if user.active == true %}<span class="badge badge-success">True</span>{% else %}<span class="badge badge-secondary">False</span>{% endif %}</td>
