@@ -27,6 +27,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 db.app = app
 
+settings.setupRedis(app) # Boggs needs to password this!
+settings.informRedisOfUpdate() # incase database has been manually changed get a new copy of data 
+
 firstRunCheck = system.check_existing_settings()
 
 if firstRunCheck is False:
