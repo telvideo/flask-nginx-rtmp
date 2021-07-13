@@ -6,6 +6,7 @@ from flask import abort, current_app
 from flask_socketio import emit
 from flask_security import current_user
 from sqlalchemy.sql.expression import func
+from sqlalchemy.sql import text
 
 from classes.shared import db, socketio, limiter
 from classes import Sec
@@ -233,5 +234,21 @@ def toggledVerified(msg):
             db.session.commit()
             system.newLog(1, "User " + current_user.username + " toggleVerified " + str(userQuery.username))
     db.session.close()
+    return 'OK'
+
+@socketio.on('changeDonationURL')
+def changeDonationURL(msg):         
+    if current_user.has_role('Admin'):
+        userID = int(msg['userID'])
+        theText = msg['theText']
+
+        # do direct SQL on table to avoid a slow DB call 
+        cmd = 'UPDATE user SET donationURL = :theText  WHERE id = :userID'
+        result = db.engine.execute(text(cmd), theText = theText, userID = userID)
+
+        system.newLog(1, "User "  + current_user.username +" changed DonationURL for user " + str(userID) + " to " + theText)
+
+    db.session.close()
+
     return 'OK'
 

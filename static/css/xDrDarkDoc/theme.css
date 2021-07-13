@@ -491,7 +491,6 @@ a:link {
 
   }
 
-
   .followingBadge{
     height: 4vh !important; 
     margin: 0;
@@ -501,11 +500,7 @@ a:link {
     
     /*height: calc(100vh / var(--NotificationRatio));
   */
-    font-size: 2.4vh !important;
-    
-
-    
-    
+    font-size: 2.4vh !important;   
   }
 
   .chan-liveBadge{
@@ -747,12 +742,6 @@ a:link {
     color: #fff;
   }
   
-  .markBox {
-
-    width: 30px !important;
-    color: red;
-
-  }
   
   .itemList {
       padding-left: 0;
@@ -1604,8 +1593,6 @@ a:link {
           top: initial;
           font-size:1em;
       }
-  
-  
   }
   
   @media screen and (max-width : 640px) {
@@ -1684,6 +1671,4 @@ a:link {
   }
 
 
-
-/* Niko Code */
-
+ 

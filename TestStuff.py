@@ -5,6 +5,7 @@
 from flask import request, flash, render_template, redirect, url_for, Blueprint, current_app, Response, session, abort
 from flask_security import Security, SQLAlchemyUserDatastore, current_user, login_required, roles_required
 from flask_security.utils import hash_password
+from sqlalchemy.sql import text
 
 from flask import Flask
 from conf import config
@@ -111,10 +112,16 @@ r.delete("MARK TEST")
 fred = r.get('MARK TEST')
 
 
+userID = 3
+theText ="New Set Value!!!"
+cmd = 'UPDATE user SET donationURL = :theText  WHERE id = :userID'
 
-recordedVid = RecordedVideo.RecordedVideo.query.filter_by(id=136).first()
-recordedVid.NupVotes = recordedVid.NupVotes + 1 
-print(recordedVid.NupVotes)
+result = db.engine.execute(text(cmd), theText = theText, userID = userID)
+
+system.newLog(1, "User "  + current_user.username +" AFTER*********** " + str(userID) + " to " + theText)
+
+
+
 db.session.commit()
 exit()
 

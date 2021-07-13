@@ -913,8 +913,7 @@
                                   <td><a href="/profile/{{user.username}}" >{{user.username}}</a></td>
                                   <td>{{user.email}}</td>
 
-                                  <td><input type="text" placeholder={{user.donationURL}}></td>
-                                    
+                                  <td onclick="editDonationUrl(this)"><input value="{{user.donationURL}}" disabled onblur="disableDonationUrl(this,{{user.id}})"></td>
                                   
                                   <td><span class="badge badge-primary">{% if user.authType == 0 %}Local{% elif user.authType == 1 %}oAuth{% endif %}</span></td>
                                   <td>{% if user.authType == 1 %}<span class="badge badge-primary">{{user.oAuthProvider}}</span>{% endif %}</td>

@@ -676,3 +676,15 @@ function toggleVerified(userID) {
     
   socket.emit('toggleVerified', {userID: userID});
 }
+
+function editDonationUrl(el) {
+  el.childNodes[0].removeAttribute("disabled");
+  el.childNodes[0].focus();
+  //window.getSelection().removeAllRanges();  
+}
+
+function disableDonationUrl(el, Num) {
+  el.setAttribute("disabled","");
+    
+  socket.emit('changeDonationURL', {userID: Num, theText:el.value});
+}

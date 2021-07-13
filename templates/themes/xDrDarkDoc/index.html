@@ -9,6 +9,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="{{request.url|normalize_url}}" />
 <meta property="og:image" content="{{request.url_root|normalize_urlroot}}/{{sysSettings.systemLogo}}" />
+<!-- <meta http-equiv="refresh" content="30"> <!-- Super bodgy bad hacky way of updating the main page, must do this better and for all pages... -->
+
 {% endblock %}
 
 {% block body %}
