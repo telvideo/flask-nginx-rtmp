@@ -1,5 +1,7 @@
 from .shared import db
 from .settings import settings
+from .settings import getSettingsFromRedis
+
 from uuid import uuid4
 
 import datetime
@@ -46,7 +48,9 @@ class Stream(db.Model):
         db.session.commit()
 
     def serialize(self):
-        sysSettings = settings.query.first()
+        #sysSettings = settings.query.first()
+        sysSettings = getSettingsFromRedis()
+
         streamURL = ''
         if sysSettings.adaptiveStreaming is True:
             streamURL = '/live-adapt/' + self.channel.channelLoc + '.m3u8'

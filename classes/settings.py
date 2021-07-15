@@ -104,10 +104,13 @@ def informRedisOfUpdate():
     rTest = int(rTest) +1   # Add one so that all processes (and ours) notice that they need to refresh their global version of redis
     r.set('OSP REDIS',int(rTest)) 
 
-# Fill redis with data read from database.  Called once at startup and whenever informRedisOfUpdate() is called
+# Fill redis with data read from database.   Called once at startup and whenever informRedisOfUpdate() is called
 def fillRedis():
 
     lsysSettings = settings.query.first()       #get real data from database using local handle
+ 
+    if lsysSettings is None:
+        return False
 
     r.set("id", lsysSettings.id)
     r.set("siteName", lsysSettings.siteName)
@@ -156,6 +159,8 @@ def fillRedis():
     else:
         r.set("requireConfirmedEmail", int(lsysSettings.requireConfirmedEmail))
 
+    return True
+
 # Globals used to store a copy of redis data so we don't need to load it from Redis every time
 gsysSettings = settings("Resis Not set","","","",0,0,0,0,0,0,0,0,0,0,0,0)   # Do not use gsysSettings as part of any actual database call or it will break sql 
 gsysSettingsCounter = int(0)
@@ -175,7 +180,8 @@ def getSettingsFromRedis():
 
     rTest = r.get('OSP REDIS')
     if rTest ==  None:                              
-        fillRedis()                                 # create redis if not there
+        if (fillRedis() == False):                  # create redis if not there
+            return(None)
         r.set('OSP REDIS',int(1))                   # set initial value
         rTest=1
 

@@ -34,7 +34,7 @@
 {% endblock %}
 
 {% block body %}
-<!-- dochatLinks is grabbed by chat.js -->
+<!-- dochatLinks is grabbed by chat.js  -->
 <label id="dochatLinks" name="{{channel.chatLinks}}" style="display: none;"></label>
 
     <div class="container-fluid pl-0" id="tmain">
@@ -166,8 +166,7 @@
                             <button id="upvoteButton" type="button" class="btn btn-primary pl-1 btnSizer"
                                 onclick="changeUpvote();" title="Like" {% if current_user.is_authenticated==false
                                 %} disabled aria-disabled="true" {% endif %}>
-                                <i id="upVoteIcon" class="far fa-thumbs-up"> <span id="totalUpvotes"></span> 
-                                    {# {{stream.NupVotes}} #} </i>
+                                <i id="upVoteIcon" class="far fa-thumbs-up"> <span id="totalUpvotes">{{stream.NupVotes}}</span></i>
                             </button>
                         </span>
                         <span class="float-right">
@@ -709,13 +708,13 @@
 
 <script>
     socket.on('connect', function () {
-        socket.emit('getUpvoteTotal', { loc: '{{channel.channelLoc}}', vidType: 'stream' });
+        socket.emit('getUpvoteTotal', { loc: '{{channel.id}}', vidType: 'stream' });
     });
 </script>
 
 <script>
     setInterval(function () {
-        socket.emit('getUpvoteTotal', { loc: '{{channel.channelLoc}}', vidType: 'stream' });
+        socket.emit('getUpvoteTotal', { loc: '{{channel.id}}', vidType: 'stream' });
     }, 30000);
 </script>
 

@@ -18,16 +18,18 @@ from app import r
 @socketio.on('getViewerTotal')
 def handle_viewer_total_request(streamData, room=None):
     channelLoc = str(streamData['data'])
-
+    
     viewers = xmpp.getChannelCounts(channelLoc)
 
-    ChannelUpdateStatement = (update(Channel.Channel).where(Channel.Channel.channelLoc == channelLoc).values(channelViewers=viewers))
-    channelQuery = Channel.Channel.query.filter_by(channelLoc=channelLoc).with_entities(Channel.Channel.id).first()
+    # Why were we doing the below in a "getViewerTotal" function when this data is already provided?  Also "channelViewers"???
 
-    StreamUpdateStatement = (update(Stream.Stream).where(Stream.Stream.linkedChannel == channelQuery.id).values(currentViewers=viewers))
+    #ChannelUpdateStatement = (update(Channel.Channel).where(Channel.Channel.channelLoc == channelLoc).values(channelViewers=viewers))
+    #channelQuery = Channel.Channel.query.filter_by(channelLoc=channelLoc).with_entities(Channel.Channel.id).first()
 
-    db.session.commit()
-    db.session.close()
+    #StreamUpdateStatement = (update(Stream.Stream).where(Stream.Stream.linkedChannel == chanID).values(currentViewers=viewers))
+
+    #db.session.commit()
+    #db.session.close()
     if room is None:
         emit('viewerTotalResponse', {'data': str(viewers)})
     else:

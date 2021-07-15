@@ -22,13 +22,10 @@ def handle_upvote_total_request(streamData):
     myVoteQuery = None
 
     if vidType == 'stream':
-        loc = str(loc)
-        channelQuery = Channel.Channel.query.filter_by(channelLoc=loc).first()
-        if channelQuery.stream:
-            stream = channelQuery.stream[0]
-#            totalQuery = upvotes.streamUpvotes.query.filter_by(streamID=stream.id).count()
+        stream = Stream.Stream.query.filter_by(linkedChannel=loc).with_entities(Stream.Stream.id,Stream.Stream.NupVotes).first()
 
-            totalQuery = stream.NupVotes  #Boggs
+        if stream:
+            totalQuery = stream.NupVotes  
             try:
                 myVoteQuery = upvotes.streamUpvotes.query.filter_by(userID=current_user.id, streamID=stream.id).first()
             except:

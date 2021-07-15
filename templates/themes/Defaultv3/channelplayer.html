@@ -692,14 +692,14 @@
 
     <script>
         socket.on('connect', function() {
-            socket.emit('getUpvoteTotal', {loc: '{{channel.channelLoc}}', vidType: 'stream'});
+            socket.emit('getUpvoteTotal', {loc: '{{channel.id}}', vidType: 'stream'});
             socket.emit('getViewerTotal', {data: "{{channel.channelLoc}}"} );
         });
     </script>
 
     <script>
         setInterval(function() {
-          socket.emit('getUpvoteTotal', {loc: '{{channel.channelLoc}}', vidType: 'stream'});
+          socket.emit('getUpvoteTotal', {loc: '{{channel.id}}', vidType: 'stream'});
         },30000 );
     </script>
 
