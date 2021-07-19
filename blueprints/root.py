@@ -324,9 +324,8 @@ def rtmp_check():
                     rtmpServerID = streamEntry.rtmpServer
 
                     #rtmpServer = settings.rtmpServer.query.filter_by(id=rtmpServerID).first()
-                    RTMPServersList = settings.getrtmpServer("root.py rtmp_check():")
+                    RTMPServersList = settings.getrtmpServer()
                     rtmpServer = RTMPServersList[0]
-
 
                     resp = Response("OK")
                     resp.headers['X_UpstreamHost'] = rtmpServer.address

@@ -32,9 +32,10 @@
 
     {% endif %}
 </div>
+<!--<span id="carouseltestText"></span> -->
 
  <!-- Carousel Code from w3 schools -->
- <div id="Pro_carousel" class="carousel slide" data-ride="carousel" data-interval="5000" data-pause="hover">
+ <div id="Pro_carousel" class="carousel slide" data-ride="carousel" data-interval="4500" data-pause="hover">
 
   <!-- The slideshow -->
   <div class="carousel-inner index-streams-container-bg pro-carousel">
@@ -44,7 +45,7 @@
 
     {% for stream in streamList %}
     <div class="carousel-item .icon-next">
-      <center><a href="/view/{{stream.channelLoc}}"><img class="shadow gif lazy pro-carousel-item" {% if stream.protected and sysSettings.protectionEnabled %} src="/static/img/video-locked.jpg" onerror="this.src='/static/img/video-locked.jpg';" {% else %} src="/static/img/video-placeholder.jpg" onerror="this.src='/static/img/video-placeholder.jpg';" {% endif %} data-src="/stream-thumb/{{stream.channelLoc}}.png" </center>
+      <center><a href="/view/{{stream.channelLoc}}"><img class="shadow lazy pro-carousel-item" {% if stream.protected and sysSettings.protectionEnabled %} src="/static/img/video-locked.jpg" onerror="this.src='/static/img/video-locked.jpg';" {% else %} src="/static/img/video-placeholder.jpg" onerror="this.src='/static/img/video-placeholder.jpg';" {% endif %} data-src="/stream-thumb/{{stream.channelLoc}}.gif" </center>
       <div class="carousel-caption d-none d-md-block">
         <center><h4 style="background-color:rgba(0,0,0,0.5);width: 50%;">{{stream.streamName|limit_title}}</h4></center>
       </div>

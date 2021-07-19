@@ -15,8 +15,13 @@
 
   --VideoTopAddon:calc(var(--TopBarHeight) + var(--chanTopBarHeight) + 1vh );
 
-  --ChatTextSize: 1.2vw;
+/*  --ChatTextSize: 1.2vw;
+ 
+  --ChatTextSize: calc(3px + 0.5vw + 0.5vh); 
+   --ChatTextSize: calc(5px + 0.8vw); */
+   --ChatTextSize: 16px; 
 
+   
   --sideBarWidth: 5vw;
 }
 
@@ -1006,8 +1011,11 @@ a:link {
       }
       
       .chatFont{
-        font-size: 2vh !important;
+/*        font-size: 2vh !important;*/
         /*line-height: 2.1vh !important; */
+
+       /* line-height: calc(0.5em + 1.0vw) !important;
+*/
         padding: 0;
         margin: 0;
       }

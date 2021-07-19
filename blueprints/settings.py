@@ -385,7 +385,7 @@ def admin_page():
         topicsList = topics.topics.query.order_by(topics.topics.name.asc())
 
         #rtmpServers = settings.rtmpServer.query.all()
-        rtmpServers = settings.getrtmpServer("settings.py admin_page():")
+        rtmpServers = settings.getrtmpServer()
 
         edgeNodes = settings.edgeStreamer.query.all()
 

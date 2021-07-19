@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+ 
+  
+  {% block head %}
+  
+  {% endblock %}
+  
+</head>
+<body>
+<!---  <img src="/static/img/gitlab.png" alt="Prosmile2" class="livesidenavPic">  -->                                      
+  {% if sideBarStreamList != [] %}
+  <div class="liveText ">LIVE</div>
+      {% for stream in sideBarStreamList %}
+      <li class="row m-0 p-0 text-nowrap my-0 py-0">
+          <a href="/view/{{stream.channelLoc}}/" class="my-0 py-0">
+              <div class="mx-0 px-0 my-0">
+               <!--  <img class=" gif lazy livesidenavPic my-0 py-0 " onerror="this.src='/static/img/video-placeholder.jpg'" data-src="/stream-thumb/{{stream.channelLoc}}.png"> -->
+ <!--               <img src="/stream-thumb/{{stream.channelLoc}}.gif" onerror="this.src='/stream-thumb/{{stream.channelLoc}}.png'" alt="whoops" class="gif livesidenavPic my-0 py-0"> 
+ -->              <img src="/stream-thumb/{{stream.channelLoc}}.gif" onerror="this.src='/static/img/video-placeholder.jpg'" alt="whoops" class="gif livesidenavPic my-0 py-0"> 
+
+                  <span style = "font-size: 1.2vw">
+                      <b> {{stream.currentViewers}}      <span style="font-size:0.8vw"><i class="fas fa-eye"></i></span></b> 
+                      <b> {{stream.totalViewers}}        <span style="font-size:0.5vw"><i class="fas fa-users"></i></span></b>  
+                      <b> {{stream.NupVotes}}            <span style="font-size:0.5vw"><i class="fas fa-thumbs-up"></i></span></b>
+                      <span style="font-size:1.5vw"> {{stream.username}} <!-- {{stream.streamName}} --> </span>
+                       <!--- <b> {{stream.channelName}} #} -->
+                  </span>
+              </div>
+          </a>
+      </li>
+      {% endfor %}
+  {% endif %}
+</body>
+</html>

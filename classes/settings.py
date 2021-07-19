@@ -360,16 +360,14 @@ def getAuthProvider(calledby):
 
 
 
-def getrtmpServer(calledby ):
+def getrtmpServer():
     global grtmpServerSettings
 
-    #system.newLog(1, "getrtmpServer BY= " + calledby) 
-    
     #rList = rtmpServer.query.all()
     #return (rList )
 
     if (grtmpServerSettings == []):
-        #system.newLog(1, "getrtmpServer Inside ************************* = " + calledby) 
+        #system.newLog(1, "getrtmpServer Inside ************************* = " ) 
 
         tempServerSettingsList = rtmpServer.query.all() 
 

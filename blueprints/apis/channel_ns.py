@@ -41,7 +41,7 @@ def checkRTMPAuthIP(requestData):
         requestIP = requestData.environ['HTTP_X_FORWARDED_FOR']
 
     #authorizedRTMPServers = settings.rtmpServer.query.all()
-    authorizedRTMPServers = settings.getrtmpServer("channel_ns.py checkRTMPAuthIP(requestData):")
+    authorizedRTMPServers = settings.getrtmpServer()
 
 
     receivedIP = requestIP
@@ -133,7 +133,7 @@ class api_1_ListChannel(Resource):
                         return {'results': [ob.authed_serialize() for ob in channelQuery]}
                 return {'results': {'message': 'Request Error'}}, 400
         else:
-            channelList = Channel.Channel.query.filter_by(channelLoc=channelEndpointID).all()
+            channelList = Channel.Channel.query.filter_by(channelLoc=channelEndpointID).all() ##mrn here it is!
             db.session.commit()
             return {'results': [ob.serialize() for ob in channelList]}
 

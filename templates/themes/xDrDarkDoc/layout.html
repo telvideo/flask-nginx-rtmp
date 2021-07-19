@@ -19,12 +19,11 @@
   <link rel="stylesheet" href="/static/vendor/bootstrap-toggle/css/bootstrap-toggle.min.css">
   <link rel="stylesheet" href="/static/vendor/dropzone/css/basic.min.css" />
   <link rel="stylesheet" href="/static/vendor/dropzone/css/dropzone.min.css" />
-  <link rel="stylesheet" href="/static/css/xDrDarkDoc/simplemde-theme-dark.min.css">
+<!---  <link rel="stylesheet" href="/static/css/xDrDarkDoc/simplemde-theme-dark.min.css"> -->
   <script src="/static/vendor/socketio/js/socket.io.js"></script>
   <script src="/static/vendor/jquery/js/jquery-3.5.1.min.js"></script>
   <script src="/static/vendor/lazyload/js/lazyload.min.js"></script>
   <script src="/static/vendor/easymde/js/easymde.min.js"></script>
-  
   
   {% block head %}
   
@@ -130,6 +129,9 @@
     
   </nav>
   <div id="mySidenav" class="sidenav my-0 py-0" onmouseover="openNav();" onmouseout="closeNav();">
+
+    <span id="testText"></span>
+{#
     {% if sideBarStreamList != [] %}
     <div class="liveText ">LIVE</div>
         {% for stream in sideBarStreamList %}
@@ -143,7 +145,7 @@
                         <b> {{stream.NupVotes}}            <span style="font-size:0.5vw"><i class="fas fa-thumbs-up"></i></span></b>
                    -->    <span style="font-size:1.5vw"> {{stream.username|limit_title}} <!-- {{stream.streamName}} --> </span>
 
-                         <!--- <b> {{stream.channelName|limit_title}} #} -->
+                         <!--- <b> {{stream.channelName|limit_title}}  -->
                     </span>
                 </div>
             </a>
@@ -151,19 +153,14 @@
         {% endfor %}
      
     {% endif %}
-
-    
+#}    
     {% if subslist != [] %}
-     
     <span class="following-text">FOLLOWING</span> 
         {% for chan in sideBarSubslist %}
         <li class="row m-0 p-0 text-nowrap">
             <a href="/channel/{{chan.id}}/" class="m-0 p-0 ">
                     <img class="sidenavPic rounded " src="/images/{{chan.imageLocation}}" onerror="this.src='/static/img/user2.png';">
                         <span style="font-size:1.5vw">{{chan.channelName|limit_title}}</span>
-                    
-                        
-                
             </a>
         </li>
         {% endfor %}
@@ -348,8 +345,24 @@
     Dropzone.autoDiscover = false;     
   </script>
   {% block scripts %}
-  
+
+
   {% endblock %}
+
+
+
+
+  <script type="text/javascript" charset="utf-8">
+    var conn_options = {
+        'sync disconnect on unload': true
+    };
+
+    var Msocket = io("/", { reconnection: true, forceNew: false });
+
+    
+  </script>
+
+ 
     <script>
 
     function showSpinner() {
@@ -617,6 +630,40 @@
         
       </script>
 
+ <script>
+  
+   //console.log("*********** ********* First emitgetViewstuff ***  **************************");
+
+    Msocket.emit('getViewerStuff');
+
+    setInterval(function () {
+      //  console.log("getViewerStuff");
+        Msocket.emit('getViewerStuff');
+    }, 8000);
+  </script>
+
+  <script type="text/javascript" charset="utf-8">
+    Msocket.on('getViewerStuffResponse', function (msg) {
+      //console.log("* getViewerStuffResponse START ")
+
+      tdata = msg['data'];
+      //console.log(tdata);
+
+      tsideBarStreamList = msg['sideBarStreamList'];
+      //console.log(tsideBarStreamList);
+
+      var myCarousel = document.getElementById("carouseltestText");
+      if (myCarousel != null){
+        myCarousel.innerHTML = msg['data'];
+
+      }
+
+      document.getElementById("testText").innerHTML = tsideBarStreamList;
+
+      //console.log("getViewerStuffResponse END!!!!");
+    });
+  </script>
+
 <!-- Removed Due to breaking seeking
   <script>
     (async () => {
@@ -637,6 +684,7 @@
       }
 
     })()
+
     .catch(e => console.log(`${e}`));
   </script>
 -->

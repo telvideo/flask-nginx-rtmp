@@ -55,7 +55,7 @@
                         <span id="liveIndicatorBadge"
                             class="mx-0 px-1 liveindicator badge badge-secondary chan-liveBadge"><b><i
                                     class="fas fa-video-slash"></i><span class="d-none d-sm-none d-md-inline">
-                                    OfflHGine</span></b></span> 
+                                    Offline</span></b></span> 
                       
                         {% if channel.protected and sysSettings.protectionEnabled %}
                             <span class="mx-0 px-1 liveindicator badge badge-info "><i class="fas fa-user-lock"></i><span class="d-none d-sm-none d-md-inline"> Protected</span></span></h6>
@@ -129,7 +129,7 @@
                             <i class="fas fa-clock mx-1"></i> <span id="streamTime"> 00:00:00</span>
                         </span>
 
-                        {% if streamer.donationURL != None %}
+                        {% if streamer.donationURL != None and streamer.donationURL != "" %} 
                         <a href={{streamer.donationURL}} class="float-right" target="_blank">                        
                             <button id="give1000Button" title="Donate to {{channel.channelName}}" type="button" 
                             class="btn  MoneySizer btn-primary">$</button>
@@ -551,12 +551,12 @@
     player.play();
 </script>
 
-<script>
+<!--
+    <script>
     $(document).ready(function () {
-        monitor_vid(player);
+        //monitor_vid(player);
     });
-</script>
-
+</script> !-->
 
 <script type="text/javascript" charset="utf-8">
     var conn_options = {
@@ -701,21 +701,9 @@
 </script>
 
 <script>
-    setInterval(function () {
-        socket.emit('getViewerTotal', { data: "{{channel.channelLoc}}" });
-    }, 5000);
-</script>
-
-<script>
     socket.on('connect', function () {
         socket.emit('getUpvoteTotal', { loc: '{{channel.id}}', vidType: 'stream' });
     });
-</script>
-
-<script>
-    setInterval(function () {
-        socket.emit('getUpvoteTotal', { loc: '{{channel.id}}', vidType: 'stream' });
-    }, 30000);
 </script>
 
 <script type="text/javascript" charset="utf-8">
@@ -776,16 +764,16 @@
 
 
 <script>
+    videoContainer = document.getElementById('videoContainer');
+
     //Fixes for VideoJS on Disconnect to Force a Reconnect when the readyState is stuck at 2
     function monitor_vid(vidplayer) {
-
-
         videoJSObj = vidplayer;
         currentReadyState = videoJSObj.readyState();
 
         videoWindowState = document.getElementsByTagName('video');
 
-        videoContainer = document.getElementById('videoContainer');
+        /*videoContainer = document.getElementById('videoContainer'); */
         offlineWindow = document.getElementById('offlineImage');
 
         onlineBadge = document.getElementById('liveIndicatorBadge');
@@ -860,9 +848,28 @@
         });
         var lastVideoState = currentReadyState;
     }
+    var getUpvoteTotalwait = 0;
 
     setInterval(function () {
-        monitor_vid(player);
+        monitor_vid(player); 
+        if (videoContainer.style.display == "block"){
+            //console.log("IS block, getting stuff");
+            console.log( getUpvoteTotalwait);
+
+            socket.emit('getViewerTotal', { data: "{{channel.channelLoc}}" });
+            getUpvoteTotalwait = getUpvoteTotalwait + 1;
+
+            if (getUpvoteTotalwait>2){
+                socket.emit('getUpvoteTotal', { loc: '{{channel.id}}', vidType: 'stream' });
+                //console.log("GETTING getUpvoteTotal !!!! **********");
+                getUpvoteTotalwait =0;
+            }
+
+        }else{
+            console.log("NOT  block")
+
+        }
+    
     }, 10000);
 </script>
 

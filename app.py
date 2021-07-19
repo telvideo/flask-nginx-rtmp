@@ -465,29 +465,8 @@ def inject_sideBar():
             join(Channel.Channel, Channel.Channel.id == subscriptions.channelSubs.channelID ).\
             with_entities(Channel.Channel.imageLocation,Channel.Channel.id,Channel.Channel.channelName)
 
-    
-    #  streamQuery = Stream.Stream.query.order_by(Stream.Stream.currentViewers).all()
-    streamQuery = Stream.Stream.query.join(Channel.Channel, Channel.Channel.id == Stream.Stream.linkedChannel) \
-    .join(Sec.User, Sec.User.id == Channel.Channel.owningUser).with_entities(Stream.Stream.id,
-#        Stream.Stream.uuid,
-#        Stream.Stream.startTimestamp,
-        Stream.Stream.linkedChannel,
-#        Stream.Stream.streamKey,
-#        Stream.Stream.streamName,
-#        Stream.Stream.topic,
-        Stream.Stream.currentViewers,
-        Stream.Stream.totalViewers,
-#        Stream.Stream.rtmpServer,
-        Stream.Stream.NupVotes,
-        Channel.Channel.channelLoc,
-#        Sec.User.pictureLocation,
-#        Sec.User.verified,
-#        Channel.Channel.imageLocation,
-        Sec.User.username,
-#        Channel.Channel.channelName
-        ).order_by(Stream.Stream.currentViewers.desc()).all()
-   
-    return dict(sideBarStreamList=streamQuery,sideBarSubslist = chanSubQuery )
+
+    return dict(sideBarSubslist = chanSubQuery)
 
 print({"level": "info", "message": "Initializing Flask Signal Handlers"})
 #----------------------------------------------------------------------------#
@@ -613,7 +592,7 @@ try:
 except:
     pass
 if __name__ == '__main__':
-    app.jinja_env.auto_reload = True
-    app.config['TEMPLATES_AUTO_RELOAD'] = True
+    app.jinja_env.auto_reload = False
+    app.config['TEMPLATES_AUTO_RELOAD'] = False
     socketio.run(app, debug=config.debugMode)
     
