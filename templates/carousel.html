@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  
+</head>
+
+<body>                                             
+ <!-- Carousel Code from w3 schools -->
+ <div id="osp_carousel" class="carousel slide" data-ride="carousel" data-interval="1500" data-pause="hover">
+
+  <!-- The slideshow -->
+  <div class="carousel-inner index-streams-container-bg pro-carousel">
+    <div class="carousel-item active">
+      <center><a href="https://discord.gg/"><img class="pro-carousel-item" src="/static/img/Discord-Logo-White.png" alt="Join us on Discord"  title="Join us"></a></center>
+    </div>
+
+    {% for stream in sideBarStreamList %}
+    <div class="carousel-item .icon-next">
+      <center><a href="/view/{{stream.channelLoc}}"><img class="shadow lazy pro-carousel-item" onerror="this.src='/static/img/video-placeholder.jpg';"  src="/stream-thumb/{{stream.channelLoc}}.gif"  data-src="/stream-thumb/{{stream.channelLoc}}.gif"  </center>
+      <div class="carousel-caption d-none d-md-block">
+        <center><h4 style="background-color:rgba(0,0,0,0.5);width: 50%;">{{stream.streamName}}</h4></center>
+      </div>
+    </a>
+    </div>
+
+    {% endfor %}
+  </div>
+
+  <!-- Left and right controls -->
+  <a class="carousel-control-prev" href="#osp_carousel" data-slide="prev">
+    <span class="carousel-control-prev-icon"></span>
+  </a>
+  <a class="carousel-control-next" href="#osp_carousel" data-slide="next">
+    <span class="carousel-control-next-icon"></span>
+  </a>
+</div>
+
+</body>
+    
+    
+</html>

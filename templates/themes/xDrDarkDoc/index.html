@@ -32,8 +32,8 @@
 
     {% endif %}
 </div>
-<!--<span id="carouseltestText"></span> -->
-
+<span id="carouseltestText"></span> 
+{#
  <!-- Carousel Code from w3 schools -->
  <div id="Pro_carousel" class="carousel slide" data-ride="carousel" data-interval="4500" data-pause="hover">
 
@@ -63,6 +63,7 @@
     <span class="carousel-control-next-icon"></span>
   </a>
 </div>
+#}
 <div class="container-fluid p-2" id="index-streams-container" style="background-color: var(--PDSlateDark);">
     <div class="row mx-2">
         <div class="index-video-title">
@@ -83,11 +84,10 @@
             </form>
           </span>
         </div>
-        {% if streamList == [] %}
-        No Live Streams Online...
-        {% endif %}
     </div>
-    
+
+    <span id="liveNowtestText"></span> 
+    {#
     <div class="row mx-1">
         <ul id="streamList" class="itemList d-flex flex-wrap justify-content-start" style="width:100%;"><!--Manually Defined Due to Mobile Strangeness-->
             {% for stream in streamList %}
@@ -121,6 +121,7 @@
             {% endfor %}
         </ul>
     </div>
+    #}
 </div>
 
 <div class="container-fluid p-2" id="index-videos-container" style="background-color: var(--PDSlateDark);">

@@ -22,6 +22,7 @@ from functions import database
 from functions import system
 from classes.shared import db
 from classes import settings
+from classes import topics
 
 from globals import globalvars
 from classes import RecordedVideo
@@ -33,7 +34,16 @@ import glob
 from functions import videoFunc
 
 from classes import Channel
-from classes.Sec import User
+from classes import Sec
+
+import jinja2
+    
+mtemplateLoader = jinja2.FileSystemLoader(searchpath="./")
+templateEnv = jinja2.Environment(loader=mtemplateLoader)
+sideBartemplate = templateEnv.get_template("/templates/liveStreams.html")
+caroueltemplate = templateEnv.get_template("/templates/carousel.html")
+liveNowtemplate = templateEnv.get_template("/templates/liveNow.html")
+
 
 app = Flask(__name__)
 
@@ -73,6 +83,7 @@ def index():
                             mycontent="Hello World")
 #render_template('admin.html',name= "Fred")
 import redis
+from flask_redis import FlaskRedis
    
 print("fred")
 
@@ -84,10 +95,13 @@ f = open("/opt/dicks.txt", "a")
 f.write(stri)
 f.close()
 
+settings.setupRedis(app) # Boggs needs to password this!
 
+from classes.settings import r
 
 #myset = settings.getSettingsFromRedis()
-r = redis.Redis(host=config.redisHost, port=config.redisPort, decode_responses=True)
+#r = redis.Redis(host=config.redisHost, port=config.redisPort, decode_responses=True)
+#r = FlaskRedis(decode_responses=True)
 import time
 
 from pottery import Redlock
@@ -98,27 +112,70 @@ from pottery import Redlock
 
 
 print("BOB")
-#r = redis.StrictRedis(decode_responses=True)
 
-myStr = "Fred String"
-r.set('MARK TEST',str(myStr))
-fred = str(r.get('MARK TEST'))
+doCarouel = True #bool(reqestType['doCarouel'])
 
+sideBarliveView = r.get('sideBarliveView')
 
-if fred == myStr:
-    print("Yes")
+# if there is nothing in redis we need to set it
+if (sideBarliveView == None):
+    print("sideBarliveViewString = None")
 
-r.delete("MARK TEST")
-fred = r.get('MARK TEST')
+    #r.delete("MARK TEST")    #fred = r.get('MARK TEST')
+    
+    #  streamQuery = Stream.Stream.query.order_by(Stream.Stream.currentViewers).all()
+    streamQuery = Stream.Stream.query.join(Channel.Channel, Channel.Channel.id == Stream.Stream.linkedChannel) \
+    .join(Sec.User, Sec.User.id == Channel.Channel.owningUser) \
+    .join(topics.topics, topics.topics.id == Stream.Stream.topic ).with_entities(Stream.Stream.id,
+        Stream.Stream.linkedChannel,
+        Stream.Stream.streamName,
+        topics.topics.name,
+        Stream.Stream.currentViewers,
+        Stream.Stream.totalViewers,
+        Stream.Stream.NupVotes,
+        Channel.Channel.channelLoc,
+        Channel.Channel.protected,
+        Sec.User.pictureLocation,
+#        Sec.User.verified,
+#        Channel.Channel.imageLocation,
+        Sec.User.username,
+#        Channel.Channel.channelName
+        ).order_by(Stream.Stream.currentViewers.desc()).all()
+     
+    sysSettings = settings.getSettingsFromRedis()
 
+    sideBarliveView = sideBartemplate.render(sideBarStreamList = streamQuery)  
+    carouselliveView = caroueltemplate.render(sideBarStreamList = streamQuery)  
+    liveNowView      = liveNowtemplate.render(sideBarStreamList = streamQuery, sysSettingsprotected = sysSettings.protectionEnabled)  
 
-userID = 3
-theText ="New Set Value!!!"
-cmd = 'UPDATE user SET donationURL = :theText  WHERE id = :userID'
+    r.set('carouselliveView',carouselliveView) 
+    r.set('liveNowView',liveNowView) 
+    r.set('sideBarliveView',sideBarliveView) #set this one last...
+    r.expire('sideBarliveView', 30)
+else:
+    # sideBarliveView is already set, so get the others if they are wanted
+    if (doCarouel == True):
+        carouselliveView = r.get('carouselliveView')
+        liveNowView = r.get('liveNowView')
+    else:
+        carouselliveView = ""
+        liveNowView = ""
 
-result = db.engine.execute(text(cmd), theText = theText, userID = userID)
+#    r.get('carouselliveView',carouselliveView) 
+#    r.get('liveNowView',liveNowView) 
 
-system.newLog(1, "User "  + current_user.username +" AFTER*********** " + str(userID) + " to " + theText)
+print("End.")
+#emit('getViewerStuffResponse', {'data': str(carouselliveView),'sideBarStreamList': str(sideBarliveView),'liveNowList': str(liveNowView)})
+
+exit()
+
+#userID = 3
+#theText ="New Set Value!!!"
+#cmd = 'UPDATE user SET donationURL = :theText  WHERE id = :userID'
+
+#result = db.engine.execute(text(cmd), theText = theText, userID = userID)
+
+#system.newLog(1, "User "  + current_user.username +" AFTER*********** " + str(userID) + " to " + theText)
 
 
 

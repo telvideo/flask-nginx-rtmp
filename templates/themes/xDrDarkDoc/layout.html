@@ -130,7 +130,7 @@
   </nav>
   <div id="mySidenav" class="sidenav my-0 py-0" onmouseover="openNav();" onmouseout="closeNav();">
 
-    <span id="testText"></span>
+    <span id="sidebartestText"></span>
 {#
     {% if sideBarStreamList != [] %}
     <div class="liveText ">LIVE</div>
@@ -630,37 +630,76 @@
         
       </script>
 
- <script>
-  
-   //console.log("*********** ********* First emitgetViewstuff ***  **************************");
+  <script>
+//      var carcurrentIndex = $('div.active').index() + 1;
 
-    Msocket.emit('getViewerStuff');
+
+//    var carcurrentIndex = $('div.active').index() + 1;
+   
+//    $('#osp_carousel').bind('slid', function() {
+//      carcurrentIndex = $('div.active').index() + 1;
+//      console.log("Slide ")
+//      console.log(carcurrentIndex )
+    //$('.num').html('' + OSPcurrentIndex + '/' + totalItems + '');
+ // });
+
+    //console.log("START");
+
+    var myCarousel = document.getElementById("carouseltestText");
+//    myCarousel = true;
+    carouselValid = false;
+    if (myCarousel != null){
+      carouselValid = true;}
+
+    //console.log("First getViewerStuff carouselValid = ");    console.log(carouselValid);
+    Msocket.emit('getViewerStuff',{doCarouel:carouselValid}); 
 
     setInterval(function () {
-      //  console.log("getViewerStuff");
-        Msocket.emit('getViewerStuff');
-    }, 8000);
+      //  console.log("getViewerStuff carouselValid= ");       console.log(carouselValid);
+        Msocket.emit('getViewerStuff',{doCarouel:carouselValid});
+
+    }, 8000);  // this timeout must be one more second than r.expire('sideBarliveView', 7 in stream.py to sync up correctly.
   </script>
 
   <script type="text/javascript" charset="utf-8">
     Msocket.on('getViewerStuffResponse', function (msg) {
       //console.log("* getViewerStuffResponse START ")
-
-      tdata = msg['data'];
-      //console.log(tdata);
-
-      tsideBarStreamList = msg['sideBarStreamList'];
-      //console.log(tsideBarStreamList);
-
+    
       var myCarousel = document.getElementById("carouseltestText");
       if (myCarousel != null){
         myCarousel.innerHTML = msg['data'];
-
       }
 
-      document.getElementById("testText").innerHTML = tsideBarStreamList;
+      var myliveNow = document.getElementById("liveNowtestText");
+      if (myliveNow != null){
+        myliveNow.innerHTML = msg['liveNowList'];
+      }
 
-      //console.log("getViewerStuffResponse END!!!!");
+      //console.log("OSPcurrentInde= ")
+     // console.log(carcurrentIndex)
+//      var oldsideBar = document.getElementById("osp_carousel");
+    //  var currentItem = $("#osp_carousel.item.active" );
+	//		var tcurrentIndex = $('#osp_carousel.item').index(currentItem) + 1;
+     // console.log("CurITem= ");
+     // console.log(currentItem);
+     // console.log(tcurrentIndex);
+
+      var mysideBar = document.getElementById("sidebartestText");
+      if (mysideBar != null){
+        mysideBar.innerHTML = msg['sideBarStreamList'];
+      }
+   
+      //$('#osp_carousel').bind('slid', function() {
+      //  carcurrentIndex = $('div.active').index() + 1;
+      //  console.log("Slide ")
+      //  console.log(carcurrentIndex )
+      //});
+      
+      $('#osp_carousel').carousel(1)
+//			$('#osp_carousel').carousel('cycle')
+//			$('#osp_carousel').carousel('next')
+
+     // console.log("getViewerStuffResponse.");
     });
   </script>
 

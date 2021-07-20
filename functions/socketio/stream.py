@@ -7,6 +7,7 @@ from classes import Channel
 from classes import Stream
 from classes import settings
 from classes import Sec
+from classes import topics
 
 from functions import system
 from functions import webhookFunc
@@ -14,20 +15,85 @@ from functions import templateFilters
 from functions import xmpp
 from functions import themes
 
-from app import r
+from classes.settings import r
 
 import jinja2
     
 mtemplateLoader = jinja2.FileSystemLoader(searchpath="./")
-mtemplateEnv = jinja2.Environment(loader=mtemplateLoader)
-mTEMPLATE_FILE = "/templates/liveStreams.html"
-mtemplate = mtemplateEnv.get_template(mTEMPLATE_FILE)
+templateEnv = jinja2.Environment(loader=mtemplateLoader)
+sideBartemplate = templateEnv.get_template("/templates/liveStreams.html")
+caroueltemplate = templateEnv.get_template("/templates/carousel.html")
+liveNowtemplate = templateEnv.get_template("/templates/liveNow.html")
 
 @socketio.on('getViewerStuff')
-def handle_viewer_Stuff():
+def handle_viewer_Stuff(reqestType):
+
+    doCarouel = bool(reqestType['doCarouel'])
+
+    sideBarliveView = r.get('sideBarliveView')
+
+    # if there is nothing in redis we need to get it and set it for everyone else
+    if (sideBarliveView == None):
+        #print("sideBarliveViewString = None")
+
+        #r.delete("MARK TEST")    #fred = r.get('MARK TEST')
+        
+        #  streamQuery = Stream.Stream.query.order_by(Stream.Stream.currentViewers).all()
+        streamQuery = Stream.Stream.query.join(Channel.Channel, Channel.Channel.id == Stream.Stream.linkedChannel) \
+        .join(Sec.User, Sec.User.id == Channel.Channel.owningUser) \
+        .join(topics.topics, topics.topics.id == Stream.Stream.topic ).with_entities(Stream.Stream.id,
+            Stream.Stream.linkedChannel,
+            Stream.Stream.streamName,
+            topics.topics.name,
+            Stream.Stream.currentViewers,
+            Stream.Stream.totalViewers,
+            Stream.Stream.NupVotes,
+            Channel.Channel.channelLoc,
+            Channel.Channel.protected,
+            Sec.User.pictureLocation,
+    #        Sec.User.verified,
+    #        Channel.Channel.imageLocation,
+            Sec.User.username,
+    #        Channel.Channel.channelName
+            ).order_by(Stream.Stream.currentViewers.desc()).all()
+        
+        sysSettings = settings.getSettingsFromRedis()
+
+        sideBarliveView = sideBartemplate.render(sideBarStreamList = streamQuery)  
+        carouselliveView = caroueltemplate.render(sideBarStreamList = streamQuery)  
+        liveNowView      = liveNowtemplate.render(sideBarStreamList = streamQuery, sysSettingsprotected = sysSettings.protectionEnabled)  
+
+        r.set('sideBarliveView',sideBarliveView)
+        r.expire('sideBarliveView', 7)  # timeout for redis, this must be 1 less than the timeout used when the UI calls this 
+
+        r.set('carouselliveView',carouselliveView) 
+        r.set('liveNowView',liveNowView) 
+    else:
+        # sideBarliveView is already set, so get the others if they are wanted
+        if (doCarouel == True):
+            carouselliveView = r.get('carouselliveView')
+            liveNowView = r.get('liveNowView')
+        else:
+            carouselliveView = ""
+            liveNowView = ""
+
+    #    r.get('carouselliveView',carouselliveView) 
+    #    r.get('liveNowView',liveNowView) 
+
+#    carouselliveView = "From1"
+#    liveNowView = "From2"
+#    sideBarliveView ="From3 "
+
+    emit('getViewerStuffResponse', {'data': str(carouselliveView),'sideBarStreamList': str(sideBarliveView),'liveNowList': str(liveNowView)})
+
+    return 'OK'
+
+#####    
+    doCarouel = bool(reqestType['doCarouel'])
+#    doCarouel = False
 
     # chanSubQuery = subscriptions.channelSubs.query.filter_by(userID=current_user.id).all()
-    chanSubQuery = []
+    # chanSubQuery = []
 
  #   if current_user.is_authenticated:
  #       chanSubQuery = subscriptions.channelSubs.query.filter_by(userID=current_user.id).\
@@ -37,19 +103,21 @@ def handle_viewer_Stuff():
     
     #  streamQuery = Stream.Stream.query.order_by(Stream.Stream.currentViewers).all()
     streamQuery = Stream.Stream.query.join(Channel.Channel, Channel.Channel.id == Stream.Stream.linkedChannel) \
-    .join(Sec.User, Sec.User.id == Channel.Channel.owningUser).with_entities(Stream.Stream.id,
+    .join(Sec.User, Sec.User.id == Channel.Channel.owningUser) \
+    .join(topics.topics, topics.topics.id == Stream.Stream.topic ).with_entities(Stream.Stream.id,
 #        Stream.Stream.uuid,
 #        Stream.Stream.startTimestamp,
         Stream.Stream.linkedChannel,
 #        Stream.Stream.streamKey,
-#        Stream.Stream.streamName,
-#        Stream.Stream.topic,
+        Stream.Stream.streamName,
+        topics.topics.name,
         Stream.Stream.currentViewers,
         Stream.Stream.totalViewers,
 #        Stream.Stream.rtmpServer,
         Stream.Stream.NupVotes,
         Channel.Channel.channelLoc,
-#        Sec.User.pictureLocation,
+        Channel.Channel.protected,
+        Sec.User.pictureLocation,
 #        Sec.User.verified,
 #        Channel.Channel.imageLocation,
         Sec.User.username,
@@ -57,18 +125,19 @@ def handle_viewer_Stuff():
         ).order_by(Stream.Stream.currentViewers.desc()).all()
    
     
-     #liveView = "FROM STREAM" #render_template(themes.checkOverride('liveStreams.html'))  
-    #streamliveView = render_template(themes.checkOverride('liveStreams.html'),sideBarStreamList = streamQuery)  
-    
-    #streamliveView = render_template('liveStreams.html',sideBarStreamList = streamQuery)  
+    streamliveView = sideBartemplate.render(sideBarStreamList = streamQuery)  
 
+    # if this is the main page render the carousel and live now
+    if (doCarouel is True): 
+        sysSettings = settings.getSettingsFromRedis()
 
-    streamliveView = mtemplate.render(sideBarStreamList = streamQuery)  
-    
+        carouselliveView = caroueltemplate.render(sideBarStreamList = streamQuery)  
+        liveNowView      = liveNowtemplate.render(sideBarStreamList = streamQuery, sysSettingsprotected = sysSettings.protectionEnabled)  
+    else:
+        carouselliveView = ""
+        liveNowView = ""
 
-    carouselliveView = "TESTrender_templateTest"  
-    
-    emit('getViewerStuffResponse', {'data': str(carouselliveView),'sideBarStreamList': str(streamliveView)})
+    emit('getViewerStuffResponse', {'data': str(carouselliveView),'sideBarStreamList': str(streamliveView),'liveNowList': str(liveNowView)})
 
     return 'OK'
 
