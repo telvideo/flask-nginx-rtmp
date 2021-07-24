@@ -21,6 +21,82 @@ def disconnect():
 
     return 'OK'
 
+# This function is a merge of addUserCount & newViewer.  Does the same as both but less work done
+@socketio.on('newViewerandaddUserCount')
+def newViewerandaddUserCount(streamData):
+    channelID = streamData['data']
+  
+    sysSettings = settings.getSettingsFromRedis()
+
+    requestedChannel = Channel.Channel.query.filter_by(id=channelID).first()
+    stream = Stream.Stream.query.filter_by(linkedChannel=channelID).first()
+
+    try:
+        currentViewers = xmpp.getChannelCounts(requestedChannel.channelLoc)
+        requestedChannel.currentViewers = currentViewers
+
+    except: 
+        currentViewers = 999
+
+    streamName = ""
+    streamTopic = 0
+
+    if stream is not None:
+        stream.currentViewers = currentViewers
+        streamName = stream.streamName
+        streamTopic = stream.topic
+    else:
+        streamName = requestedChannel.channelName
+        streamTopic = requestedChannel.topic
+
+    if requestedChannel.imageLocation is None:
+        channelImage = (sysSettings.siteProtocol + sysSettings.siteAddress + "/static/img/video-placeholder.jpg")
+    else:
+        channelImage = (sysSettings.siteProtocol + sysSettings.siteAddress + "/images/" + requestedChannel.imageLocation)
+
+    try:
+        join_room(requestedChannel.channelLoc)
+    except: 
+        pass
+ 
+    if current_user.is_authenticated:
+        pictureLocation = current_user.pictureLocation
+        if current_user.pictureLocation is None:
+            pictureLocation = '/static/img/user2.png'
+        else:
+            pictureLocation = '/images/' + pictureLocation
+
+        webhookFunc.runWebhook(requestedChannel.id, 2, channelname=requestedChannel.channelName,
+                   channelurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/channel/" + str(requestedChannel.id)),
+                   channeltopic=requestedChannel.topic, channelimage=channelImage, streamer=templateFilters.get_userName(requestedChannel.owningUser),
+                   channeldescription=str(requestedChannel.description), streamname=streamName, streamurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/view/" + requestedChannel.channelLoc),
+                   streamtopic=templateFilters.get_topicName(streamTopic), streamimage=(sysSettings.siteProtocol + sysSettings.siteAddress + "/stream-thumb/" + requestedChannel.channelLoc + ".png"),
+                   user=current_user.username, userpicture=(sysSettings.siteProtocol + sysSettings.siteAddress + str(pictureLocation)))
+    else:
+        webhookFunc.runWebhook(requestedChannel.id, 2, channelname=requestedChannel.channelName,
+                   channelurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/channel/" + str(requestedChannel.id)),
+                   channeltopic=requestedChannel.topic, channelimage=channelImage, streamer=templateFilters.get_userName(requestedChannel.owningUser),
+                   channeldescription=str(requestedChannel.description), streamname=streamName,
+                   streamurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/view/" + requestedChannel.channelLoc),
+                   streamtopic=templateFilters.get_topicName(streamTopic), streamimage=(sysSettings.siteProtocol + sysSettings.siteAddress + "/stream-thumb/" + requestedChannel.channelLoc + ".png"),
+                   user="Guest", userpicture=(sysSettings.siteProtocol + sysSettings.siteAddress + '/static/img/user2.png'))
+
+ 
+    requestedChannel.views = requestedChannel.views + 1
+    if stream is not None:
+       stream.totalViewers = stream.totalViewers + 1
+
+    newView = views.views(0, requestedChannel.id)
+    db.session.add(newView)
+
+    try:
+        db.session.commit()
+    except: 
+        pass
+        
+    db.session.close()
+    return 'OK'
+
 @socketio.on('newViewer')
 def handle_new_viewer(streamData):
     channelLoc = str(streamData['data'])
@@ -79,8 +155,7 @@ def handle_new_viewer(streamData):
                    streamtopic=templateFilters.get_topicName(streamTopic), streamimage=(sysSettings.siteProtocol + sysSettings.siteAddress + "/stream-thumb/" + requestedChannel.channelLoc + ".png"),
                    user="Guest", userpicture=(sysSettings.siteProtocol + sysSettings.siteAddress + '/static/img/user2.png'))
 
-    if sysSettings.systemTheme != "xDrDarkDoc":
-        handle_viewer_total_request(streamData, room=streamData['data'])
+    handle_viewer_total_request(streamData, room=streamData['data'])
 
     db.session.commit()
     db.session.close()
@@ -135,8 +210,7 @@ def handle_leaving_viewer(streamData):
         db.session.commit()
     leave_room(streamData['data'])
 
-    if sysSettings.systemTheme != "xDrDarkDoc":
-        handle_viewer_total_request(streamData, room=streamData['data'])
+    handle_viewer_total_request(streamData, room=streamData['data'])
 
     db.session.commit()
     db.session.close()

@@ -633,6 +633,8 @@
 
 <script>
     socket.on('connect', function () {
+        //newViewerandaddUserCount        
+        //socket.emit('newViewerandaddUserCount', { data: '{{channel.id}}' });
         socket.emit('newViewer', { data: '{{channel.channelLoc}}' });
         socket.emit('addUserCount', { data: '{{channel.channelLoc}}' });
     });
