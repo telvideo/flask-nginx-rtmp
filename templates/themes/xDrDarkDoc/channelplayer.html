@@ -157,16 +157,26 @@
                         </span> -->                        
                         
                         <span class="float-right">
-                            <i class="fas fa-users px-1"></i> {{channel.views}}
-                            <i class="fas fa-star px-1"></i> {{channel.Nsubscriptions}}<br />
-                            <i class="fas fa-eye px-1"></i> <span id="currentViewers">{{channel.currentViewers}}</span>
+                            <i class="fas fa-users px-1"></i><span id="totalViewers">{{channel.views}}</span>
+                            <i class="fas fa-star px-1"></i><span id="Nsubscriptions">{{channel.Nsubscriptions}}</span><br/>
+                            <i class="fas fa-eye px-1"></i><span id="currentViewers">{{channel.currentViewers}}</span>
                         </span>
                         
                         <span class="float-right">
                             <button id="upvoteButton" type="button" class="btn btn-primary pl-1 btnSizer"
                                 onclick="changeUpvote();" title="Like" {% if current_user.is_authenticated==false
                                 %} disabled aria-disabled="true" {% endif %}>
-                                <i id="upVoteIcon" class="far fa-thumbs-up"> <span id="totalUpvotes">{{stream.NupVotes}}</span></i>
+
+                                <!--if (document.getElementById("upVoteIcon").classList.contains('far')) {
+                                    document.getElementById("upVoteIcon").classList.remove('far');
+                                    document.getElementById("upVoteIcon").classList.add('fas');
+                                -->
+                                {% if myUpvote == True %}
+                                    <i id="upVoteIcon" class="fas fa-thumbs-up"> <span id="totalUpvotes">{{stream.NupVotes}}</span></i>
+                                {% else %}
+                                    <i id="upVoteIcon" class="far fa-thumbs-up"> <span id="totalUpvotes">{{stream.NupVotes}}</span></i>
+                                {% endif %}
+
                             </button>
                         </span>
                         <span class="float-right">
@@ -514,8 +524,55 @@
 
 {% block scripts %}
 
+
 <script>
-    var player = videojs('video', {
+
+    function createPlayer(){
+        player = videojs('video', {
+            autoplay: true,
+            errorDisplay: false,
+            liveui: true,
+            liveTracker: {
+                trackingThreshold: 5,
+                liveTolerance: 15
+            },
+            html5:
+            {
+                nativeAudioTracks: false,
+                nativeVideoTracks: false,
+                hls:
+                {
+                    overrideNative: true
+                }
+            },
+            plugins: {
+                httpSourceSelector: {
+                    default: 'auto'
+                }
+            }
+        });
+        
+
+        qualityLevels = player.qualityLevels();
+        httpSelector = player.httpSourceSelector();
+
+        player.ready(function () {
+            this.src({
+                src: '{{streamURL}}',
+                type: 'application/x-mpegURL'
+            });
+        });
+
+    }
+
+    $(document).ready(function () {
+        //monitor_vid(player);
+    });
+
+
+    var player;
+    createPlayer();
+/*    var player = videojs('video', {
         autoplay: true,
         errorDisplay: false,
         liveui: true,
@@ -537,7 +594,7 @@
                 default: 'auto'
             }
         }
-    });
+    }); 
 
     qualityLevels = player.qualityLevels();
     httpSelector = player.httpSourceSelector();
@@ -548,7 +605,15 @@
             type: 'application/x-mpegURL'
         });
     });
-    player.play();
+
+    */
+
+//    var pcookieVolume = getCookie('ospvolume');
+//    console.log('XXXXXplay: ' + pcookieVolume)
+//    if (!(pcookieVolume == null)) {
+//        player.volume(pcookieVolume);
+//    }
+//    player.play();
 </script>
 
 <!--
@@ -587,12 +652,14 @@
     });
 </script>
 
+<!--
 <script type="text/javascript" charset="utf-8">
     socket.on('viewerTotalResponse', function (msg) {
+        console.log('XXXXXXXXXXXXXXXXXsocket.on(viewerTotalResponse')
         document.getElementById("currentViewers").innerHTML = msg['data'];
     });
 </script>
-
+-->
 <script>
     // Handing of Stream Timer
     function convertToHMS(timestamp) {
@@ -654,6 +721,14 @@
 
     var stickerList = {{ stickerList | safe }}
 
+    var onlineBadge = document.getElementById('liveIndicatorBadge');
+    var videoContainer = document.getElementById('videoContainer');
+    var offlineWindow = document.getElementById('offlineImage');
+    var offlineWindow = document.getElementById('offlineImage');
+    var onlineBadge = document.getElementById('liveIndicatorBadge');
+    var streamnameDiv = document.getElementById('streamMetadataName');
+    var streamcurrentViewers = document.getElementById("currentViewers");
+
     $('#chatinput').on('keyup', function (e) {
         if (e.keyCode === 13) {
             sendMessage();
@@ -700,11 +775,11 @@
     })
 </script>
 
-<script>
+<!--<script>
     socket.on('connect', function () {
-        socket.emit('getUpvoteTotal', { loc: '{{channel.id}}', vidType: 'stream' });
+//        socket.emit('khgetUpvoteTotal', { loc: '{{channel.id}}', vidType: 'stream' });
     });
-</script>
+</script> -->
 
 <script type="text/javascript" charset="utf-8">
     socket.on('upvoteTotalResponse', function (msg) {
@@ -722,6 +797,141 @@
             }
         }
     });
+
+    var oldTopic=0;
+    var needsReset=true;
+    var needsDisplayBlock =true;
+    var oldStreamName = "";
+    var oldtotalUpvotes = 0;
+    var oldcurrentViewers = 0;
+    var oldtotalViewers = 0;
+    var oldNsubscriptions = 0;
+
+    socket.on('getStreamStuffResponse', function (msg) {
+        var inStreamName            = msg['streamName'];
+        var inStreamTopic           = msg['streamTopic'];
+        var inStreamTimeStamp       = msg['startTimestamp'];
+        var inStreamViewers         = msg['viewers'];
+        var inStreamNupVotes        = msg['NupVotes'];
+        var inStreamViews           = msg['views'];
+        var inStreamNsubscriptions  = msg['Nsubscriptions'];
+        
+        console.log("getResponse " + inStreamName + " T: " + inStreamTopic + " TS: " + inStreamTimeStamp +" V: " + inStreamViewers);
+
+        if (inStreamTopic == -1 ){
+            console.log("***************** No stream needReset= " + needsReset)
+
+            if (needsReset==true){
+                needsReset = false;
+                needsDisplayBlock = true;                
+
+                videoJSObj = player;
+                try {
+                        videoJSObj.pause();
+                        videoJSObj.reset();
+                        onlineBadge.className = 'mx-0 px-1 liveindicator badge badge-secondary chan-liveBadge';
+                        onlineBadge.innerHTML = '<i class="fas fa-video-slash"></i><span class="d-none d-sm-none d-md-inline"> Offline</span>';
+                        videoContainer.style.display = "none";
+                        offlineWindow.style.display = "block";
+                        var currentStreamName = "No Stream";
+                       
+                        streamTimeStamp = new Date('UTC');
+
+                        streamnameDiv.innerHTML = '<span><b> ' + currentStreamName + '</b></span>';
+                        streamcurrentViewers.innerHTML = '0';
+
+                    } catch (e) {
+                        console.log("OSP tried pause reset but had an issue:" + e)
+                }                
+            } // if (needsReset==true)
+        }
+        else{
+            videoJSObj = player;
+            currentReadyState = videoJSObj.readyState();
+           
+            if (needsDisplayBlock == true){
+                needsDisplayBlock = false;                
+                videoContainer.style.display = "block";
+                offlineWindow.style.display = "none";
+
+                onlineBadge.className = 'mx-0 px-1 liveindicator badge badge-danger chan-liveBadge';
+                onlineBadge.innerHTML = '<i class="fas fa-video"></i><span class="d-none d-sm-none d-md-inline"> Live</span>';
+            }
+
+            console.log('currentReady = ' + currentReadyState);
+
+            if (currentReadyState <= 2) {
+                try {
+                    needsReset = true;
+
+                    console.log('**************** RESTARTING (currentReadyState <2)');
+
+
+                  //  var bcookieVolume = getCookie('ospvolume');
+                  //  console.log('XXXXXRESTARTplay: ' + bcookieVolume)
+                 //   if (!(bcookieVolume == null)) {
+                 //       player.volume(bcookieVolume);
+                 //   }
+
+                    videoJSObj.reset();
+                    videoJSObj.src('{{streamURL}}');
+                    videoJSObj.pause();
+                    videoJSObj.trigger('loadstart');
+                    videoJSObj.play();
+                } catch (e) {
+                    console.log("OSP tried restarting the stream but had an issue:" + e)
+                }
+            }
+
+            //var currentStreamTopic = inStreamTopic;
+            var currentStreamName = inStreamName
+            streamTimeStamp = new Date(inStreamTimeStamp + ' UTC');
+
+            if (oldTopic != inStreamTopic){
+                var topicDiv = document.getElementById('streamMetadataTopic');
+
+                var topicJSList = [];
+                {% for x in topics %}
+                topicJSList["{{x.id}}"] = "{{x.name}}";
+                {% endfor %}
+
+                var topicDivHTML = '<b><i class="fas fa-hashtag"></i> <a href="/topic/' + inStreamTopic + '"><span>' + topicJSList[inStreamTopic] + '</span></a></b>';
+             
+                topicDiv.innerHTML = topicDivHTML;
+                oldTopic = inStreamTopic;
+            }
+            
+            if (currentStreamName != oldStreamName){
+                streamnameDiv.innerHTML = '<b><i class="fas fa-video"></i> <span> ' + currentStreamName + '</span></b>';
+                oldStreamName = currentStreamName;
+            }
+
+            
+            if (inStreamViewers != oldcurrentViewers){
+                streamcurrentViewers.innerHTML = inStreamViewers;
+                oldcurrentViewers = inStreamViewers;
+            }
+        }
+
+        if (inStreamNupVotes != oldtotalUpvotes ){
+            document.getElementById("totalUpvotes").innerHTML = inStreamNupVotes;
+            oldtotalUpvotes = inStreamNupVotes;
+        }
+
+        if (inStreamViews != oldtotalViewers){
+            document.getElementById("totalViewers").innerHTML = inStreamViews;
+            oldtotalViewers = inStreamViews;
+        }
+
+        if (inStreamNsubscriptions != oldNsubscriptions){
+            document.getElementById("Nsubscriptions").innerHTML = inStreamNsubscriptions;
+            oldNsubscriptions = inStreamNsubscriptions;
+        }
+
+        console.log('ENDgetStreamStuffResponse');
+    });
+
+
 </script>
 
 <script>
@@ -744,9 +954,9 @@
 <script>
     function popoutChat() {
         {% if current_user.is_authenticated %}
-        MyWindows = window.open('/view/{{channel.channelLoc}}/?chatOnly=True', 'myWindow', 'width=500,height=900');
+        MyWindows = window.open('/view/{{channel.channelLoc}}/?chatOnly=True', 'myWindow', 'width=500,height=500');
         {% else %}
-        MyWindows = window.open('/view/{{channel.channelLoc}}/?chatOnly=True&guestUser=' + username, 'myWindow', 'width=500,height=900');
+        MyWindows = window.open('/view/{{channel.channelLoc}}/?chatOnly=True&guestUser=' + username, 'myWindow', 'width=500,height=500');
         {% endif %}
         //var chatbox = document.getElementById("chatside");
         //chatbox.style.display = "none";
@@ -764,113 +974,23 @@
 
 
 <script>
-    videoContainer = document.getElementById('videoContainer');
-
-    //Fixes for VideoJS on Disconnect to Force a Reconnect when the readyState is stuck at 2
-    function monitor_vid(vidplayer) {
-        videoJSObj = vidplayer;
-        currentReadyState = videoJSObj.readyState();
-
-        videoWindowState = document.getElementsByTagName('video');
-
-        /*videoContainer = document.getElementById('videoContainer'); */
-        offlineWindow = document.getElementById('offlineImage');
-
-        onlineBadge = document.getElementById('liveIndicatorBadge');
-
-        $.getJSON('/apiv1/channel/{{channel.channelLoc}}', function (data) {
-            var channelList = data['results'][0];
-            var streamIDList = channelList['stream'];
-
-            if (streamIDList.length > 0) {
-                var currentStreamID = streamIDList[0];
-
-                videoContainer.style.display = "block";
-                offlineWindow.style.display = "none";
-
-                if (currentReadyState <= 2) {
-                    try {
-                        videoJSObj.reset();
-                        videoJSObj.src('{{streamURL}}');
-                        videoJSObj.pause();
-                        videoJSObj.trigger('loadstart');
-                        videoJSObj.play();
-                    } catch (e) {
-                        console.log("OSP tried restarting the stream but had an issue:" + e)
-                    }
-                }
-
-
-                $.getJSON('/apiv1/stream/' + currentStreamID, function (data) {
-                    var streamData = data['results'][0];
-                    var currentStreamTopic = streamData['topic'];
-                    var currentStreamName = streamData['streamName'];
-                    streamTimeStamp = new Date(streamData['startTimestamp'] + ' UTC');
-
-                    var topicDiv = document.getElementById('streamMetadataTopic');
-                    var nameDiv = document.getElementById('streamMetadataName');
-
-                    var topicJSList = [];
-                    {% for x in topics %}
-                    topicJSList["{{x.id}}"] = "{{x.name}}";
-                    {% endfor %}
-
-
-                    var nameDivHTML = '<b><i class="fas fa-video"></i> <span> ' + currentStreamName + '</span></b>';
-                    var topicDivHTML = '<b><i class="fas fa-hashtag"></i> <a href="/topic/' + currentStreamTopic + '"><span>' + topicJSList[currentStreamTopic] + '</span></a></b>';
-
-                    onlineBadge.className = 'mx-0 px-1 liveindicator badge badge-danger chan-liveBadge';
-                    onlineBadge.innerHTML = '<i class="fas fa-video"></i><span class="d-none d-sm-none d-md-inline"> Live</span>';
-
-                    nameDiv.innerHTML = nameDivHTML;
-                    topicDiv.innerHTML = topicDivHTML;
-
-                });
-
-            } else {
-                try {
-                    videoJSObj.pause();
-                    videoJSObj.reset();
-                    onlineBadge.className = 'mx-0 px-1 liveindicator badge badge-secondary chan-liveBadge';
-                    onlineBadge.innerHTML = '<i class="fas fa-video-slash"></i><span class="d-none d-sm-none d-md-inline"> Offline</span>';
-                    videoContainer.style.display = "none";
-                    offlineWindow.style.display = "block";
-                    var currentStreamName = "No Stream";
-                    var nameDiv = document.getElementById('streamMetadataName');
-                    streamTimeStamp = new Date('UTC');
-                    var nameDivHTML = '<span><b> ' + currentStreamName + '</b></span>';
-                    nameDiv.innerHTML = nameDivHTML;
-
-                } catch (e) {
-                    console.log("OSP tried restarting the stream but had an issue:" + e)
-                }
-            }
-        });
-        var lastVideoState = currentReadyState;
-    }
-    var getUpvoteTotalwait = 0;
-
-    setInterval(function () {
-        monitor_vid(player); 
-        if (videoContainer.style.display == "block"){
-            //console.log("IS block, getting stuff");
-            console.log( getUpvoteTotalwait);
-
-            socket.emit('getViewerTotal', { data: "{{channel.channelLoc}}" });
-            getUpvoteTotalwait = getUpvoteTotalwait + 1;
-
-            if (getUpvoteTotalwait>2){
-                socket.emit('getUpvoteTotal', { loc: '{{channel.id}}', vidType: 'stream' });
-                //console.log("GETTING getUpvoteTotal !!!! **********");
-                getUpvoteTotalwait =0;
-            }
-
-        }else{
-            console.log("NOT  block")
-
-        }
     
-    }, 10000);
+    //main database / redis polling function is called from here 
+    setInterval(function () {
+        socket.emit('getStreamStuff', { data: "{{channel.id}}", channelLoc: "{{channel.channelLoc}}" }); 
+        console.log("Sending getStreamStuff for channel: " + "{{channel.id}}");
+      
+        //var currentVolume = player.volume();
+
+        //console.log("CurrentVolume from timer = " + currentVolume)
+        //setCookie('ospvolume', currentVolume, 365);
+
+        //var fcookieVolume = getCookie('ospvolume');
+        //console.log("MMMMMMMCookie read Volume = " + fcookieVolume)
+
+
+    }, 2500);  // how often we poll...  must be more than the redis timeout set in  r.expire(myRedisID, 2) in  handle_getStream_Stuff
+
 </script>
 
 <script>
@@ -924,7 +1044,6 @@
 </script>
 
 <script>
-
     socket.on('sendChanSubResults', function (msg) {
         var subButton = document.getElementById('chanSubStateButton');
         if (msg['state'] === true) {
@@ -935,27 +1054,21 @@
             subButton.className = "followingBadge btn btn-sm btn-success";
         }
       });
-
 </script>
 
 <script>
-    videoListOptions = {
-        valueNames: ['name', 'upvotes', "views", "length", "date"]
-    };
+    $(document).ready(function () {
 
-    clipListOptions = {
-        valueNames: ['name', 'upvotes', "views", "length", "date"]
-    };
-
-    var recordedVideosList = new List('recordedVideoList', videoListOptions);
-    var clipList = new List('clipsList', clipListOptions);
-
+//        var dcookieVolume = getCookie('ospvolume');
+//        console.log("HHHHCookie Volume = " + dcookieVolume)
+});
 </script>
-
 <script>
+
     const video = document.querySelector('video');
     video.addEventListener('play', (event) => {
         var cookieVolume = getCookie('ospvolume');
+        console.log('XXXXXplay cookieVolue: ' + cookieVolume)
         if (!(cookieVolume == null)) {
             player.volume(cookieVolume);
         }
@@ -963,8 +1076,96 @@
 
     video.addEventListener('volumechange', (event) => {
         var currentVolume = player.volume();
+
+        console.log("CurrentVolume = " + currentVolume)
         setCookie('ospvolume', currentVolume, 365);
+  //      mcookieVolume = getCookie('ospvolume');
+  //      console.log("READCookie Volume = " + mcookieVolume)
+
     });
 </script>
 
 {% endblock %}
+
+/*
+
+//videoContainer = document.getElementById('videoContainer');
+
+//Fixes for VideoJS on Disconnect to Force a Reconnect when the readyState is stuck at 2
+function monitor_vid(vidplayer) {
+    videoJSObj = vidplayer;
+    currentReadyState = videoJSObj.readyState();
+
+
+    $.getJSON('/apiv1/channel/{{channel.channelLoc}}', function (data) {
+        var channelList = data['results'][0];
+        var streamIDList = channelList['stream'];
+
+        if (streamIDList.length > 0) {
+            var currentStreamID = streamIDList[0];
+
+            videoContainer.style.display = "block";
+            offlineWindow.style.display = "none";
+
+            if (currentReadyState <= 2) {
+                try {
+                    videoJSObj.reset();
+                    videoJSObj.src('{{streamURL}}');
+                    videoJSObj.pause();
+                    videoJSObj.trigger('loadstart');
+                    videoJSObj.play();
+                } catch (e) {
+                    console.log("OSP tried restarting the stream but had an issue:" + e)
+                }
+            }
+
+
+            $.getJSON('/apiv1/stream/' + currentStreamID, function (data) {
+                var streamData = data['results'][0];
+                var currentStreamTopic = streamData['topic'];
+                var currentStreamName = streamData['streamName'];
+                streamTimeStamp = new Date(streamData['startTimestamp'] + ' UTC');
+
+                var topicDiv = document.getElementById('streamMetadataTopic');
+                var nameDiv = document.getElementById('streamMetadataName');
+
+                var topicJSList = [];
+                {% for x in topics %}
+                topicJSList["{{x.id}}"] = "{{x.name}}";
+                {% endfor %}
+
+
+                var nameDivHTML = '<b><i class="fas fa-video"></i> <span> ' + currentStreamName + '</span></b>';
+                var topicDivHTML = '<b><i class="fas fa-hashtag"></i> <a href="/topic/' + currentStreamTopic + '"><span>' + topicJSList[currentStreamTopic] + '</span></a></b>';
+
+                onlineBadge.className = 'mx-0 px-1 liveindicator badge badge-danger chan-liveBadge';
+                onlineBadge.innerHTML = '<i class="fas fa-video"></i><span class="d-none d-sm-none d-md-inline"> Live</span>';
+
+                nameDiv.innerHTML = nameDivHTML;
+                topicDiv.innerHTML = topicDivHTML;
+
+            });
+
+        } else {
+            try {
+                videoJSObj.pause();
+                videoJSObj.reset();
+                onlineBadge.className = 'mx-0 px-1 liveindicator badge badge-secondary chan-liveBadge';
+                onlineBadge.innerHTML = '<i class="fas fa-video-slash"></i><span class="d-none d-sm-none d-md-inline"> Offline</span>';
+                videoContainer.style.display = "none";
+                offlineWindow.style.display = "block";
+
+                var nameDiv = document.getElementById('streamMetadataName');
+                streamTimeStamp = new Date('UTC');
+                var nameDivHTML = '<span><b> ' + "No Stream" + '</b></span>';
+                nameDiv.innerHTML = nameDivHTML;
+
+            } catch (e) {
+                console.log("OSP tried restarting the stream but had an issue:" + e)
+            }
+        }
+    });
+
+}
+
+*/

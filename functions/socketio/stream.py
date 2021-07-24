@@ -77,67 +77,84 @@ def handle_viewer_Stuff(reqestType):
             carouselliveView = ""
             liveNowView = ""
 
-    #    r.get('carouselliveView',carouselliveView) 
-    #    r.get('liveNowView',liveNowView) 
-
-#    carouselliveView = "From1"
-#    liveNowView = "From2"
-#    sideBarliveView ="From3 "
-
     emit('getViewerStuffResponse', {'data': str(carouselliveView),'sideBarStreamList': str(sideBarliveView),'liveNowList': str(liveNowView)})
 
     return 'OK'
 
-#####    
-    doCarouel = bool(reqestType['doCarouel'])
-#    doCarouel = False
+@socketio.on('getStreamStuff')
+def handle_getStream_Stuff(streamData):
 
-    # chanSubQuery = subscriptions.channelSubs.query.filter_by(userID=current_user.id).all()
-    # chanSubQuery = []
+    channelID = int(streamData['data'])
+    channelLoc = streamData['channelLoc']
 
- #   if current_user.is_authenticated:
- #       chanSubQuery = subscriptions.channelSubs.query.filter_by(userID=current_user.id).\
- #           join(Channel.Channel, Channel.Channel.id == subscriptions.channelSubs.channelID ).\
- #           with_entities(Channel.Channel.imageLocation,Channel.Channel.id,Channel.Channel.channelName)
+    streamQuery = None
+    myRedisID = "streamName" +str(channelID)
 
+    streamData = r.hgetall(myRedisID)
+    # if there is nothing in redis we need to get it and set it for everyone else to use later
+    if (streamData == {}):
+       # streamQuery = Stream.Stream.query.filter_by(linkedChannel=channelID) \
+       #     .with_entities(Stream.Stream.streamName, Stream.Stream.topic, Stream.Stream.startTimestamp, Stream.Stream.NupVotes). first()
     
-    #  streamQuery = Stream.Stream.query.order_by(Stream.Stream.currentViewers).all()
-    streamQuery = Stream.Stream.query.join(Channel.Channel, Channel.Channel.id == Stream.Stream.linkedChannel) \
-    .join(Sec.User, Sec.User.id == Channel.Channel.owningUser) \
-    .join(topics.topics, topics.topics.id == Stream.Stream.topic ).with_entities(Stream.Stream.id,
-#        Stream.Stream.uuid,
-#        Stream.Stream.startTimestamp,
-        Stream.Stream.linkedChannel,
-#        Stream.Stream.streamKey,
-        Stream.Stream.streamName,
-        topics.topics.name,
-        Stream.Stream.currentViewers,
-        Stream.Stream.totalViewers,
-#        Stream.Stream.rtmpServer,
-        Stream.Stream.NupVotes,
-        Channel.Channel.channelLoc,
-        Channel.Channel.protected,
-        Sec.User.pictureLocation,
-#        Sec.User.verified,
-#        Channel.Channel.imageLocation,
-        Sec.User.username,
-#        Channel.Channel.channelName
-        ).order_by(Stream.Stream.currentViewers.desc()).all()
-   
-    
-    streamliveView = sideBartemplate.render(sideBarStreamList = streamQuery)  
+        
+        streamQuery = Stream.Stream.query.join(Channel.Channel, Channel.Channel.id == Stream.Stream.linkedChannel) \
+            .filter_by(id=channelID).with_entities(Stream.Stream.id,
+                Stream.Stream.topic,
+                Stream.Stream.streamName,
+                Stream.Stream.currentViewers,
+                Stream.Stream.totalViewers,
+                Stream.Stream.startTimestamp,
+                Stream.Stream.NupVotes,
+                Channel.Channel.views,
+                Channel.Channel.Nsubscriptions        
+                ).first()
 
-    # if this is the main page render the carousel and live now
-    if (doCarouel is True): 
-        sysSettings = settings.getSettingsFromRedis()
+        # if the stream query failed it's cos there is no stream linked to the channel then get the channel info
+        if streamQuery == None:
+            requestedChannel = Channel.Channel.query.filter_by(id=channelID).with_entities(Channel.Channel.views,
+                #Channel.Channel.currentViewers,
+                Channel.Channel.Nsubscriptions).first() 
+            views = requestedChannel.views
+            Nsubscriptions = requestedChannel.Nsubscriptions
+        else:
+            views = streamQuery.views
+            Nsubscriptions = streamQuery.Nsubscriptions
 
-        carouselliveView = caroueltemplate.render(sideBarStreamList = streamQuery)  
-        liveNowView      = liveNowtemplate.render(sideBarStreamList = streamQuery, sysSettingsprotected = sysSettings.protectionEnabled)  
-    else:
-        carouselliveView = ""
-        liveNowView = ""
 
-    emit('getViewerStuffResponse', {'data': str(carouselliveView),'sideBarStreamList': str(streamliveView),'liveNowList': str(liveNowView)})
+        if streamQuery != None:
+            try:
+                viewers = xmpp.getChannelCounts(channelLoc)
+            except: 
+                viewers = 0
+
+            streamData = {"streamName":streamQuery.streamName,
+                    "streamTime":str(streamQuery.startTimestamp),
+                    "topic"     :streamQuery.topic,
+                    "viewers"   :viewers,
+                    "NupVotes"  :str(streamQuery.NupVotes),
+                    "views"     :str(views),
+                    "Nsubscriptions"     :str(Nsubscriptions)}
+
+        else:
+            streamData = {"streamName":"",
+                    "streamTime":"",
+                    "topic"     :-1,
+                    "viewers"   :'0',
+                    "NupVotes"  :'0',
+                    "views"     :str(views),
+                    "Nsubscriptions"    :str(Nsubscriptions)}
+
+        r.hmset(myRedisID,streamData)   # set redis even if there is no stream cos lots of people might be waiting...
+        r.expire(myRedisID, 2)          # after 2 seconds it will die and can be recreated, timeout should be less than how often we poll...
+
+    emit('getStreamStuffResponse', {'streamName'    : streamData["streamName"],
+                                    'streamTopic'   : streamData["topic"],
+                                    'startTimestamp': streamData["streamTime"],
+                                    'viewers'       : streamData["viewers"],     
+                                    'NupVotes'      : streamData["NupVotes"], 
+                                    'views'         : streamData["views"],
+                                    'Nsubscriptions': streamData["Nsubscriptions"]                                    
+                                    })
 
     return 'OK'
 

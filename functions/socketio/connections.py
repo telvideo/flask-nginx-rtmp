@@ -79,7 +79,8 @@ def handle_new_viewer(streamData):
                    streamtopic=templateFilters.get_topicName(streamTopic), streamimage=(sysSettings.siteProtocol + sysSettings.siteAddress + "/stream-thumb/" + requestedChannel.channelLoc + ".png"),
                    user="Guest", userpicture=(sysSettings.siteProtocol + sysSettings.siteAddress + '/static/img/user2.png'))
 
-    handle_viewer_total_request(streamData, room=streamData['data'])
+    if sysSettings.systemTheme != "xDrDarkDoc":
+        handle_viewer_total_request(streamData, room=streamData['data'])
 
     db.session.commit()
     db.session.close()
@@ -134,7 +135,8 @@ def handle_leaving_viewer(streamData):
         db.session.commit()
     leave_room(streamData['data'])
 
-    handle_viewer_total_request(streamData, room=streamData['data'])
+    if sysSettings.systemTheme != "xDrDarkDoc":
+        handle_viewer_total_request(streamData, room=streamData['data'])
 
     db.session.commit()
     db.session.close()

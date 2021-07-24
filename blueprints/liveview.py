@@ -14,6 +14,7 @@ from classes import Stream
 from classes import Sec
 from classes import banList
 from classes import stickers
+from classes import upvotes
 
 from globals.globalvars import ejabberdServer
 
@@ -210,13 +211,20 @@ def view_page(loc):
                 clipsList.sort(key=lambda x: x.views, reverse=True)
 
             subState = False
+            myUpvote = True
+
             if current_user.is_authenticated:
                 chanSubQuery = subscriptions.channelSubs.query.with_entities(subscriptions.channelSubs.id).filter_by(channelID=requestedChannel.id, userID=current_user.id).first()
                 if chanSubQuery is not None:
                     subState = True      
             
+                if streamData:
+                    myVoteQuery = upvotes.streamUpvotes.query.filter_by(userID=current_user.id, streamID=streamData.id).first()
+                    if myVoteQuery is not None:
+                        myUpvote = True
+
             return render_template(themes.checkOverride('channelplayer.html'),  streamer=streamerQuery, stream=streamData, topics=topicList, streamURL=streamURL, channel=requestedChannel, clipsList=clipsList,
-                                   subState=subState, secureHash=secureHash, rtmpURI=rtmpURI, xmppserver=xmppserver, stickerList=stickerList, stickerSelectorList=stickerSelectorList, bannedWords=bannedWordArray)
+                                   subState=subState, myUpvote=myUpvote, secureHash=secureHash, rtmpURI=rtmpURI, xmppserver=xmppserver, stickerList=stickerList, stickerSelectorList=stickerSelectorList, bannedWords=bannedWordArray)
         else:
             isAutoPlay = request.args.get("autoplay")
             if isAutoPlay is None:

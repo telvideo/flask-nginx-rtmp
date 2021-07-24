@@ -133,7 +133,7 @@ class api_1_ListChannel(Resource):
                         return {'results': [ob.authed_serialize() for ob in channelQuery]}
                 return {'results': {'message': 'Request Error'}}, 400
         else:
-            channelList = Channel.Channel.query.filter_by(channelLoc=channelEndpointID).all() ##mrn here it is!
+            channelList = Channel.Channel.query.filter_by(channelLoc=channelEndpointID).all() ##mrn boggs nasty big call need to not do...
             db.session.commit()
             return {'results': [ob.serialize() for ob in channelList]}
 
