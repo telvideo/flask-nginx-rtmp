@@ -114,6 +114,91 @@ from pottery import Redlock
 
 
 
+channelID = 2
+
+if True:
+#    channelID = str(streamData['data'])
+    channelID = 2 #str(streamData['channelID'])
+ 
+    sysSettings = settings.getSettingsFromRedis()
+
+
+    requestedChannel = Channel.Channel.query.filter_by(id=channelID).first()
+    stream = Stream.Stream.query.filter_by(linkedChannel=channelID).first()
+
+    currentViewers = 555 #xmpp.getChannelCounts(requestedChannel.channelLoc)
+
+    streamName = ""
+    streamTopic = 0
+
+    requestedChannel.currentViewers = currentViewers
+#    db.session.commit()
+
+    if stream is not None:
+        stream.currentViewers = currentViewers
+#        db.session.commit()
+        streamName = stream.streamName
+        streamTopic = stream.topic
+
+    else:
+        streamName = requestedChannel.channelName
+        streamTopic = requestedChannel.topic
+
+    if requestedChannel.imageLocation is None:
+        channelImage = (sysSettings.siteProtocol + sysSettings.siteAddress + "/static/img/video-placeholder.jpg")
+    else:
+        channelImage = (sysSettings.siteProtocol + sysSettings.siteAddress + "/images/" + requestedChannel.imageLocation)
+
+    join_room(equestedChannel.channelLoc)
+   
+ 
+    if current_user.is_authenticated:
+        pictureLocation = current_user.pictureLocation
+        if current_user.pictureLocation is None:
+            pictureLocation = '/static/img/user2.png'
+        else:
+            pictureLocation = '/images/' + pictureLocation
+
+        webhookFunc.runWebhook(requestedChannel.id, 2, channelname=requestedChannel.channelName,
+                   channelurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/channel/" + str(requestedChannel.id)),
+                   channeltopic=requestedChannel.topic, channelimage=channelImage, streamer=templateFilters.get_userName(requestedChannel.owningUser),
+                   channeldescription=str(requestedChannel.description), streamname=streamName, streamurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/view/" + requestedChannel.channelLoc),
+                   streamtopic=templateFilters.get_topicName(streamTopic), streamimage=(sysSettings.siteProtocol + sysSettings.siteAddress + "/stream-thumb/" + requestedChannel.channelLoc + ".png"),
+                   user=current_user.username, userpicture=(sysSettings.siteProtocol + sysSettings.siteAddress + str(pictureLocation)))
+    else:
+        webhookFunc.runWebhook(requestedChannel.id, 2, channelname=requestedChannel.channelName,
+                   channelurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/channel/" + str(requestedChannel.id)),
+                   channeltopic=requestedChannel.topic, channelimage=channelImage, streamer=templateFilters.get_userName(requestedChannel.owningUser),
+                   channeldescription=str(requestedChannel.description), streamname=streamName,
+                   streamurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/view/" + requestedChannel.channelLoc),
+                   streamtopic=templateFilters.get_topicName(streamTopic), streamimage=(sysSettings.siteProtocol + sysSettings.siteAddress + "/stream-thumb/" + requestedChannel.channelLoc + ".png"),
+                   user="Guest", userpicture=(sysSettings.siteProtocol + sysSettings.siteAddress + '/static/img/user2.png'))
+
+ 
+ #   db.session.commit()
+ #   db.session.close()
+
+###
+  #  requestedChannel = Channel.Channel.query.filter_by(channelLoc=channelLoc).first()
+  #  streamData = Stream.Stream.query.filter_by(streamKey=requestedChannel.streamKey).first()
+
+    requestedChannel.views = requestedChannel.views + 1
+    if stream is not None:
+       stream.totalViewers = stream.totalViewers + 1
+#    db.session.commit()
+
+    newView = views.views(0, requestedChannel.id)
+    db.session.add(newView)
+
+    try:
+        db.session.commit()
+    except: 
+        pass
+        
+    db.session.close()
+
+
+
 print("BOB")
 
 doCarouel = True #bool(reqestType['doCarouel'])
