@@ -94,8 +94,7 @@
                             </video>
                         </div>
                         <div id="offlineImage" style="display:none;" class="mPannel">
-                            <img class="videoStream s
-                            hadow mPannel" {% if channel.offlineImageLocation !=None %}
+                            <img class="videoStream shadow mPannel" {% if channel.offlineImageLocation !=None %}
                                 src="/images/{{channel.offlineImageLocation}}" {% else %}
                                 src="/static/img/video-placeholder.jpg" {% endif %}
                                 onerror="this.onerror=null;this.src='/static/img/video-placeholder.jpg';">
