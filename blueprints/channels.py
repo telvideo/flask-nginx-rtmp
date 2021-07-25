@@ -7,63 +7,53 @@ from classes import RecordedVideo
 from classes import Stream
 from classes import subscriptions
 from classes import Sec
+from classes import topics
+from globals import globalvars
+from functions import templateFilters
 
 from functions import themes
 
 channels_bp = Blueprint('channel', __name__, url_prefix='/channel')
 
+
+from classes.settings import r
+
+import jinja2  # we can't just use standard render_template() cos that will fire all our global injects and other stuff
+    
+
 @channels_bp.route('/')
 def channels_page():
-    #sysSettings = settings.settings.query.first()
-    sysSettings = settings.getSettingsFromRedis()
-    
-#    if sysSettings.showEmptyTables:
-#        chanQuery = Channel.Channel.query.all()
-#    else:
-    chanQuery = Channel.Channel.query.join(Sec.User,Sec.User.id == Channel.Channel.owningUser).with_entities(Channel.Channel.topic,
-            Channel.Channel.protected,
-            Channel.Channel.Nsubscriptions,
-            Channel.Channel.views,
-            Channel.Channel.channelName,
-            Channel.Channel.imageLocation,
-            Channel.Channel.owningUser,
-            Sec.User.username,
-            Sec.User.pictureLocation,
-            Channel.Channel.id).order_by(Channel.Channel.channelName.desc()).all()
-      
 
-    streamSet = set()
-    streamQuery = Stream.Stream.query.with_entities(Stream.Stream.linkedChannel).all()
-    for aStream in streamQuery:
-        streamSet.add(aStream.linkedChannel) 
+    renderedchannels = r.get('renderedchannels')
+
+    # if there is nothing in redis we need to get it and set it for everyone else
+    if (renderedchannels == None):
+        sysSettings = settings.getSettingsFromRedis()
+            
+        if sysSettings.showEmptyTables:
+            channelList = Channel.Channel.query.all()
+        else:
+            channelList = []
+            for channel in Channel.Channel.query.all():
+                if len(channel.recordedVideo) > 0:
+                    channelList.append(channel)
+
+        mtemplateLoader = jinja2.FileSystemLoader(searchpath="./")
+        templateEnv = jinja2.Environment(loader=mtemplateLoader)
+        templateFilters.init(templateEnv)
+     
+        channelstemplate = templateEnv.get_template(themes.checkOverrideDirect('redischannels.html',sysSettings.systemTheme))
+
+        renderedchannels = channelstemplate.render(channelList=channelList)  
+
+        #print("rendered")
+        r.set('renderedchannels',renderedchannels)
+        r.expire('renderedchannels', 60)  # timeout for redis 
 
     channelList = []
 
-    for chan in chanQuery:
-        if chan.id in streamSet:
-            isStreaming = True
-        else:
-            isStreaming = False
-            
-        aChan = {"protected":chan.protected,
-        "id":chan.id,
-        "owningUser":chan.owningUser,
-        "Nsubscriptions":chan.Nsubscriptions,
-        "views":chan.views,
-        "imageLocation":chan.imageLocation,
-        "channelName":chan.channelName,
-        "topic":chan.topic,
-        "username":chan.username,
-        "isStreaming":isStreaming,
-        "pictureLocation":chan.pictureLocation}
-#            "totalViewers":achan.totalViewers,
-#            "username": achan.username,
-#            "channelName":achan.channelName,
-#            "verified":achan.verified}
-        channelList.append(aChan) 
+    return render_template(themes.checkOverride('channels.html'), channeldList=channelList, renderedchannels = renderedchannels)
 
-
-    return render_template(themes.checkOverride('channels.html'), channelList=channelList)
 
 @channels_bp.route('/<int:chanID>/')
 def channel_view_page(chanID):

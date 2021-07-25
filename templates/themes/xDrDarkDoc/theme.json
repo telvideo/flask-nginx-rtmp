@@ -18,6 +18,8 @@
     "clipplayer.html",
     "search.html",
     "subscriptions.html",
-    "notifications.html"
+    "notifications.html",
+    "redischannels.html",
+    "liveStreams.html"
   ]
 }

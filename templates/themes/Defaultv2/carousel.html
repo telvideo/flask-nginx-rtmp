@@ -5,7 +5,6 @@
   <meta charset="UTF-8">
   
 </head>
-
 <body>                                             
  <!-- Carousel Code from w3 schools -->
  <div id="osp_carousel" class="carousel slide" data-ride="carousel" data-interval="1500" data-pause="hover">
@@ -15,7 +14,6 @@
     <div class="carousel-item active">
       <center><a href="https://discord.gg/"><img class="pro-carousel-item" src="/static/img/Discord-Logo-White.png" alt="Join us on Discord"  title="Join us"></a></center>
     </div>
-
     {% for stream in sideBarStreamList %}
     <div class="carousel-item .icon-next">
       <center><a href="/view/{{stream.channelLoc}}"><img class="shadow lazy pro-carousel-item" onerror="this.src='/static/img/video-placeholder.jpg';"  src="/stream-thumb/{{stream.channelLoc}}.gif"  data-src="/stream-thumb/{{stream.channelLoc}}.gif"  </center>
@@ -24,7 +22,6 @@
       </div>
     </a>
     </div>
-
     {% endfor %}
   </div>
 
@@ -36,8 +33,5 @@
     <span class="carousel-control-next-icon"></span>
   </a>
 </div>
-
 </body>
-    
-    
 </html>

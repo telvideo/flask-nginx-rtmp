@@ -37,6 +37,20 @@ def checkOverride(themeHTMLFile):
     except:
         return "themes/Defaultv2/" + themeHTMLFile
 
+# Direct version of above used by direct calls to render()
+# Checks Theme Override Data and if does not exist in override, use Defaultv2's HTML with theme's layout.html
+def checkOverrideDirect(themeHTMLFile, thesystemTheme ):
+   
+    # Check if normal theme override exists
+    try:
+        if themeHTMLFile in globalvars.themeData.get('Override',[]):
+
+            return "/templates/themes/" + thesystemTheme + "/" + themeHTMLFile
+        else:
+            return "/templates/themes/Defaultv2/" + themeHTMLFile
+    except:
+        return "/templates/themes/Defaultv2/" + themeHTMLFile
+
 # Code Modified from https://github.com/Hecsall/favicon-generator
 def faviconGenerator(imageLocation):
     originalImage = imageLocation

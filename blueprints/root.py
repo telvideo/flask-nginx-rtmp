@@ -33,7 +33,10 @@ def main_page():
     sysSettings = settings.getSettingsFromRedis()
 
     streamList =  []
-    # themes which use the dynamic data on live front page don't need this here...
+    # now that we have dynamic live data front page don't need this here really except that it's 
+    # used by the search, but who needs to be able to search on the live list?  idk maybe the live 
+    # data needs to be pushed into the search real-time somehow... will leave it like this hard coded for now
+    # to not break other themes
     if sysSettings.systemTheme != "xDrDarkDoc":
         #activeStreams = Stream.Stream.query.order_by(Stream.Stream.currentViewers).all()
         activeStreams = Stream.Stream.query.join(Channel.Channel, Channel.Channel.id == Stream.Stream.linkedChannel) \

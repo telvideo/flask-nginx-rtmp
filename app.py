@@ -390,7 +390,7 @@ print({"level": "info", "message": "Initializing Template Filters"})
 from functions import templateFilters
 
 # Initialize Jinja2 Template Filters
-templateFilters.init(app)
+templateFilters.init(app.jinja_env)
 
 print({"level": "info", "message": "Setting Jinja2 Global Env Functions"})
 #----------------------------------------------------------------------------#

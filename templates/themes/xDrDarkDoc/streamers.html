@@ -5,7 +5,8 @@
 {% endblock %}
 
 {% block body %}
-
+{{renderedstreamers|safe}}
+<!--
 <div class="container-fluid p-2" id="index-streamer-container">
     <div class="row mx-2">
         <div id="streamerList" class="col-lg col-xs-12 col-sm-12">
@@ -39,6 +40,7 @@
         </div>
     </div>
 </div>
+-->
 {% endblock %}
 
 {% block scripts %}

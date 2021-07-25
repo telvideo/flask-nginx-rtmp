@@ -22,7 +22,7 @@ def page_not_found(e):
     f.write(stri)
     f.close()
 
-    return "420 Error. Did someone smoke that page?", 404
+    return "404 Error.", 404
     #return render_template(themes.checkOverride('404.html'), sysSetting=sysSettings, previous=request.referrer), 404
 
 @errorhandler_bp.app_errorhandler(500)
@@ -30,6 +30,6 @@ def page_not_found(e):
     #sysSettings = settings.settings.query.first()
     #sysSettings = settings.getSettingsFromRedis()    
     system.newLog(0,"500 Error - " + str(request.url))
-    return "500 Error. Did someone smoke that page? Take a break and try again later maybe?", 500
+    return "500 Error. Who lost that page? Take a break and try again later maybe?", 500
 
 #    return render_template(themes.checkOverride('500.html'), previous=request.referrer, error=e), 500

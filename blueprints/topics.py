@@ -5,38 +5,54 @@ from classes import settings
 from classes import topics
 from classes import Stream
 from classes import RecordedVideo
-
+from functions import templateFilters
 from functions import themes
+from classes.settings import r
+
+import jinja2  
 
 topics_bp = Blueprint('topic', __name__, url_prefix='/topic')
 
 @topics_bp.route('/')
 def topic_page():
-    #sysSettings = settings.settings.query.first()
 
-    sysSettings = settings.getSettingsFromRedis()
-    if sysSettings.showEmptyTables:
-        topicsList = topics.topics.query.all() 
-    else:
-        topicIDList = []
-        for streamInstance in db.session.query(Stream.Stream.topic).distinct():
-            topicIDList.append(streamInstance.topic)
-        for recordedVidInstance in db.session.query(RecordedVideo.RecordedVideo.topic).distinct():
-            if recordedVidInstance.topic not in topicIDList:
-                topicIDList.append(recordedVidInstance.topic)
+    renderedtopics = r.get('renderedtopics')
+    topicsList = []
 
-        topicsList = []
+    # if there is nothing in redis we need to get it and set it for everyone else
+    if (renderedtopics == None):
+  
+        sysSettings = settings.getSettingsFromRedis()
+        if sysSettings.showEmptyTables:
+            topicsList = topics.topics.query.all() 
+        else:
+            topicIDList = []
+            for streamInstance in db.session.query(Stream.Stream.topic).distinct():
+                topicIDList.append(streamInstance.topic)
+            for recordedVidInstance in db.session.query(RecordedVideo.RecordedVideo.topic).distinct():
+                if recordedVidInstance.topic not in topicIDList:
+                    topicIDList.append(recordedVidInstance.topic)
 
-        for item in topicIDList:
-            topicQuery = topics.topics.query.filter_by(id=item).first()
-            if topicQuery is not None:
-                topicsList.append(topicQuery)
+            for item in topicIDList:
+                topicQuery = topics.topics.query.filter_by(id=item).first()
+                if topicQuery is not None:
+                    topicsList.append(topicQuery)
 
-    topicsList.sort(key=lambda x: x.name.lower())
+        topicsList.sort(key=lambda x: x.name.lower())
 
-    #topicsList = topics.topics.query.order_by(topics.topics.name).all() 
 
-    return render_template(themes.checkOverride('topics.html'), topicsList=topicsList)
+        mtemplateLoader = jinja2.FileSystemLoader(searchpath="./")
+        templateEnv = jinja2.Environment(loader=mtemplateLoader)
+        templateFilters.init(templateEnv)     
+        topicstemplate = templateEnv.get_template(themes.checkOverrideDirect('redistopics.html',sysSettings.systemTheme))
+
+        renderedtopics = topicstemplate.render(topicsList=topicsList)  
+
+        #print("rendered")
+        r.set('renderedtopics',renderedtopics)
+        r.expire('renderedtopics', 60)  # timeout for redis 
+
+    return render_template(themes.checkOverride('topics.html'), topicsList=topicsList, renderedtopics = renderedtopics)
 
 
 @topics_bp.route('/<topicID>/')

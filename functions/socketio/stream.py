@@ -17,13 +17,14 @@ from functions import themes
 
 from classes.settings import r
 
-import jinja2
+import jinja2  # we can't just use standard render_template() cos that will fire all our global injects and other stuff
     
 mtemplateLoader = jinja2.FileSystemLoader(searchpath="./")
 templateEnv = jinja2.Environment(loader=mtemplateLoader)
-sideBartemplate = templateEnv.get_template("/templates/liveStreams.html")
-caroueltemplate = templateEnv.get_template("/templates/carousel.html")
-liveNowtemplate = templateEnv.get_template("/templates/liveNow.html")
+#sideBartemplate = templateEnv.get_template("/templates/liveStreams.html")
+#caroueltemplate = templateEnv.get_template("/templates/carousel.html")
+#liveNowtemplate = templateEnv.get_template("/templates/liveNow.html")
+
 
 @socketio.on('getViewerStuff')
 def handle_viewer_Stuff(reqestType):
@@ -34,11 +35,6 @@ def handle_viewer_Stuff(reqestType):
 
     # if there is nothing in redis we need to get it and set it for everyone else
     if (sideBarliveView == None):
-        #print("sideBarliveViewString = None")
-
-        #r.delete("MARK TEST")    #fred = r.get('MARK TEST')
-        
-        #  streamQuery = Stream.Stream.query.order_by(Stream.Stream.currentViewers).all()
         streamQuery = Stream.Stream.query.join(Channel.Channel, Channel.Channel.id == Stream.Stream.linkedChannel) \
         .join(Sec.User, Sec.User.id == Channel.Channel.owningUser) \
         .join(topics.topics, topics.topics.id == Stream.Stream.topic ).with_entities(Stream.Stream.id,
@@ -58,6 +54,10 @@ def handle_viewer_Stuff(reqestType):
             ).order_by(Stream.Stream.currentViewers.desc()).all()
         
         sysSettings = settings.getSettingsFromRedis()
+
+        sideBartemplate = templateEnv.get_template(themes.checkOverrideDirect('liveStreams.html',sysSettings.systemTheme))
+        caroueltemplate = templateEnv.get_template(themes.checkOverrideDirect('carousel.html',sysSettings.systemTheme))
+        liveNowtemplate = templateEnv.get_template(themes.checkOverrideDirect('liveNow.html',sysSettings.systemTheme))
 
         sideBarliveView = sideBartemplate.render(sideBarStreamList = streamQuery)  
         carouselliveView = caroueltemplate.render(sideBarStreamList = streamQuery)  
@@ -93,10 +93,6 @@ def handle_getStream_Stuff(streamData):
     streamData = r.hgetall(myRedisID)
     # if there is nothing in redis we need to get it and set it for everyone else to use later
     if (streamData == {}):
-       # streamQuery = Stream.Stream.query.filter_by(linkedChannel=channelID) \
-       #     .with_entities(Stream.Stream.streamName, Stream.Stream.topic, Stream.Stream.startTimestamp, Stream.Stream.NupVotes). first()
-    
-        
         streamQuery = Stream.Stream.query.join(Channel.Channel, Channel.Channel.id == Stream.Stream.linkedChannel) \
             .filter_by(id=channelID).with_entities(Stream.Stream.id,
                 Stream.Stream.topic,
@@ -133,7 +129,7 @@ def handle_getStream_Stuff(streamData):
                     "viewers"   :viewers,
                     "NupVotes"  :str(streamQuery.NupVotes),
                     "views"     :str(views),
-                    "Nsubscriptions"     :str(Nsubscriptions)}
+                    "Nsubscriptions" :str(Nsubscriptions)}
 
         else:
             streamData = {"streamName":"",
