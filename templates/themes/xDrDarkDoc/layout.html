@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="/static/vendor/bootstrap-toggle/css/bootstrap-toggle.min.css">
   <link rel="stylesheet" href="/static/vendor/dropzone/css/basic.min.css" />
   <link rel="stylesheet" href="/static/vendor/dropzone/css/dropzone.min.css" />
-<!---  <link rel="stylesheet" href="/static/css/xDrDarkDoc/simplemde-theme-dark.min.css"> -->
+  <link rel="stylesheet" href="/static/css/xDrDarkDoc/simplemde-theme-dark.min.css"> 
   <script src="/static/vendor/socketio/js/socket.io.js"></script>
   <script src="/static/vendor/jquery/js/jquery-3.5.1.min.js"></script>
   <script src="/static/vendor/lazyload/js/lazyload.min.js"></script>
@@ -115,7 +115,7 @@
                 <a class="dropdown-item" href="#" data-toggle="modal" data-target="#uploadModal"><i class="fas fa-upload"></i> UPLOAD VIDEO</a>
               {% endif %}
             {% endif %}
-            <!--<a class="dropdown-item" href="/settings/api"><i class="fas fa-key"></i> API KEYS</a> -->
+            <a class="dropdown-item" href="/settings/api"><i class="fas fa-key"></i> API KEYS</a>
             {% endif %}
           <!---  <a class="dropdown-item" href="/settings/user/subscriptions"><i class="fas fa-star"></i> FOLLOWING</a> -->
             <a class="dropdown-item" href="/settings/user"><i class="fas fa-cogs"></i> SETTINGS</a>
@@ -175,46 +175,45 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="moveModalTitle">Your Text here.com</h5>
+          <h5 class="modal-title" id="moveModalTitle">About OSP</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
-          <div class="text-center">                  
-            <img src="/static/img/logo.png"  width="200" height="200" class="d-inline-block align-top" alt="">
-            <p>Your description here    </p>
+          <div class="text-center">
+            <img src="/static/img/logo.png">
+            <p class="pt-4">
+              Open Streamin Platform Version <b>{{sysSettings.version}}</b>
+            </p>
           </div>
-          <br>
           <div>
             <table>
               <tbody>
                 <tr>
+                  <td><i class="pr-2 fas fa-globe-europe"></i> Website</td>
+                  <td><a href="https://openstreamingplatform.com">openstreamingplatform.com</a></td>
+                </tr>
+                <tr>
+                  <td><i class="pr-2 fab fa-gitlab"></i> Code repository</td>
+                  <td><a href="https://gitlab.com/Deamos/flask-nginx-rtmp-manager/">Deamos/flask-nginx-rtmp-manager/</a></td>
+                </tr>
+                <tr>
+                  <td><i class="pr-2 fab fa-reddit"></i> Reddit</td>
+                  <td><a href="https://reddit.com/r/openstreamingplatform">/r/openstreamingplatform</a></td>
+                </tr>
+                <tr>
                   <td><i class="pr-2 fab fa-discord"></i> Discord</td>
-                  <td><a href="">Discord.com</a></td>
-                </tr>
-                <tr>
-                  <td><i class="pr-2 fab fa-twitter"></i> Twitter</td>
-                  <td><a href="">Twitter.com</a></td>
-                </tr>
-                <tr>
-                  <td><i class="pr-2 fab fa-discord"></i> Guilded</td>
-                  <td><a href="">Guilded.com</a></td>
-                </tr>
-                <tr>
-                  <td><i class="pr-2 fab fa-facebook"></i> Facebook</td>
-                  <td><a href="">Facebook.com</a></td>
-                </tr>
-                <tr>
-                  <td><i class="pr-2 fab fa-instagram"></i> Instagram</td>
-                  <td><a href="">Instagram.com</a></td>
-                </tr>
-                <tr>
-                  <td><i class="pr-2 fas fa-globe-europe"></i> Powered By</td>
-                  <td><a href="https://openstreamingplatform.com">Openstreamingplatform.com Version <b>{{sysSettings.version}}</b> </a></td>
+                  <td><a href="https://discord.gg/Jp5rzbD">Open Streaming Platform</a></td>
                 </tr>
               </tbody>
             </table>
+          </div>
+          <div class="text-center">
+            <p class="pt-4">
+              <i class="fab fa-osi"></i><br>
+              MIT License
+            </p>
           </div>
         </div>
         <div class="modal-footer">
