@@ -9,7 +9,6 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="{{request.url|normalize_url}}" />
 <meta property="og:image" content="{{request.url_root|normalize_urlroot}}/{{sysSettings.systemLogo}}" />
-<!-- <meta http-equiv="refresh" content="30"> <!-- Super bodgy bad hacky way of updating the main page, must do this better and for all pages... -->
 
 {% endblock %}
 
@@ -33,95 +32,33 @@
     {% endif %}
 </div>
 <span id="carouseltestText"></span> 
-{#
- <!-- Carousel Code from w3 schools -->
- <div id="Pro_carousel" class="carousel slide" data-ride="carousel" data-interval="4500" data-pause="hover">
 
-  <!-- The slideshow -->
-  <div class="carousel-inner index-streams-container-bg pro-carousel">
-    <div class="carousel-item active">
-      <center><a href="https://discord.gg/"><img class="pro-carousel-item" src="/static/img/Discord-Logo-White.png" alt="Join us on Discord"  title="Join us"></a></center>
-    </div>
-
-    {% for stream in streamList %}
-    <div class="carousel-item .icon-next">
-      <center><a href="/view/{{stream.channelLoc}}"><img class="shadow lazy pro-carousel-item" {% if stream.protected and sysSettings.protectionEnabled %} src="/static/img/video-locked.jpg" onerror="this.src='/static/img/video-locked.jpg';" {% else %} src="/static/img/video-placeholder.jpg" onerror="this.src='/static/img/video-placeholder.jpg';" {% endif %} data-src="/stream-thumb/{{stream.channelLoc}}.gif" </center>
-      <div class="carousel-caption d-none d-md-block">
-        <center><h4 style="background-color:rgba(0,0,0,0.5);width: 50%;">{{stream.streamName|limit_title}}</h4></center>
-      </div>
-    </a>
-    </div>
-
-    {% endfor %}
-  </div>
-
-  <!-- Left and right controls -->
-  <a class="carousel-control-prev" href="#Pro_carousel" data-slide="prev">
-    <span class="carousel-control-prev-icon"></span>
-  </a>
-  <a class="carousel-control-next" href="#Pro_carousel" data-slide="next">
-    <span class="carousel-control-next-icon"></span>
-  </a>
-</div>
-#}
 <div class="container-fluid p-2" id="index-streams-container" style="background-color: var(--PDSlateDark);">
     <div class="row mx-2">
         <div class="index-video-title">
-          <span style="float:left;">
-            <h1>Live Now</h1>
-          </span>            
           <span style="float:right;">
             <a class="navbar-brand" href="/channel">
-              <!-- <img src="/static/img/Mascot_3.png" title = "TOPICS" class="nav-link img-fluid navbar-image " > -->
               <span><h4 style="display: inline;">Channels</h4></span>
             </a>
             <a class="navbar-brand" href="/topic">
-              <!-- <img src="/static/img/Mascot_3.png" title = "TOPICS" class="nav-link img-fluid navbar-image " > -->
-              <span><h4 style="display: inline;padding-left: 15px;">Browse</h4></span>
+              <span><h4 style="display: inline;padding-left: 1vw;">Topics</h4></span>
+            </a>
+            <a class="navbar-brand" href="/streamer">
+              <span><h4 style="display: inline;padding-left: 1vw;">Streamers</h4></span>
             </a>
             <form class="form-inline my-2 my-lg-0 mr-auto px-3" style="height:14px;" action="/search" method="post">
               <input class="form-control search" name="term" type="search" placeholder="&#xf002; Search..." aria-label="Search" style="height:16px;font-weight: 900;font-family: 'Font Awesome 5 Free', Arial, Sans-serif;width: 95%;" size="24">
             </form>
           </span>
+          <span style="float:left;">
+            <h1>Live Now</h1>
+          </span>            
+
         </div>
     </div>
 
     <span id="liveNowtestText"></span> 
-    {#
-    <div class="row mx-1">
-        <ul id="streamList" class="itemList d-flex flex-wrap justify-content-start" style="width:100%;"><!--Manually Defined Due to Mobile Strangeness-->
-            {% for stream in streamList %}
-            <li class="displayCard mx-2 my-1">
-              <a href="/view/{{stream.channelLoc}}/">
-                <div class="displayCard-thumbnail zoom">
-                  <div class="video-badges">
-                    <span class="badge badge-danger mx-1"><i class="fas fa-video"></i></span>
-                    {% if stream.protected and sysSettings.protectionEnabled %}<span class="badge badge-warning mx-1"><i class="fas fa-user-lock"></i> Protected</span>{% endif %}
-                  </div>
-                  <img class="shadow gif lazy" {% if stream.protected and sysSettings.protectionEnabled %} src="/static/img/video-locked.jpg" onerror="this.src='/static/img/video-locked.jpg';" {% else %} src="/static/img/video-placeholder.jpg" onerror="this.src='/static/img/video-placeholder.jpg';" {% endif %} data-src="/stream-thumb/{{stream.channelLoc}}.png">
-                  <div class="displayCard-counts">
-                    <span class="displayCard-left align-left" style="color:white;">
-                      <span class="px-2 flex-fill upvotes"><i class="fas fa-thumbs-up"></i> <b>{{stream.NupVotes}}</b></span>
-                    </span>
-                    <span class="displayCard-right" style="float:right;color:white;">
-                      <span class="px-2 flex-fill liveviews"><i class="fas fa-eye"></i> <b>{{stream.currentViewers}}</b></span>
-                      <span class="px-2 flex-fill views"><i class="fas fa-users"></i> <b>{{stream.totalViewers}}</b></span>
-                    </span>
-                  </div>
-                </div>
-                <div class="card-data">
-                  <img class="rounded" src="/images/{{stream.pictureLocation}}" onerror="this.src='/static/img/user2.png';">
-                  <div class="metadata">
-                    <div class="card-cut-text name ml-2"><h5>{{stream.streamName|limit_title}}</h5></div>
-                    <div class="topic ml-2" style="padding-top: 5px;font-size: large;">{{stream.topic|get_topicName}}</div>
-                  </div>
-                </div>
-              </a>
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
-    #}
+    
 </div>
 
 <div class="container-fluid p-2" id="index-videos-container" style="background-color: var(--PDSlateDark);">
@@ -241,13 +178,6 @@
         </ul>
     </div>
 </div>
-<!--{% if current_user.has_role('Streamer') %}
-{% else %}
-<center><script data-cfasync="false" type="text/javascript" src="https://www.onclickperformance.com/a/display.php?r=4468639"></script> </center>
- <script type="text/javascript" data-adel="atag" src="//ashcdn.com/script/atg.js" czid="wlxaxsap"></script> 
-{% endif %}
--->
-
 {% endblock %}
 
 {% block scripts %}
