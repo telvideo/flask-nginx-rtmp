@@ -18,6 +18,9 @@
     "search.html",
     "subscriptions.html",
     "notifications.html",
-    "redisliveNow.html"
+    "redisliveNow.html",
+    "redischannels.html",
+    "redisstreamers.html",
+    "redistopics.html"
   ]
 }
