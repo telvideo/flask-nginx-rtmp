@@ -17,9 +17,6 @@
                 <span class="badge badge-danger mx-1"><i class="fas fa-video"></i></span>
                 {% if stream.protected and sysSettingsprotected %}<span class="badge badge-warning mx-1"><i class="fas fa-user-lock"></i> Protected</span>{% endif %}
               </div>
-            <!---  <center><a href="/view/{{stream.channelLoc}}"><img class="shadow lazy" onerror="this.src='/static/img/video-placeholder.jpg';"  src="/stream-thumb/{{stream.channelLoc}}.gif"  data-src="/stream-thumb/{{stream.channelLoc}}.gif"  </center>
-            -->
-
               <img class="shadow lazy" {% if stream.protected and sysSettingsprotected %} src="/static/img/video-locked.jpg" onerror="this.src='/static/img/video-locked.jpg';" {% else %} src="/stream-thumb/{{stream.channelLoc}}.gif" onerror="this.src='/static/img/video-placeholder.jpg';" {% endif %} data-src="/stream-thumb/{{stream.channelLoc}}.gif">
               <div class="displayCard-counts">
                 <span class="displayCard-left align-left" style="color:white;">

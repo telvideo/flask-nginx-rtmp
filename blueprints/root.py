@@ -97,7 +97,7 @@ def main_page():
                             RecordedVideo.RecordedVideo.thumbnailLocation, RecordedVideo.RecordedVideo.channelName,
                             RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, RecordedVideo.RecordedVideo.NupVotes,
                             Sec.User.pictureLocation, Channel.Channel.protected,
-                            Channel.Channel.channelName.label('ChanName')) \
+                            Sec.User.username, Channel.Channel.channelName.label('ChanName')) \
             .order_by(RecordedVideo.RecordedVideo.views.desc()).limit(16)
 
         clipQuery = RecordedVideo.Clips.query.filter_by(published=True) \
@@ -108,7 +108,7 @@ def main_page():
                             Channel.Channel.owningUser, RecordedVideo.Clips.views, RecordedVideo.Clips.length,
                             RecordedVideo.Clips.clipName, Channel.Channel.protected, Channel.Channel.channelName,
                             RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, RecordedVideo.Clips.NupVotes,
-                            Sec.User.pictureLocation) \
+                            Sec.User.pictureLocation,Sec.User.username) \
             .order_by(RecordedVideo.Clips.views.desc()).limit(16)
     # Sort by Most Recent
     elif sysSettings.sortMainBy == 1:

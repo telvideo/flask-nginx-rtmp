@@ -40,9 +40,9 @@ import jinja2
     
 mtemplateLoader = jinja2.FileSystemLoader(searchpath="./")
 templateEnv = jinja2.Environment(loader=mtemplateLoader)
-sideBartemplate = templateEnv.get_template("/templates/liveStreams.html")
-caroueltemplate = templateEnv.get_template("/templates/carousel.html")
-liveNowtemplate = templateEnv.get_template("/templates/liveNow.html")
+#sideBartemplate = templateEnv.get_template("/templates/redissidebar.html")
+#caroueltemplate = templateEnv.get_template("/templates/rediscarousel")
+#liveNowtemplate = templateEnv.get_template("/templates/redisliveNow.html")
 
 
 app = Flask(__name__)
@@ -110,10 +110,172 @@ import time
 from pottery import Redlock
 #redis_lock = Redlock(key='OSP_DB_INIT_HANDLER', masters={r})
 #redis_lock.acquire()
+from functions import templateFilters
+from functions import themes
 
 
 
+userID = int(1)
 
+if True:
+    chans = Channel.Channel.query.join(Sec.User,Sec.User.id == userID).with_entities(
+        Channel.Channel.protected,
+        Channel.Channel.Nsubscriptions,
+        Channel.Channel.views,
+        Channel.Channel.channelName,
+        Channel.Channel.imageLocation,
+        Channel.Channel.owningUser,
+        Channel.Channel.description,
+        Channel.Channel.topic,
+        Channel.Channel.id,
+        Sec.User.username,
+        Sec.User.pictureLocation,
+        Channel.Channel.id).filter(Channel.Channel.owningUser == userID).all()
+
+    openStreams = Stream.Stream.query\
+        .join(Channel.Channel,Channel.Channel.id == Stream.Stream.linkedChannel)\
+        .join(Sec.User, Sec.User.id == userID ).with_entities(
+            Channel.Channel.channelLoc,
+            Channel.Channel.protected,
+            #Channel.Channel.id,
+            Channel.Channel.id.label('chanID'),
+            Channel.Channel.channelName,
+            Stream.Stream.streamName,
+            Stream.Stream.topic,
+            Stream.Stream.NupVotes,
+            Stream.Stream.currentViewers,
+            Stream.Stream.totalViewers).all()
+
+    userChannels = []
+    strSet = set()
+    for stre in openStreams:
+        strSet.add(stre.id)
+
+    for chan in chans:
+        if chan.id in openStreams:
+            isStreaming = True
+        else:
+            isStreaming = False
+            
+        channelData = {"protected":chan.protected,
+            "id":chan.id,
+            "owningUser":chan.owningUser,
+            "Nsubscriptions":chan.Nsubscriptions,
+            "views":chan.views,
+            "imageLocation":chan.imageLocation,
+            "channelName":chan.channelName,
+            "username":chan.username,
+            "isStreaming":isStreaming,
+            "pictureLocation":chan.pictureLocation,
+            "description":chan.description
+            }
+        
+        userChannels.append(channelData)
+
+
+    recordedVideoQuery = []
+    clipsList = []
+    streams = []
+    streamerQuery = Sec.User.query.filter_by(id=userID).first()
+    
+    #return render_template(themes.checkOverride('videoListView.html'), openStreams=streams, recordedVids=recordedVideoQuery, userChannels=userChannels, clipsList=clipsList, title=streamerQuery.username, streamerData=streamerQuery)
+
+    streamerQuery = Sec.User.query.filter_by(id=userID).first()
+    if streamerQuery is not None:
+        if streamerQuery.has_role('Streamer'):
+            userChannels = Channel.Channel.query.filter_by(owningUser=userID).all()
+
+            streams = []
+
+            for channel in userChannels:
+                for stream in channel.stream:
+                    streams.append(stream)
+
+            recordedVideoQuery = RecordedVideo.RecordedVideo.query.filter_by(owningUser=userID, pending=False, published=True).all()
+
+            # Sort Video to Show Newest First
+            recordedVideoQuery.sort(key=lambda x: x.videoDate, reverse=True)
+
+            clipsList = []
+            for vid in recordedVideoQuery:
+                for clip in vid.clips:
+                    if clip.published is True:
+                        clipsList.append(clip)
+
+            clipsList.sort(key=lambda x: x.views, reverse=True)
+
+   #         return render_template(themes.checkOverride('videoListView.html'), openStreams=streams, recordedVids=recordedVideoQuery, userChannels=userChannels, clipsList=clipsList, title=streamerQuery.username, streamerData=streamerQuery)
+    flash('Invalid Streamer','error')
+   # return redirect(url_for("root.main_page"))
+
+
+exit()
+
+recordedVids = RecordedVideo.RecordedVideo.query.filter_by(channelID=chanID, pending=False, published=True)\
+            .join(Sec.User,Sec.User.id == RecordedVideo.RecordedVideo.owningUser)\
+            .join(Channel.Channel, Channel.Channel.id == chanID)\
+            .with_entities(
+            Channel.Channel.protected,
+            RecordedVideo.RecordedVideo.id,
+            RecordedVideo.RecordedVideo.gifLocation,
+#            RecordedVideo.RecordedVideo.
+            RecordedVideo.RecordedVideo.topic,
+            RecordedVideo.RecordedVideo.videoDate,
+            RecordedVideo.RecordedVideo.published).order_by(RecordedVideo.RecordedVideo. videoDate.desc()).all()
+
+
+
+recordedVids = RecordedVideo.RecordedVideo.query.filter_by(channelID=chanID, pending=False, published=True).order_by(
+        RecordedVideo.RecordedVideo. videoDate.desc()).all()
+
+rec  = recordedVids[0]
+chan = recordedVids[0].channel
+cid  = recordedVids[0].channel.id      #
+bob = recordedVids[0].user.username
+       
+
+exit()
+sysSettings = settings.getSettingsFromRedis()
+#doCarouel = bool(reqestType['doCarouel'])
+
+sideBarliveView = r.get('sideBarliveView')
+
+# if there is nothing in redis we need to get it and set it for everyone else
+if (True ):
+    streamQuery = Stream.Stream.query.join(Channel.Channel, Channel.Channel.id == Stream.Stream.linkedChannel) \
+    .join(Sec.User, Sec.User.id == Channel.Channel.owningUser) \
+    .join(topics.topics, topics.topics.id == Stream.Stream.topic ).with_entities(Stream.Stream.id,
+        Stream.Stream.linkedChannel,
+        Stream.Stream.streamName,
+        Stream.Stream.topic,
+        topics.topics.name,
+        Stream.Stream.currentViewers,
+        Stream.Stream.totalViewers,
+        Stream.Stream.NupVotes,
+        Channel.Channel.channelLoc,
+        Channel.Channel.protected,
+        Sec.User.pictureLocation,
+#        Sec.User.verified,
+#        Channel.Channel.imageLocation,
+        Sec.User.username,
+#        Channel.Channel.channelName
+        ).order_by(Stream.Stream.currentViewers.desc()).all()
+    
+    sysSettings = settings.getSettingsFromRedis()
+
+    mtemplateLoader = jinja2.FileSystemLoader(searchpath="./")
+    templateEnv = jinja2.Environment(loader=mtemplateLoader)
+    templateFilters.init(templateEnv)
+
+    sideBartemplate = templateEnv.get_template(themes.checkOverrideDirect('redissidebar.html',sysSettings.systemTheme))
+    caroueltemplate = templateEnv.get_template(themes.checkOverrideDirect('rediscarousel.html',sysSettings.systemTheme))
+    liveNowtemplate = templateEnv.get_template(themes.checkOverrideDirect('redisliveNow.html',sysSettings.systemTheme))
+
+    sideBarliveView = sideBartemplate.render(sideBarStreamList = streamQuery)  
+    carouselliveView = caroueltemplate.render(sideBarStreamList = streamQuery)  
+    liveNowView      = liveNowtemplate.render(sideBarStreamList = streamQuery, sysSettingsprotected = sysSettings.protectionEnabled)  
+
+exit()
 channelID = 2
 
 if True:
@@ -198,6 +360,13 @@ if True:
     db.session.close()
 
 
+
+
+
+
+
+   
+exit()
 
 print("BOB")
 

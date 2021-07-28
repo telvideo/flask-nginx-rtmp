@@ -14,6 +14,7 @@ from functions import webhookFunc
 from functions import templateFilters
 from functions import xmpp
 from functions import themes
+from functions import templateFilters
 
 from classes.settings import r
 
@@ -21,10 +22,11 @@ import jinja2  # we can't just use standard render_template() cos that will fire
     
 mtemplateLoader = jinja2.FileSystemLoader(searchpath="./")
 templateEnv = jinja2.Environment(loader=mtemplateLoader)
-#sideBartemplate = templateEnv.get_template("/templates/liveStreams.html")
-#caroueltemplate = templateEnv.get_template("/templates/carousel.html")
-#liveNowtemplate = templateEnv.get_template("/templates/liveNow.html")
+templateFilters.init(templateEnv)
 
+#sideBartemplate = templateEnv.get_template("/templates/redissidebar.html")
+#caroueltemplate = templateEnv.get_template("/templates/rediscarousel.html")
+#liveNowtemplate = templateEnv.get_template("/templates/redisliveNow.html")
 
 @socketio.on('getViewerStuff')
 def handle_viewer_Stuff(reqestType):
@@ -40,11 +42,14 @@ def handle_viewer_Stuff(reqestType):
         .join(topics.topics, topics.topics.id == Stream.Stream.topic ).with_entities(Stream.Stream.id,
             Stream.Stream.linkedChannel,
             Stream.Stream.streamName,
+            Stream.Stream.topic,            
             topics.topics.name,
             Stream.Stream.currentViewers,
             Stream.Stream.totalViewers,
             Stream.Stream.NupVotes,
+            Stream.Stream.id,
             Channel.Channel.channelLoc,
+            Channel.Channel.channelName,
             Channel.Channel.protected,
             Sec.User.pictureLocation,
     #        Sec.User.verified,
@@ -55,9 +60,13 @@ def handle_viewer_Stuff(reqestType):
         
         sysSettings = settings.getSettingsFromRedis()
 
-        sideBartemplate = templateEnv.get_template(themes.checkOverrideDirect('liveStreams.html',sysSettings.systemTheme))
-        caroueltemplate = templateEnv.get_template(themes.checkOverrideDirect('carousel.html',sysSettings.systemTheme))
-        liveNowtemplate = templateEnv.get_template(themes.checkOverrideDirect('liveNow.html',sysSettings.systemTheme))
+        #mtemplateLoader = jinja2.FileSystemLoader(searchpath="./")
+        #templateEnv = jinja2.Environment(loader=mtemplateLoader)
+        #templateFilters.init(templateEnv)
+
+        sideBartemplate = templateEnv.get_template(themes.checkOverrideDirect('redissidebar.html',sysSettings.systemTheme))
+        caroueltemplate = templateEnv.get_template(themes.checkOverrideDirect('rediscarousel.html',sysSettings.systemTheme))
+        liveNowtemplate = templateEnv.get_template(themes.checkOverrideDirect('redisliveNow.html',sysSettings.systemTheme))
 
         sideBarliveView = sideBartemplate.render(sideBarStreamList = streamQuery)  
         carouselliveView = caroueltemplate.render(sideBarStreamList = streamQuery)  
