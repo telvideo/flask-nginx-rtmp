@@ -185,13 +185,15 @@ function enterRoom(room) {
   return true;
 }
 
+
 // Function for Sending Chat Input
 function sendMessage() {
     var chatInput = document.getElementById('chatinput');
     var message = chatInput.value;
-    if (message.length > 750) {
-        message = message.slice(0,750);
+    if (message.length > 420) {
+        message = message.slice(0,420);
     }
+    
     if (message != '') {
         var o = {to: ROOMNAME + '@' + ROOM_SERVICE, type: 'groupchat'};
         var m = $msg(o);
@@ -245,9 +247,11 @@ function room_pres_handler(a, b, c) {
       } else if (status.includes("301")) {
           msg = Strophe.getResourceFromJid(from) + " was banned from the room.";
       } else {
-          msg = Strophe.getResourceFromJid(from) + " has left the room.";
+          msg = "" //Strophe.getResourceFromJid(from) + " has left the room.";
       }
-      serverMessage(msg);
+      if (msg != "") {
+        serverMessage(msg);
+      }
   //} else if (presenceType == 'online') {
   //    msg = Strophe.getResourceFromJid(from) + " joined the room.";
   //    serverMessage(msg);
@@ -350,6 +354,24 @@ function process_stickers(msg) {
   return msg;
 }
 
+// Make links clickable in chat, taken from https://stackoverflow.com/questions/49634850/javascript-convert-plain-text-links-to-clickable-links
+function linkify(inputText) {
+    var replacedText, replacePattern1, replacePattern2, replacePattern3;
+
+    //URLs starting with http://, https://, or ftp://
+    replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+    replacedText = inputText.replace(replacePattern1, '<a href="$1" target="_blank">$1</a>');
+
+    //URLs starting with "www." (without // before it, or it'd re-link the ones done above).
+    replacePattern2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
+    replacedText = replacedText.replace(replacePattern2, '$1<a href="http://$2" target="_blank">$2</a>');
+
+    //Change email addresses to mailto:: links.
+    replacePattern3 = /(([a-zA-Z0-9\-\_\.])+@[a-zA-Z\_]+?(\.[a-zA-Z]{2,6})+)/gim;
+    replacedText = replacedText.replace(replacePattern3, '<a href="mailto:$1">$1</a>');
+
+    return replacedText;
+}
 
 // Function to Handle New Messages
 function onMessage(msg) {
@@ -389,6 +411,12 @@ function onMessage(msg) {
 
           var msg = format_msg(msg)
           msg = process_stickers(msg);
+
+          const CdoLinks = document.getElementById("dochatLinks").getAttribute("name"); 
+
+          if (CdoLinks == "True"){
+            msg = linkify(msg)
+          }
 
           tempNode.querySelector("span.chatMessage").innerHTML = msg;
           tempNode.style.display = "block";

@@ -25,7 +25,8 @@ oauth_bp = Blueprint('oauth', __name__, url_prefix='/oauth')
 
 @oauth_bp.route('/login/<provider>')
 def oAuthLogin(provider):
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
     if sysSettings is not None:
 
         oAuthClient = oauth.create_client(provider)

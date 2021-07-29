@@ -39,6 +39,7 @@ from classes import stickers
 
 from functions import system
 from functions import themes
+from functions import videoFunc
 
 from globals import globalvars
 
@@ -184,7 +185,8 @@ def user_addInviteCode():
 @roles_required('Admin')
 def admin_page():
     videos_root = current_app.config['WEB_ROOT'] + 'videos/'
-    sysSettings = settings.settings.query.first()
+    sysSettings = settings.settings.query.first() #This can't use settings.getSettingsFromRedis() as it's changed
+
     if request.method == 'GET':
         if request.args.get("action") is not None:
             action = request.args.get("action")
@@ -334,32 +336,57 @@ def admin_page():
         branch = "Local Install"
         validGitRepo = False
         repo = None
-        try:
-            repo = git.Repo(search_parent_directories=True)
-            validGitRepo = True
-        except:
-            pass
+#        try:
+#            repo = git.Repo(search_parent_directories=True)
+#            validGitRepo = True
+#        except:
+#            pass
 
-        if validGitRepo:
-            try:
-                remoteSHA = None
-                if repo is not None:
-                    repoSHA = str(repo.head.object.hexsha)
-                    branch = repo.active_branch
-                    branch = branch.name
-                    remote = repo.remotes.origin.fetch()[0].commit
-                    remoteSHA = str(remote)
-            except:
-                validGitRepo = False
-                branch = "Local Install"
+#        if validGitRepo:
+#            try:
+#                remoteSHA = None
+#                if repo is not None:
+#                    repoSHA = str(repo.head.object.hexsha)
+#                    branch = repo.active_branch
+#                    branch = branch.name
+#                    remote = repo.remotes.origin.fetch()[0].commit
+#                    remoteSHA = str(remote)
+#            except:
+#                validGitRepo = False
+#                branch = "Local Install"
 
         appDBVer = dbVersion.dbVersion.query.first().version
         userList = Sec.User.query.all()
+
+#        userList = Sec.User.query.join(Sec.roles_users,Sec.User.id == Sec.roles_users.user_id ).with_entities(Sec.User.id,
+#            Sec.User.pictureLocation,
+#            Sec.User.username,
+#            Sec.User.authType,
+#            Sec.User.oAuthProvider,
+#            Sec.User.active,
+#            Sec.User.verified,
+#            Sec.User.roles).all()
+
         roleList = Sec.Role.query.all()
-        channelList = Channel.Channel.query.all()
+        #channelList = Channel.Channel.query.all()
+        channelList = Channel.Channel.query.join(Sec.User, Channel.Channel.owningUser == Sec.User.id).with_entities(Channel.Channel.id,
+            Channel.Channel.imageLocation,
+            Channel.Channel.owningUser,
+            Channel.Channel.channelLoc,
+            Channel.Channel.views,
+            Channel.Channel.topic,
+            Channel.Channel.chatEnabled,
+            Channel.Channel.record,
+            Channel.Channel.allowComments,
+            Channel.Channel.protected,
+            Sec.User.username).all()
+
         streamList = Stream.Stream.query.all()
-        topicsList = topics.topics.query.all()
-        rtmpServers = settings.rtmpServer.query.all()
+        topicsList = topics.topics.query.order_by(topics.topics.name.asc())
+
+        #rtmpServers = settings.rtmpServer.query.all()
+        rtmpServers = settings.getrtmpServer()
+
         edgeNodes = settings.edgeStreamer.query.all()
 
         defaultRoles = {}
@@ -413,6 +440,22 @@ def admin_page():
                 themeList.append(theme)
 
         logsList = logs.logs.query.order_by(logs.logs.timestamp.desc()).limit(250)
+        #vidList  =  RecordedVideo.RecordedVideo.query.order_by(RecordedVideo.RecordedVideo.videoDate.asc())#.limit(250)
+        
+        vidList  =  RecordedVideo.RecordedVideo.query.join(Sec.User, RecordedVideo.RecordedVideo.owningUser == Sec.User.id)\
+            .with_entities(RecordedVideo.RecordedVideo.id, RecordedVideo.RecordedVideo.owningUser,
+                RecordedVideo.RecordedVideo.views, RecordedVideo.RecordedVideo.length,
+                RecordedVideo.RecordedVideo.channelName,
+                RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate,
+                RecordedVideo.RecordedVideo.videoLocation,
+                Sec.User.username)
+
+        missingSet = set()
+
+        videos_root = globalvars.videoRoot + 'videos/'
+        for recordedVid in vidList:
+            if os.path.exists("{}{}".format(videos_root, recordedVid.videoLocation)) == False:
+                missingSet.add(recordedVid.id)
 
         oAuthProvidersList = settings.oAuthProvider.query.all()
 
@@ -439,7 +482,7 @@ def admin_page():
                                remoteSHA=remoteSHA, themeList=themeList, statsViewsDay=statsViewsDay,
                                viewersTotal=viewersTotal, currentViewers=currentViewers, nginxStatData=nginxStatData,
                                globalHooks=globalWebhookQuery, defaultRoleDict=defaultRoles,
-                               logsList=logsList, edgeNodes=edgeNodes, rtmpServers=rtmpServers, oAuthProvidersList=oAuthProvidersList,
+                               logsList=logsList, vidList = vidList, missingSet = missingSet, edgeNodes=edgeNodes, rtmpServers=rtmpServers, oAuthProvidersList=oAuthProvidersList,
                                ejabberdStatus=ejabberd, bannedWords=bannedWordString, globalStickers=globalStickers, page=page)
     elif request.method == 'POST':
 
@@ -573,8 +616,9 @@ def admin_page():
                 sysSettings.systemLogo = systemLogo
 
             db.session.commit()
-
+            settings.informRedisOfUpdate()
             sysSettings = settings.settings.query.first()
+            #sysSettings = settings.getSettingsFromRedis()
 
             current_app.config.update(
                 SERVER_NAME=None,
@@ -956,7 +1000,8 @@ def rtmpStat_page(node):
 @login_required
 @roles_required('Streamer')
 def settings_channels_page():
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
 
     videos_root = current_app.config['WEB_ROOT'] + 'videos/'
 
@@ -1012,6 +1057,10 @@ def settings_channels_page():
         if 'chatSelect' in request.form:
             chatEnabled = True
 
+        chatLinks = False
+        if 'chatLinksSelect' in request.form:
+            chatLinks = True
+
         allowComments = False
 
         if 'allowComments' in request.form:
@@ -1028,7 +1077,7 @@ def settings_channels_page():
 
             newChannel = Channel.Channel(current_user.id, newUUID, channelName, topic, record, chatEnabled,
                                          allowComments, description)
-
+            newChannel.chatLinks = chatLinks
             if 'photo' in request.files:
                 file = request.files['photo']
                 if file.filename != '':
@@ -1074,6 +1123,7 @@ def settings_channels_page():
                 requestedChannel.protected = protection
                 requestedChannel.defaultStreamName = defaultstreamName
                 requestedChannel.autoPublish = autoPublish
+                requestedChannel.chatLinks = chatLinks
                 #requestedChannel.rtmpRestream = rtmpRestream
                 #requestedChannel.rtmpRestreamDestination = rtmpRestreamDestination
 
@@ -1082,11 +1132,13 @@ def settings_channels_page():
                     requestedVanityURL = request.form['vanityURL']
                     requestedVanityURL = re.sub('[^A-Za-z0-9]+', '', requestedVanityURL)
                     if requestedVanityURL != '':
-                        existingChannnelQuery = Channel.Channel.query.filter_by(vanityURL=requestedVanityURL).first()
+                        existingChannnelQuery = Channel.Channel.query.filter_by(
+                            vanityURL=requestedVanityURL).filter(Channel.Channel.id != requestedChannel.id ).first()
+
                         if existingChannnelQuery is None:
                             vanityURL = requestedVanityURL
                         else:
-                            flash("Short link not saved. Link with same name exists!", "error")
+                            flash("ERROR! Short link not saved. Link with same name exists!", "ERROR")
 
                 requestedChannel.vanityURL = vanityURL
 
@@ -1138,17 +1190,18 @@ def settings_channels_page():
                 flash("Invalid Change Attempt", "Error")
             redirect(url_for('.settings_channels_page'))
 
-    topicList = topics.topics.query.all()
+    topicList = topics.topics.query.order_by(topics.topics.name.asc())
+
     user_channels = Channel.Channel.query.filter_by(owningUser=current_user.id).all()
 
-    activeRTMPQuery = settings.rtmpServer.query.filter_by(active=True).all()
-    activeRTMPList = []
-    for server in activeRTMPQuery:
-        address = server.address
-        if address == "127.0.0.1" or address == "localhost":
-            address = sysSettings.siteAddress
-        if address not in activeRTMPList:
-            activeRTMPList.append(address)
+ #   activeRTMPQuery = settings.rtmpServer.query.filter_by(active=True).all()
+ #   activeRTMPList = []
+ #   for server in activeRTMPQuery:
+ #       address = server.address
+ #       if address == "127.0.0.1" or address == "localhost":
+ #           address = sysSettings.siteAddress
+ #       if address not in activeRTMPList:
+ #           activeRTMPList.append(address)
 
     # Get xmpp room options
     from app import ejabberd
@@ -1249,14 +1302,15 @@ def settings_channels_page():
         user_channels_stats[channel.id] = statsViewsDay
 
     return render_template(themes.checkOverride('user_channels.html'), channels=user_channels, topics=topicList, channelRooms=channelRooms, channelMods=channelMods,
-                           viewStats=user_channels_stats, rtmpList=activeRTMPList)
+                           viewStats=user_channels_stats) # rtmpList=activeRTMPList
 
 
 @settings_bp.route('/channels/chat', methods=['POST', 'GET'])
 @login_required
 @roles_required('Streamer')
 def settings_channels_chat_page():
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
 
     if request.method == 'POST':
         from app import ejabberd
@@ -1332,7 +1386,7 @@ def initialSetup():
 
     if firstRunCheck is False:
 
-        sysSettings = settings.settings.query.all()
+        sysSettings = settings.settings.query.all()  # do not call sysSettings = settings.getSettingsFromRedis()
 
         for setting in sysSettings:
             db.session.delete(setting)
@@ -1417,8 +1471,10 @@ def initialSetup():
                                                globalvars.version)
             db.session.add(serverSettings)
             db.session.commit()
+            settings.informRedisOfUpdate()
 
             sysSettings = settings.settings.query.first()
+            #sysSettings = settings.getSettingsFromRedis()
 
             if settings is not None:
                 current_app.config.update(

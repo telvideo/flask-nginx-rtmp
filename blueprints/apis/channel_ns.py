@@ -40,7 +40,9 @@ def checkRTMPAuthIP(requestData):
     else:
         requestIP = requestData.environ['HTTP_X_FORWARDED_FOR']
 
-    authorizedRTMPServers = settings.rtmpServer.query.all()
+    #authorizedRTMPServers = settings.rtmpServer.query.all()
+    authorizedRTMPServers = settings.getrtmpServer()
+
 
     receivedIP = requestIP
     ipList = requestIP.split(',')
@@ -93,7 +95,8 @@ class api_1_ListChannels(Resource):
 
                     # Establish XMPP Channel
                     from app import ejabberd
-                    sysSettings = settings.settings.query.all()[0]
+                    #sysSettings = settings.settings.query.all()[0]
+                    sysSettings = settings.getSettingsFromRedis()
                     ejabberd.create_room(newChannel.channelLoc, 'conference.' + sysSettings.siteAddress, sysSettings.siteAddress)
                     ejabberd.set_room_affiliation(newChannel.channelLoc, 'conference.' + sysSettings.siteAddress, int(requestAPIKey.userID) + "@" + sysSettings.siteAddress, "owner")
 
@@ -130,7 +133,7 @@ class api_1_ListChannel(Resource):
                         return {'results': [ob.authed_serialize() for ob in channelQuery]}
                 return {'results': {'message': 'Request Error'}}, 400
         else:
-            channelList = Channel.Channel.query.filter_by(channelLoc=channelEndpointID).all()
+            channelList = Channel.Channel.query.filter_by(channelLoc=channelEndpointID).all() ##mrn boggs nasty big call need to not do...
             db.session.commit()
             return {'results': [ob.serialize() for ob in channelList]}
 

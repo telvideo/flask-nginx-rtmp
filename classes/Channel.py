@@ -15,6 +15,7 @@ class Channel(db.Model):
     currentViewers = db.Column(db.Integer)
     record = db.Column(db.Boolean)
     chatEnabled = db.Column(db.Boolean)
+    chatLinks =  db.Column(db.Boolean)
     chatBG = db.Column(db.String(255))
     chatTextColor = db.Column(db.String(10))
     chatAnimation = db.Column(db.String(255))
@@ -31,6 +32,8 @@ class Channel(db.Model):
     rtmpRestreamDestination = db.Column(db.String(4096))
     xmppToken = db.Column(db.String(64))
     vanityURL = db.Column(db.String(1024))
+    Nsubscriptions = db.Column(db.Integer)
+    notificationsLastSentTime = db.Column(db.DateTime())
     stream = db.relationship('Stream', backref='channel', cascade="all, delete-orphan", lazy="joined")
     recordedVideo = db.relationship('RecordedVideo', backref='channel', cascade="all, delete-orphan", lazy="joined")
     upvotes = db.relationship('channelUpvotes', backref='stream', cascade="all, delete-orphan", lazy="joined")
@@ -51,6 +54,7 @@ class Channel(db.Model):
         self.record = record
         self.allowComments = allowComments
         self.chatEnabled = chatEnabled
+        self.chatLinks = True
         self.chatBG = "Standard"
         self.chatTextColor = "#FFFFFF"
         self.chatAnimation = "slide-in-left"
@@ -65,6 +69,8 @@ class Channel(db.Model):
         self.rtmpRestreamDestination = ""
         self.xmppToken = str(os.urandom(32).hex())
         self.vanityURL = None
+        self.Nsubscriptions = 0
+        self.notificationsLastSentTime = "2020-01-01 00:00:00"
 
     def __repr__(self):
         return '<id %r>' % self.id
@@ -91,7 +97,8 @@ class Channel(db.Model):
             'recordedVideoIDs': [obj.id for obj in self.recordedVideo],
             'upvotes': self.get_upvotes(),
             'protected': self.protected,
-            'vanityURL': self.vanityURL
+            'vanityURL': self.vanityURL,
+            'Nsubscriptions': self.Nsubscriptions
         }
 
     def authed_serialize(self):

@@ -12,8 +12,10 @@ class api_1_Server(Resource):
         """
             Displays a Listing of Server Settings
         """
-        serverSettings = settings.settings.query.first()
-        db.session.commit()
+        #serverSettings = settings.settings.query.first() # WTF should we be sending this info like this passwords n such???
+        serverSettings = settings.getSettingsFromRedis()
+
+        #db.session.commit()
         return {'results': serverSettings.serialize()}
 
 
@@ -37,6 +39,9 @@ class api_1_Rtmp(Resource):
             Displays a Listing of RTMP Servers
         """
 
-        rtmpList = settings.rtmpServer.query.all()
-        db.session.commit()
+        #rtmpList = settings.rtmpServer.query.all()
+        rtmpList = settings.getrtmpServer()
+
+        
+        #db.session.commit()
         return {'results': [ob.serialize() for ob in rtmpList]}

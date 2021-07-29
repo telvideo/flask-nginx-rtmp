@@ -29,7 +29,7 @@
 
           <span class="float-right mx-1">
             {% if current_user.is_authenticated %}
-            <button id="chanSubStateButton" class="btn btn-sm {% if subState == True %} btn-success {% else %} btn-outline-success {% endif %}" onclick='toggleChannelSub("{{video.channel.id}}")'>{% if subState == True %}<i class="fas fa-star"></i><span class="d-none d-sm-none d-md-inline"> Unsubscribe</span>{% else %}<i class="far fa-star"></i><span class="d-none d-sm-none d-md-inline"> Subscribe</span>{% endif %}</button>
+            <button id="chanSubStateButton" class="btn btn-sm {% if subState == True %} btn-success {% else %} btn-outline-success {% endif %}" onclick='toggleChannelSub("{{video.channelID}}")'>{% if subState == True %}<i class="fas fa-star"></i><span class="d-none d-sm-none d-md-inline"> Unsubscribe</span>{% else %}<i class="far fa-star"></i><span class="d-none d-sm-none d-md-inline"> Subscribe</span>{% endif %}</button>
             {% else %}
             <button class="btn btn-sm btn-outline-secondary disabled" disabled><i class="far fa-star"></i><span class="d-none d-sm-none d-md-inline"> Subscribe</span></button>
             {% endif %}
@@ -39,7 +39,7 @@
             </span>
             {% endif %}
           </span>
-          {% if video.channel.protected and sysSettings.protectionEnabled %}
+          {% if video.channelProtected and sysSettings.protectionEnabled %}
           <span class="float-right">
             <span class="badge badge-warning">
               <i class="fas fa-user-lock"></i><span class="d-none d-sm-none d-md-inline"> Protected</span>
@@ -103,7 +103,7 @@
       </div>
       <div class="row m-2">
         <div class="col-12 nopadding">
-          <div><b><i class="fas fa-tv"></i> <a href="/channel/{{video.channel.id}}/">{{video.channel.channelName}}</a></b></div>
+          <div><b><i class="fas fa-tv"></i> <a href="/channel/{{video.channelID}}/">{{video.channelName}}</a></b></div>
           <div><b><i class="fas fa-hashtag"></i> <a href="/topic/{{video.topic}}/">{{video.topic|get_topicName}}</a></b></div>
           <div><b><i class="fas fa-calendar-alt"></i> {{video.videoDate|normalize_date}}</b></div>
         </div>
@@ -115,7 +115,7 @@
       {% if video.comments != [] and sysSettings.allowComments == True and video.allowComments == True %}
       <div class="row m-2">
         <div class="index-video-title mb-2"><b>Comments</b></div>
-        {% for comment in video.comments %}
+        {% for comment in videoComments %}
         <div class="comment mb-2">
           <div class="row">
             <div class="col-auto mr-auto">
@@ -133,7 +133,7 @@
                   {% else %} <button type="button" id="commentUpvoteButton-{{comment.id}}" type="button" class="btn btn-outline-success" onclick="changeUpvote('comment',{{comment.id}});"> <i id="commentUpvoteIcon-{{comment.id}}"
                       class="far fa-thumbs-up"></i>
                     {% endif %}
-                    <span id="upvoteTotalComments-{{comment.id}}">{{comment.upvotes|length}}</span></button>
+                    <span id="upvoteTotalComments-{{comment.id}}">{{comment.NupVotes}}</span></button>
                   {% if video.owningUser == current_user.id or current_user.has_role('Admin') or comment.userID == current_user.id %}
                   <a href="/play/{{video.id}}/comment?action=delete&commentID={{comment.id}}" class="btn btn-danger shadow"><i class="fas fa-trash-alt"></i></a>
                   {% endif %}
@@ -154,12 +154,12 @@
                 <a href="/play/{{vid.id}}">
                   <div class="displayCard-thumbnail zoom">
                     <div class="video-badges">
-                      {% if vid.channel.protected and sysSettings.protectionEnabled %}<span class="badge badge-warning mx-2"><i class="fas fa-user-lock"></i> Protected</span>{% endif %}
+                      {% if vid.channelProtected and sysSettings.protectionEnabled %}<span class="badge badge-warning mx-2"><i class="fas fa-user-lock"></i> Protected</span>{% endif %}
                     </div>
                     <img class="shadow {% if video.gifLocation != None %}gif{% endif %} lazy" src="/static/img/video-placeholder.jpg" data-src="/videos/{{vid.thumbnailLocation}}" onerror="this.src='/static/img/video-placeholder.jpg';">
                     <div class="displayCard-counts">
                       <span class="displayCard-left align-left" style="color:white;">
-                        <span class="px-2 flex-fill upvotes"><i class="fas fa-thumbs-up"></i> <b>{{vid.id|get_Video_Upvotes}}</b></span>
+                        <span class="px-2 flex-fill upvotes"><i class="fas fa-thumbs-up"></i> <b>{{vid.NupVotes}}</b></span>
                       </span>
                       <span class="displayCard-right" style="float:right;color:white;">
                         <span class="px-2 flex-fill views"><i class="fas fa-users"></i> <b>{{vid.views}}</b></span>
@@ -168,7 +168,7 @@
                     </div>
                   </div>
                   <div class="card-data">
-                    <img class="rounded" src="/images/{{vid.channel.owner.pictureLocation}}" onerror="this.src='/static/img/user2.png';">
+                    <img class="rounded" src="/images/{{vid.gifLocation}}" onerror="this.src='/static/img/user2.png';">
                     <div class="metadata">
                       <div class="card-cut-text name ml-2"><b>{{vid.channelName|limit_title}}</b></div>
                       <div class="card-cut-text topic ml-2">{{vid.topic|get_topicName}}</div>

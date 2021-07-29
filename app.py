@@ -18,6 +18,9 @@ import random
 
 # Import 3rd Party Libraries
 from flask import Flask, redirect, request, abort, flash, current_app, session
+from flask_redis import FlaskRedis
+from pottery import Redlock
+
 from flask_session import Session
 from flask_security import Security, SQLAlchemyUserDatastore, login_required, current_user, roles_required, uia_email_mapper
 from flask_security.signals import user_registered
@@ -163,6 +166,8 @@ else:
 from classes.shared import limiter
 limiter.init_app(app)
 
+settings.setupRedis(app) # Boggs needs to password this!
+
 # Initialize Redis for Flask-Session
 if config.redisPassword == '' or config.redisPassword is None:
     r = redis.Redis(host=config.redisHost, port=config.redisPort)
@@ -170,7 +175,7 @@ if config.redisPassword == '' or config.redisPassword is None:
 else:
     r = redis.Redis(host=config.redisHost, port=config.redisPort, password=config.redisPassword)
     app.config["SESSION_REDIS"] = r
-r.flushdb()
+#r.flushdb() # we can't flush the redis anymore as we use it now to store system settings...
 
 # Initialize Flask-SocketIO
 from classes.shared import socketio
@@ -197,6 +202,9 @@ toolbar = DebugToolbarExtension(app)
 # Initialize Flask-Security
 try:
     sysSettings = settings.settings.query.first()
+    #sysSettings = settings.getSettingsFromRedis()
+
+    
     app.config['SECURITY_TOTP_ISSUER'] = sysSettings.siteName
 except:
     app.config['SECURITY_TOTP_ISSUER'] = "OSP"
@@ -228,23 +236,25 @@ try:
 except Exception as e:
     print("ejabberdctl failed to load: " + str(e))
 
+# only one process at a time is allowed to do some things until this lock is released after 5 seconds or by redis_init_lock.release()
+redis_init_lock = Redlock(key='OSP_DB_INIT_HANDLER', masters={r},auto_release_time=5*1000)
+redis_init_lock.acquire()
+
 # Loop Check if OSP DB Init is Currently Being Handled by and Process
-OSP_DB_INIT_HANDLER = None
-while OSP_DB_INIT_HANDLER != globalvars.processUUID:
-    OSP_DB_INIT_HANDLER = r.get('OSP_DB_INIT_HANDLER')
-    if OSP_DB_INIT_HANDLER != None:
-        OSP_DB_INIT_HANDLER = OSP_DB_INIT_HANDLER.decode('utf-8')
-    else:
-        r.set('OSP_DB_INIT_HANDLER', globalvars.processUUID)
-        time.sleep(random.random())
+#OSP_DB_INIT_HANDLER = None
+#while OSP_DB_INIT_HANDLER != globalvars.processUUID:
+#    OSP_DB_INIT_HANDLER = r.get('OSP_DB_INIT_HANDLER')
+#    if OSP_DB_INIT_HANDLER != None:
+#        OSP_DB_INIT_HANDLER = OSP_DB_INIT_HANDLER.decode('utf-8')
+#    else:
+#        r.set('OSP_DB_INIT_HANDLER', globalvars.processUUID)
+#        time.sleep(random.random())
 
 # Once Attempt Database Load and Validation
 try:
     database.init(app, user_datastore)
 except:
     print("DB Load Fail due to Upgrade or Issues")
-# Clear Process from OSP DB Init
-r.delete('OSP_DB_INIT_HANDLER')
 
 # Perform System Fixes
 try:
@@ -271,6 +281,11 @@ try:
 except:
     print({"level": "error", "message": "Unable to initialize OSP Edge Conf.  May be first run or DB Issue."})
 print({"level": "info", "message": "Initializing OAuth Info"})
+
+if redis_init_lock.locked(): 
+    redis_init_lock.release() # let another process into the code we have been protecting
+
+#r.delete('OSP_XMPP_INIT_HANDLER')
 # Initialize oAuth
 from classes.shared import oauth
 from functions.oauth import fetch_token
@@ -375,7 +390,7 @@ print({"level": "info", "message": "Initializing Template Filters"})
 from functions import templateFilters
 
 # Initialize Jinja2 Template Filters
-templateFilters.init(app)
+templateFilters.init(app.jinja_env)
 
 print({"level": "info", "message": "Setting Jinja2 Global Env Functions"})
 #----------------------------------------------------------------------------#
@@ -392,11 +407,10 @@ print({"level": "info", "message": "Setting Flask Context Processors"})
 def inject_notifications():
     notificationList = []
     if current_user.is_authenticated:
-        userNotificationQuery = notifications.userNotification.query.filter_by(userID=current_user.id).all()
+        userNotificationQuery = notifications.userNotification.query.filter_by(userID=current_user.id, read=False).order_by(notifications.userNotification.timestamp.desc()).limit(69)
+
         for entry in userNotificationQuery:
-            if entry.read is False:
-                notificationList.append(entry)
-        notificationList.sort(key=lambda x: x.timestamp, reverse=True)
+            notificationList.append(entry)
     return dict(notifications=notificationList)
 
 @app.context_processor
@@ -407,13 +421,20 @@ def inject_recaptchaEnabled():
 @app.context_processor
 def inject_oAuthProviders():
 
-    SystemOAuthProviders = db.session.query(settings.oAuthProvider).all()
+    #SystemOAuthProviders = db.session.query(settings.oAuthProvider).all()
+    SystemOAuthProviders = settings.getAuthProvider("inject_oAuthProviders")
+
+    #SystemOAuthProviders = db.session.query(settings.oAuthProvider).with_entities(settings.oAuthProvider.preset_auth_type, settings.oAuthProvider.friendlyName).all()
+
     return dict(SystemOAuthProviders=SystemOAuthProviders)
 
 @app.context_processor
 def inject_sysSettings():
+    if globalvars.GlobalfirstRunCheck is False:    
+        sysSettings = db.session.query(settings.settings).first()
+    else:
+        sysSettings = settings.getSettingsFromRedis()
 
-    sysSettings = db.session.query(settings.settings).first()
     allowRegistration = config.allowRegistration
     return dict(sysSettings=sysSettings, allowRegistration=allowRegistration)
 
@@ -433,6 +454,19 @@ def inject_ownedChannels():
 def inject_topics():
     topicQuery = topics.topics.query.with_entities(topics.topics.id, topics.topics.name).all()
     return dict(uploadTopics=topicQuery)
+
+@app.context_processor
+def inject_sideBar():
+    # chanSubQuery = subscriptions.channelSubs.query.filter_by(userID=current_user.id).all()
+    chanSubQuery = []
+
+    if current_user.is_authenticated:
+        chanSubQuery = subscriptions.channelSubs.query.filter_by(userID=current_user.id).\
+            join(Channel.Channel, Channel.Channel.id == subscriptions.channelSubs.channelID ).\
+            with_entities(Channel.Channel.imageLocation,Channel.Channel.id,Channel.Channel.channelName)
+
+
+    return dict(sideBarSubslist = chanSubQuery)
 
 print({"level": "info", "message": "Initializing Flask Signal Handlers"})
 #----------------------------------------------------------------------------#
@@ -458,17 +492,68 @@ def user_registered_sighandler(app, user, confirm_token, form_data=None):
 
 @app.before_request
 def do_before_request():
+
+# **************************************************************************************************************
+# Boggs custom hack to dodge whatever is going on when it's not us making this request.. idk why it's not us?????????
+#    name = str(request.url)
+
+
+
+#   if name.startswith("https"):  #trim https or http
+#        name= name[8:]
+#    else:
+#        name= name[7:] #must be "http"
+       
+#    isUs = False
+#    if name.startswith("127.0.0.1"):
+#        isUs = True
+#    else:
+#        if name.startswith("yoursite.tv"): 
+#            isUs = True        
+#        else: 
+#            if name.startswith("signal.yoursite.tv"): 
+#                isUs = True        
+#            else:
+#                if name.startswith("socket_nodes/auth"):
+#                    isUs = True
+#                else:    
+#                    if name.startswith("discordapp.com"):
+#                        isUs =True
+#                    else:
+#                        if name.startswith("www.proboggs.com"): 
+#                            isUs = True
+#                        else:    
+#                            if name.startswith("www.bobross.tv"): 
+ #                               isUs = True            
+
+
+ #  print(name)
+  #  if isUs == False:
+  #      print(str({'69 lol error': 'smoked (gone)', 'reason': 420}))
+
+
+ #       return str({'69 lol error': 'smoked (gone)', 'reason': 420})
+
+
     # Check all IP Requests for banned IP Addresses
     if request.environ.get('HTTP_X_FORWARDED_FOR') is None:
         requestIP = request.environ['REMOTE_ADDR']
     else:
         requestIP = request.environ['HTTP_X_FORWARDED_FOR']
 
+    tDate = datetime.datetime.utcnow()
+
+#    if isUs == False:
+#        stri ="WTF {} {} {} {}\n".format(tDate, requestIP,  name, request.referrer)
+#        f = open("/var/www/dicks.txt", "a")
+#        f.write(stri)
+#        f.close()
+
     if requestIP != "127.0.0.1":
         try:
-            banQuery = banList.ipList.query.filter_by(ipAddress=requestIP).first()
-            if banQuery != None:
-                return str({'error': 'banned', 'reason': banQuery.reason})
+            #banQuery = banList.ipList.query.filter_by(ipAddress=requestIP).first()
+            #if banQuery != None:
+            #    return str({'error': 'banned', 'reason': banQuery.reason})
 
             # Apply Guest UUID in Session and Handle Object
             if current_user.is_authenticated is False:
@@ -476,14 +561,14 @@ def do_before_request():
                     session['guestUUID'] = str(uuid.uuid4())
                 GuestQuery = Sec.Guest.query.filter_by(UUID=session['guestUUID']).first()
                 if GuestQuery is not None:
-                    GuestQuery.last_active_at = datetime.datetime.utcnow()
+                    GuestQuery.last_active_at = tDate
                     GuestQuery.last_active_ip = requestIP
                     db.session.commit()
                 else:
                     # Check if a previous access from an IP Address was Used
                     GuestQuery = Sec.Guest.query.filter_by(last_active_ip=requestIP).first()
                     if GuestQuery is not None:
-                        GuestQuery.last_active_at = datetime.datetime.utcnow()
+                        GuestQuery.last_active_at = tDate
                         GuestQuery.UUID = session['guestUUID']
                         db.session.commit()
                     else:
@@ -507,6 +592,7 @@ try:
 except:
     pass
 if __name__ == '__main__':
-    app.jinja_env.auto_reload = False
-    app.config['TEMPLATES_AUTO_RELOAD'] = False
-    socketio.run(app, Debug=config.debugMode)
+    app.jinja_env.auto_reload = True
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
+    socketio.run(app, debug=config.debugMode)
+    

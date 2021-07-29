@@ -12,7 +12,9 @@ from functions import xmpp
 
 @socketio.on('addMod')
 def addMod(message):
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
+    
     JID = None
     username = str(message['JID'])
     userQuery = Sec.User.query.filter(func.lower(Sec.User.username) == func.lower(username)).first()
@@ -34,7 +36,9 @@ def addMod(message):
 
 @socketio.on('deleteMod')
 def deleteMod(message):
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
+
     JID = str(message['JID'])
     channelLoc = str(message['channelLoc'])
 

@@ -1,5 +1,7 @@
 from .shared import db
 from .settings import settings
+from .settings import getSettingsFromRedis
+
 from uuid import uuid4
 
 import datetime
@@ -16,6 +18,7 @@ class Stream(db.Model):
     currentViewers = db.Column(db.Integer)
     totalViewers = db.Column(db.Integer)
     rtmpServer = db.Column(db.Integer,db.ForeignKey('rtmpServer.id'))
+    NupVotes = db.Column(db.Integer)
     upvotes = db.relationship('streamUpvotes', backref='stream', cascade="all, delete-orphan", lazy="joined")
 
     def __init__(self, streamKey, streamName, linkedChannel, topic):
@@ -28,6 +31,7 @@ class Stream(db.Model):
         self.totalViewers = 0
         self.topic = topic
         self.channelMuted = False
+        self.NupVotes = 0
 
     def __repr__(self):
         return '<id %r>' % self.id
@@ -44,7 +48,9 @@ class Stream(db.Model):
         db.session.commit()
 
     def serialize(self):
-        sysSettings = settings.query.first()
+        #sysSettings = settings.query.first()
+        sysSettings = getSettingsFromRedis()
+
         streamURL = ''
         if sysSettings.adaptiveStreaming is True:
             streamURL = '/live-adapt/' + self.channel.channelLoc + '.m3u8'
@@ -66,5 +72,6 @@ class Stream(db.Model):
             'rtmpServer': self.server.address,
             'currentViewers': self.currentViewers,
             'totalViewers': self.currentViewers,
+            'NupVotes': self.NupVotes,
             'upvotes': self.get_upvotes()
         }

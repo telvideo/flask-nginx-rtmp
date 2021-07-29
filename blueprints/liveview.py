@@ -14,6 +14,7 @@ from classes import Stream
 from classes import Sec
 from classes import banList
 from classes import stickers
+from classes import upvotes
 
 from globals.globalvars import ejabberdServer
 
@@ -24,18 +25,51 @@ liveview_bp = Blueprint('liveview', __name__, url_prefix='/view')
 
 @liveview_bp.route('/<loc>/')
 def view_page(loc):
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
 
     xmppserver = sysSettings.siteAddress
     if ejabberdServer != "127.0.0.1" and ejabberdServer != "localhost":
         xmppserver = ejabberdServer
 
-    requestedChannel = Channel.Channel.query.filter_by(channelLoc=loc).first()
+    if sysSettings.systemTheme != "xDrDarkDoc":
+        requestedChannel = Channel.Channel.query.filter_by(channelLoc=loc).first()
+    else:
+        requestedChannel = Channel.Channel.query.filter_by(channelLoc=loc).with_entities(Channel.Channel.id,
+        Channel.Channel.owningUser,
+        Channel.Channel.streamKey,
+        Channel.Channel.channelName,
+        Channel.Channel.channelLoc,
+        Channel.Channel.topic,
+        Channel.Channel.views,
+        Channel.Channel.currentViewers,
+        Channel.Channel.chatEnabled,
+        Channel.Channel.chatLinks,
+       # Channel.Channel.chatBG,
+       # Channel.Channel.chatTextColor,
+       # Channel.Channel.chatAnimation,
+        Channel.Channel.imageLocation,
+        Channel.Channel.offlineImageLocation,
+        Channel.Channel.description,
+        Channel.Channel.allowComments,
+        Channel.Channel.protected,
+        Channel.Channel.channelMuted,
+        Channel.Channel.showChatJoinLeaveNotification,
+        Channel.Channel.xmppToken,
+        Channel.Channel.Nsubscriptions,
+        Channel.Channel.vanityURL).first() 
+        
+    #requestedChannel = Channel.Channel.query.filter_by(channelLoc=loc).first()
+
     if requestedChannel is not None:
         if requestedChannel.protected and sysSettings.protectionEnabled:
             if not securityFunc.check_isValidChannelViewer(requestedChannel.id):
                 return render_template(themes.checkOverride('channelProtectionAuth.html'))
 
+        streamerQuery = Sec.User.query.filter_by(id=requestedChannel.owningUser).with_entities(Sec.User.verified, 
+            Sec.User.pictureLocation,
+            Sec.User.donationURL).first()
+    
         # Pull ejabberd Chat Options for Room
         #from app import ejabberd
         #chatOptions = ejabberd.get_room_options(requestedChannel.channelLoc, 'conference.' + sysSettings.siteAddress)
@@ -53,6 +87,7 @@ def view_page(loc):
         # Stream URL Generation
         streamURL = ''
         edgeQuery = settings.edgeStreamer.query.filter_by(active=True).all()
+        
         if sysSettings.proxyFQDN != None:
             if sysSettings.adaptiveStreaming is True:
                 streamURL = '/proxy-adapt/' + requestedChannel.channelLoc + '.m3u8'
@@ -70,7 +105,9 @@ def view_page(loc):
             else:
                 streamURL = '/live/' + requestedChannel.channelLoc + '/index.m3u8'
 
+        #Boggs this is injeced already so why send it in again need to not inject but only do this when needed?
         topicList = topics.topics.query.all()
+
         chatOnly = request.args.get("chatOnly")
 
         # Grab List of Stickers for Chat
@@ -137,15 +174,12 @@ def view_page(loc):
                         flash("Invalid User","error")
                         return(redirect(url_for("root.main_page")))
 
-                return render_template(themes.checkOverride('chatpopout.html'), stream=streamData, streamURL=streamURL, sysSettings=sysSettings, channel=requestedChannel, hideBar=hideBar, guestUser=guestUser,
+                return render_template(themes.checkOverride('chatpopout.html'), streamer=streamerQuery, stream=streamData, streamURL=streamURL, sysSettings=sysSettings, channel=requestedChannel, hideBar=hideBar, guestUser=guestUser,
                                        xmppserver=xmppserver, stickerList=stickerList, stickerSelectorList=stickerSelectorList, bannedWords=bannedWordArray)
             else:
                 flash("Chat is Not Enabled For This Stream","error")
 
-        isEmbedded = request.args.get("embedded")
-
-        #requestedChannel = Channel.Channel.query.filter_by(channelLoc=loc).first()
-
+        isEmbedded = request.args.get("embedded")                
         if isEmbedded is None or isEmbedded == "False" or isEmbedded == "false":
 
             secureHash = None
@@ -169,20 +203,28 @@ def view_page(loc):
                 rtmpURI = 'rtmp://' + sysSettings.siteAddress + ":1935/" + endpoint + "/" + requestedChannel.channelLoc
 
             clipsList = []
-            for vid in requestedChannel.recordedVideo:
-                for clip in vid.clips:
-                    if clip.published is True:
-                        clipsList.append(clip)
-            clipsList.sort(key=lambda x: x.views, reverse=True)
+            if sysSettings.systemTheme != "xDrDarkDoc":
+                for vid in requestedChannel.recordedVideo:
+                    for clip in vid.clips:
+                        if clip.published is True:
+                            clipsList.append(clip)
+                clipsList.sort(key=lambda x: x.views, reverse=True)
 
             subState = False
-            if current_user.is_authenticated:
-                chanSubQuery = subscriptions.channelSubs.query.filter_by(channelID=requestedChannel.id, userID=current_user.id).first()
-                if chanSubQuery is not None:
-                    subState = True
+            myUpvote = True
 
-            return render_template(themes.checkOverride('channelplayer.html'), stream=streamData, streamURL=streamURL, topics=topicList, channel=requestedChannel, clipsList=clipsList,
-                                   subState=subState, secureHash=secureHash, rtmpURI=rtmpURI, xmppserver=xmppserver, stickerList=stickerList, stickerSelectorList=stickerSelectorList, bannedWords=bannedWordArray)
+            if current_user.is_authenticated:
+                chanSubQuery = subscriptions.channelSubs.query.with_entities(subscriptions.channelSubs.id).filter_by(channelID=requestedChannel.id, userID=current_user.id).first()
+                if chanSubQuery is not None:
+                    subState = True      
+            
+                if streamData:
+                    myVoteQuery = upvotes.streamUpvotes.query.filter_by(userID=current_user.id, streamID=streamData.id).first()
+                    if myVoteQuery is not None:
+                        myUpvote = True
+
+            return render_template(themes.checkOverride('channelplayer.html'),  streamer=streamerQuery, stream=streamData, topics=topicList, streamURL=streamURL, channel=requestedChannel, clipsList=clipsList,
+                                   subState=subState, myUpvote=myUpvote, secureHash=secureHash, rtmpURI=rtmpURI, xmppserver=xmppserver, stickerList=stickerList, stickerSelectorList=stickerSelectorList, bannedWords=bannedWordArray)
         else:
             isAutoPlay = request.args.get("autoplay")
             if isAutoPlay is None:

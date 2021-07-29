@@ -18,112 +18,163 @@ from functions import themes
 from functions import system
 from functions import securityFunc
 
+from globals import globalvars
+
 root_bp = Blueprint('root', __name__)
-
-
 @root_bp.route('/')
 def main_page():
 
-    firstRunCheck = system.check_existing_settings()
+    if globalvars.GlobalfirstRunCheck is False:
+        globalvars.GlobalfirstRunCheck = system.check_existing_settings()
+        if globalvars.GlobalfirstRunCheck is False:
+            return render_template('/firstrun.html')
 
-    if firstRunCheck is False:
-        return render_template('/firstrun.html')
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
 
+    streamList =  []
+    # now that we have dynamic live data front page don't need this here really except that it's 
+    # used by the search, but who needs to be able to search on the live list?  idk maybe the live 
+    # data needs to be pushed into the search real-time somehow... will leave it like this hard coded for now
+    # to not break other themes
+    if sysSettings.systemTheme != "xDrDarkDoc":
+        #activeStreams = Stream.Stream.query.order_by(Stream.Stream.currentViewers).all()
+        activeStreams = Stream.Stream.query.join(Channel.Channel, Channel.Channel.id == Stream.Stream.linkedChannel) \
+                .join(Sec.User, Sec.User.id == Channel.Channel.owningUser).with_entities(Stream.Stream.id,
+    #                Stream.Stream.uuid,
+    #                Stream.Stream.startTimestamp,
+    #                Stream.Stream.linkedChannel,
+    #                Stream.Stream.streamKey,
+                    Stream.Stream.streamName,
+    #                Stream.Stream.topic,
+                    Stream.Stream.currentViewers,
+                    Stream.Stream.totalViewers,
+                    Stream.Stream.topic,
+    #                Stream.Stream.rtmpServer,
+                    Stream.Stream.NupVotes,
+                    Channel.Channel.channelLoc,
+                    Sec.User.pictureLocation,
+                    Channel.Channel.imageLocation,
+                    Sec.User.username,
+                    Channel.Channel.channelName,
+                    Channel.Channel.protected
+                    ).order_by(Stream.Stream.currentViewers.desc()).all()
+
+        for stre in activeStreams:
+            aStream = {"streamName":stre.streamName,
+            "currentViewers":stre.currentViewers,
+            "channelLoc":stre.channelLoc,
+            "pictureLocation":stre.pictureLocation,
+            "imageLocation":stre.imageLocation,
+            "NupVotes":stre.NupVotes,
+            "totalViewers":stre.totalViewers,
+            "username": stre.username,
+            "channelName":stre.channelName,
+            "topic":stre.topic}
+            streamList.append(aStream) 
+     
+    recentQuery = RecordedVideo.RecordedVideo.query.filter_by(pending=False, published=True).filter(RecordedVideo.RecordedVideo.length > 300.0, Sec.User.verified == 1) \
+        .join(Channel.Channel, RecordedVideo.RecordedVideo.channelID == Channel.Channel.id) \
+        .join(Sec.User, RecordedVideo.RecordedVideo.owningUser == Sec.User.id) \
+        .with_entities(RecordedVideo.RecordedVideo.id, RecordedVideo.RecordedVideo.owningUser,
+                        RecordedVideo.RecordedVideo.views, RecordedVideo.RecordedVideo.length,
+                        RecordedVideo.RecordedVideo.thumbnailLocation, RecordedVideo.RecordedVideo.channelName,
+                        RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, RecordedVideo.RecordedVideo.NupVotes,
+                        Sec.User.pictureLocation, Channel.Channel.protected,
+                        Channel.Channel.channelName.label('ChanName')) \
+        .order_by(RecordedVideo.RecordedVideo.videoDate.desc()).limit(10)
+#
+    recordedQuery = None
+    clipQuery = None
+
+    # Sort by Most Views
+    if sysSettings.sortMainBy == 0:
+        recordedQuery = RecordedVideo.RecordedVideo.query.filter_by(pending=False, published=True) \
+            .join(Channel.Channel, RecordedVideo.RecordedVideo.channelID == Channel.Channel.id) \
+            .join(Sec.User, RecordedVideo.RecordedVideo.owningUser == Sec.User.id) \
+            .with_entities(RecordedVideo.RecordedVideo.id, RecordedVideo.RecordedVideo.owningUser,
+                            RecordedVideo.RecordedVideo.views, RecordedVideo.RecordedVideo.length,
+                            RecordedVideo.RecordedVideo.thumbnailLocation, RecordedVideo.RecordedVideo.channelName,
+                            RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, RecordedVideo.RecordedVideo.NupVotes,
+                            Sec.User.pictureLocation, Channel.Channel.protected,
+                            Sec.User.username, Channel.Channel.channelName.label('ChanName')) \
+            .order_by(RecordedVideo.RecordedVideo.views.desc()).limit(16)
+
+        clipQuery = RecordedVideo.Clips.query.filter_by(published=True) \
+            .join(RecordedVideo.RecordedVideo, RecordedVideo.Clips.parentVideo == RecordedVideo.RecordedVideo.id) \
+            .join(Channel.Channel, Channel.Channel.id == RecordedVideo.RecordedVideo.channelID) \
+            .join(Sec.User, Sec.User.id == Channel.Channel.owningUser) \
+            .with_entities(RecordedVideo.Clips.id, RecordedVideo.Clips.thumbnailLocation,
+                            Channel.Channel.owningUser, RecordedVideo.Clips.views, RecordedVideo.Clips.length,
+                            RecordedVideo.Clips.clipName, Channel.Channel.protected, Channel.Channel.channelName,
+                            RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, RecordedVideo.Clips.NupVotes,
+                            Sec.User.pictureLocation,Sec.User.username) \
+            .order_by(RecordedVideo.Clips.views.desc()).limit(16)
+    # Sort by Most Recent
+    elif sysSettings.sortMainBy == 1:
+        recordedQuery = RecordedVideo.RecordedVideo.query.filter_by(pending=False, published=True) \
+            .join(Channel.Channel, RecordedVideo.RecordedVideo.channelID == Channel.Channel.id) \
+            .join(Sec.User, RecordedVideo.RecordedVideo.owningUser == Sec.User.id) \
+            .with_entities(RecordedVideo.RecordedVideo.id, RecordedVideo.RecordedVideo.owningUser,
+                            RecordedVideo.RecordedVideo.views, RecordedVideo.RecordedVideo.length,
+                            RecordedVideo.RecordedVideo.thumbnailLocation, RecordedVideo.RecordedVideo.channelName,
+                            RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, RecordedVideo.RecordedVideo.NupVotes,
+                            Sec.User.pictureLocation, Channel.Channel.protected,
+                            Channel.Channel.channelName.label('ChanName')) \
+            .order_by(RecordedVideo.RecordedVideo.videoDate.desc()).limit(16)
+
+        clipQuery = RecordedVideo.Clips.query.filter_by(published=True) \
+            .join(RecordedVideo.RecordedVideo, RecordedVideo.Clips.parentVideo == RecordedVideo.RecordedVideo.id) \
+            .join(Channel.Channel, Channel.Channel.id == RecordedVideo.RecordedVideo.channelID) \
+            .join(Sec.User, Sec.User.id == Channel.Channel.owningUser) \
+            .with_entities(RecordedVideo.Clips.id, RecordedVideo.Clips.thumbnailLocation,
+                            Channel.Channel.owningUser, RecordedVideo.Clips.views, RecordedVideo.Clips.length,
+                            RecordedVideo.Clips.clipName, Channel.Channel.protected, Channel.Channel.channelName,
+                            RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, RecordedVideo.Clips.NupVotes,
+                            Sec.User.pictureLocation) \
+            .order_by(RecordedVideo.RecordedVideo.videoDate.desc()).limit(16)
+    # Sort by Random
+    elif sysSettings.sortMainBy == 2:
+        recordedQuery = RecordedVideo.RecordedVideo.query.filter_by(pending=False, published=True)\
+            .join(Channel.Channel, RecordedVideo.RecordedVideo.channelID == Channel.Channel.id)\
+            .join(Sec.User, RecordedVideo.RecordedVideo.owningUser == Sec.User.id)\
+            .with_entities(RecordedVideo.RecordedVideo.NupVotes, RecordedVideo.RecordedVideo.id, RecordedVideo.RecordedVideo.owningUser, RecordedVideo.RecordedVideo.views, RecordedVideo.RecordedVideo.length, RecordedVideo.RecordedVideo.thumbnailLocation, RecordedVideo.RecordedVideo.channelName, RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, Sec.User.pictureLocation, Channel.Channel.protected, Channel.Channel.channelName.label('ChanName'))\
+            .order_by(func.random()).limit(10)
+
+        clipQuery = RecordedVideo.Clips.query.filter_by(published=True)\
+            .join(RecordedVideo.RecordedVideo, RecordedVideo.Clips.parentVideo == RecordedVideo.RecordedVideo.id)\
+            .join(Channel.Channel, Channel.Channel.id==RecordedVideo.RecordedVideo.channelID)\
+            .join(Sec.User, Sec.User.id == Channel.Channel.owningUser)\
+            .with_entities(RecordedVideo.Clips.NupVotes, RecordedVideo.Clips.id, RecordedVideo.Clips.thumbnailLocation, Channel.Channel.owningUser, RecordedVideo.Clips.views, RecordedVideo.Clips.length, RecordedVideo.Clips.clipName, Channel.Channel.protected, Channel.Channel.channelName, RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, Sec.User.pictureLocation)\
+            .order_by(func.random()).limit(5)
+    # Fall Through - Sort by Views
     else:
-        sysSettings = settings.settings.query.first()
-        activeStreams = Stream.Stream.query.order_by(Stream.Stream.currentViewers).all()
-
-        recordedQuery = None
-        clipQuery = None
-
-        # Sort by Most Views
         if sysSettings.sortMainBy == 0:
             recordedQuery = RecordedVideo.RecordedVideo.query.filter_by(pending=False, published=True) \
                 .join(Channel.Channel, RecordedVideo.RecordedVideo.channelID == Channel.Channel.id) \
                 .join(Sec.User, RecordedVideo.RecordedVideo.owningUser == Sec.User.id) \
                 .with_entities(RecordedVideo.RecordedVideo.id, RecordedVideo.RecordedVideo.owningUser,
-                               RecordedVideo.RecordedVideo.views, RecordedVideo.RecordedVideo.length,
-                               RecordedVideo.RecordedVideo.thumbnailLocation, RecordedVideo.RecordedVideo.channelName,
-                               RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate,
-                               Sec.User.pictureLocation, Channel.Channel.protected,
-                               Channel.Channel.channelName.label('ChanName')) \
+                                RecordedVideo.RecordedVideo.views, RecordedVideo.RecordedVideo.length,
+                                RecordedVideo.RecordedVideo.thumbnailLocation,
+                                RecordedVideo.RecordedVideo.channelName,
+                                RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate,
+                                Sec.User.pictureLocation, Channel.Channel.protected,
+                                Channel.Channel.channelName.label('ChanName')) \
                 .order_by(RecordedVideo.RecordedVideo.views.desc()).limit(16)
 
             clipQuery = RecordedVideo.Clips.query.filter_by(published=True) \
-                .join(RecordedVideo.RecordedVideo, RecordedVideo.Clips.parentVideo == RecordedVideo.RecordedVideo.id) \
+                .join(RecordedVideo.RecordedVideo,
+                        RecordedVideo.Clips.parentVideo == RecordedVideo.RecordedVideo.id) \
                 .join(Channel.Channel, Channel.Channel.id == RecordedVideo.RecordedVideo.channelID) \
                 .join(Sec.User, Sec.User.id == Channel.Channel.owningUser) \
                 .with_entities(RecordedVideo.Clips.id, RecordedVideo.Clips.thumbnailLocation,
-                               Channel.Channel.owningUser, RecordedVideo.Clips.views, RecordedVideo.Clips.length,
-                               RecordedVideo.Clips.clipName, Channel.Channel.protected, Channel.Channel.channelName,
-                               RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate,
-                               Sec.User.pictureLocation) \
+                                Channel.Channel.owningUser, RecordedVideo.Clips.views, RecordedVideo.Clips.length,
+                                RecordedVideo.Clips.clipName, Channel.Channel.protected, Channel.Channel.channelName,
+                                RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate,
+                                Sec.User.pictureLocation) \
                 .order_by(RecordedVideo.Clips.views.desc()).limit(16)
-        # Sort by Most Recent
-        elif sysSettings.sortMainBy == 1:
-            recordedQuery = RecordedVideo.RecordedVideo.query.filter_by(pending=False, published=True) \
-                .join(Channel.Channel, RecordedVideo.RecordedVideo.channelID == Channel.Channel.id) \
-                .join(Sec.User, RecordedVideo.RecordedVideo.owningUser == Sec.User.id) \
-                .with_entities(RecordedVideo.RecordedVideo.id, RecordedVideo.RecordedVideo.owningUser,
-                               RecordedVideo.RecordedVideo.views, RecordedVideo.RecordedVideo.length,
-                               RecordedVideo.RecordedVideo.thumbnailLocation, RecordedVideo.RecordedVideo.channelName,
-                               RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate,
-                               Sec.User.pictureLocation, Channel.Channel.protected,
-                               Channel.Channel.channelName.label('ChanName')) \
-                .order_by(RecordedVideo.RecordedVideo.videoDate.desc()).limit(16)
 
-            clipQuery = RecordedVideo.Clips.query.filter_by(published=True) \
-                .join(RecordedVideo.RecordedVideo, RecordedVideo.Clips.parentVideo == RecordedVideo.RecordedVideo.id) \
-                .join(Channel.Channel, Channel.Channel.id == RecordedVideo.RecordedVideo.channelID) \
-                .join(Sec.User, Sec.User.id == Channel.Channel.owningUser) \
-                .with_entities(RecordedVideo.Clips.id, RecordedVideo.Clips.thumbnailLocation,
-                               Channel.Channel.owningUser, RecordedVideo.Clips.views, RecordedVideo.Clips.length,
-                               RecordedVideo.Clips.clipName, Channel.Channel.protected, Channel.Channel.channelName,
-                               RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate,
-                               Sec.User.pictureLocation) \
-                .order_by(RecordedVideo.RecordedVideo.videoDate.desc()).limit(16)
-        # Sort by Random
-        elif sysSettings.sortMainBy == 2:
-            recordedQuery = RecordedVideo.RecordedVideo.query.filter_by(pending=False, published=True)\
-                .join(Channel.Channel, RecordedVideo.RecordedVideo.channelID == Channel.Channel.id)\
-                .join(Sec.User, RecordedVideo.RecordedVideo.owningUser == Sec.User.id)\
-                .with_entities(RecordedVideo.RecordedVideo.id, RecordedVideo.RecordedVideo.owningUser, RecordedVideo.RecordedVideo.views, RecordedVideo.RecordedVideo.length, RecordedVideo.RecordedVideo.thumbnailLocation, RecordedVideo.RecordedVideo.channelName, RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, Sec.User.pictureLocation, Channel.Channel.protected, Channel.Channel.channelName.label('ChanName'))\
-                .order_by(func.random()).limit(16)
-
-            clipQuery = RecordedVideo.Clips.query.filter_by(published=True)\
-                .join(RecordedVideo.RecordedVideo, RecordedVideo.Clips.parentVideo == RecordedVideo.RecordedVideo.id)\
-                .join(Channel.Channel, Channel.Channel.id==RecordedVideo.RecordedVideo.channelID)\
-                .join(Sec.User, Sec.User.id == Channel.Channel.owningUser)\
-                .with_entities(RecordedVideo.Clips.id, RecordedVideo.Clips.thumbnailLocation, Channel.Channel.owningUser, RecordedVideo.Clips.views, RecordedVideo.Clips.length, RecordedVideo.Clips.clipName, Channel.Channel.protected, Channel.Channel.channelName, RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate, Sec.User.pictureLocation)\
-                .order_by(func.random()).limit(16)
-        # Fall Through - Sort by Views
-        else:
-            if sysSettings.sortMainBy == 0:
-                recordedQuery = RecordedVideo.RecordedVideo.query.filter_by(pending=False, published=True) \
-                    .join(Channel.Channel, RecordedVideo.RecordedVideo.channelID == Channel.Channel.id) \
-                    .join(Sec.User, RecordedVideo.RecordedVideo.owningUser == Sec.User.id) \
-                    .with_entities(RecordedVideo.RecordedVideo.id, RecordedVideo.RecordedVideo.owningUser,
-                                   RecordedVideo.RecordedVideo.views, RecordedVideo.RecordedVideo.length,
-                                   RecordedVideo.RecordedVideo.thumbnailLocation,
-                                   RecordedVideo.RecordedVideo.channelName,
-                                   RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate,
-                                   Sec.User.pictureLocation, Channel.Channel.protected,
-                                   Channel.Channel.channelName.label('ChanName')) \
-                    .order_by(RecordedVideo.RecordedVideo.views.desc()).limit(16)
-
-                clipQuery = RecordedVideo.Clips.query.filter_by(published=True) \
-                    .join(RecordedVideo.RecordedVideo,
-                          RecordedVideo.Clips.parentVideo == RecordedVideo.RecordedVideo.id) \
-                    .join(Channel.Channel, Channel.Channel.id == RecordedVideo.RecordedVideo.channelID) \
-                    .join(Sec.User, Sec.User.id == Channel.Channel.owningUser) \
-                    .with_entities(RecordedVideo.Clips.id, RecordedVideo.Clips.thumbnailLocation,
-                                   Channel.Channel.owningUser, RecordedVideo.Clips.views, RecordedVideo.Clips.length,
-                                   RecordedVideo.Clips.clipName, Channel.Channel.protected, Channel.Channel.channelName,
-                                   RecordedVideo.RecordedVideo.topic, RecordedVideo.RecordedVideo.videoDate,
-                                   Sec.User.pictureLocation) \
-                    .order_by(RecordedVideo.Clips.views.desc()).limit(16)
-
-        return render_template(themes.checkOverride('index.html'), streamList=activeStreams, videoList=recordedQuery, clipList=clipQuery)
+    return render_template(themes.checkOverride('index.html'), streamList=streamList, videoList=recordedQuery, clipList=clipQuery, recentQuery = recentQuery)
 
 @root_bp.route('/search', methods=["POST"])
 def search_page():
@@ -205,7 +256,7 @@ def static_from_root_sw():
 # Link to Profile Via Username
 @root_bp.route('/u/<username>')
 def vanityURL_username_link(username):
-    userQuery = Sec.User.query.filter_by(username=username).first()
+    userQuery = Sec.User.query.with_entities(Sec.User.username).filter_by(username=username).first()
     if userQuery is not None:
         return redirect(url_for('profile.profile_view_page',username=username))
     flash("Invalid Username","error")
@@ -214,7 +265,7 @@ def vanityURL_username_link(username):
 # Link to Channels Via Vanity URLs
 @root_bp.route('/c/<vanityURL>')
 def vanityURL_channel_link(vanityURL):
-    channelQuery = Channel.Channel.query.filter_by(vanityURL=vanityURL).first()
+    channelQuery = Channel.Channel.query.with_entities(Channel.Channel.id).filter_by(vanityURL=vanityURL).first()  #change channels
     if channelQuery is not None:
         return redirect(url_for('channel.channel_view_page',chanID=channelQuery.id))
     flash('Invalid Link URL','error')
@@ -223,7 +274,7 @@ def vanityURL_channel_link(vanityURL):
 # Link to a Channel's Live Page Via Vanity URLs
 @root_bp.route('/c/<vanityURL>/live')
 def vanityURL_live_link(vanityURL):
-    channelQuery = Channel.Channel.query.filter_by(vanityURL=vanityURL).first()
+    channelQuery = Channel.Channel.query.with_entities(Channel.Channel.channelLoc).filter_by(vanityURL=vanityURL).first()
     if channelQuery is not None:
         return redirect(url_for('liveview.view_page',loc=channelQuery.channelLoc))
     flash('Invalid Link URL','error')
@@ -231,7 +282,11 @@ def vanityURL_live_link(vanityURL):
 
 @root_bp.route('/auth', methods=["POST","GET"])
 def auth_check():
-    sysSettings = settings.settings.query.with_entities(settings.settings.protectionEnabled).first()
+    #return 'OK' ## Boggs hack (not for Deamos / release).
+
+    #sysSettings = settings.settings.query.with_entities(settings.settings.protectionEnabled).first()
+    sysSettings = settings.getSettingsFromRedis()
+
     if sysSettings.protectionEnabled is False:
         return 'OK'
 
@@ -258,14 +313,19 @@ def rtmp_check():
     channelID = ""
     if 'X-Channel-ID' in request.headers:
         channelID = request.headers['X-Channel-ID']
-        channelQuery = Channel.Channel.query.filter_by(channelLoc=channelID).first()
+        channelQuery = Channel.Channel.query.filter_by(channelLoc=channelID).with_entities(Channel.Channel.stream).first()
+        
         if channelQuery is not None:
             streamList = channelQuery.stream
             if streamList != []:
                 streamEntry = streamList[0]
                 if streamEntry.rtmpServer is not None:
                     rtmpServerID = streamEntry.rtmpServer
-                    rtmpServer = settings.rtmpServer.query.filter_by(id=rtmpServerID).first()
+
+                    #rtmpServer = settings.rtmpServer.query.filter_by(id=rtmpServerID).first()
+                    RTMPServersList = settings.getrtmpServer()
+                    rtmpServer = RTMPServersList[0]
+
                     resp = Response("OK")
                     resp.headers['X_UpstreamHost'] = rtmpServer.address
                     return resp
@@ -277,21 +337,27 @@ def rtmp_check():
 # Redirect Streams
 @root_bp.route('/proxy/<channelLoc>/<file>')
 def proxy_redirect(channelLoc, file):
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
+
     proxyAddress = sysSettings.proxyFQDN
     protocol = sysSettings.siteProtocol
     return redirect(protocol + proxyAddress + '/live/' + channelLoc + '/' + file)
 
 @root_bp.route('/proxy-adapt/<channelLoc>.m3u8')
 def proxy_adaptive_redirect(channelLoc):
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
+
     proxyAddress = sysSettings.proxyFQDN
     protocol = sysSettings.siteProtocol
     return redirect(protocol + proxyAddress + '/live-adapt/' + channelLoc + '.m3u8')
 
 @root_bp.route('/proxy-adapt/<channelLoc>/<file>')
 def proxy_adaptive_subfolder_redirect(channelLoc, file):
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
+
     proxyAddress = sysSettings.proxyFQDN
     protocol = sysSettings.siteProtocol
     return redirect(protocol + proxyAddress + '/live-adapt/' + channelLoc + '/' + file)

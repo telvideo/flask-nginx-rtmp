@@ -655,3 +655,36 @@ function toggleDiv(selDiv){
     $('.settingsOption').hide();
     $(divid).show();
 }
+
+function mVideoDelete(videoID) {
+  var videoEntry = document.getElementById('HVideoList-' + videoID);
+  
+  videoEntry.parentNode.removeChild(videoEntry);
+  socket.emit('deleteVideo', {videoID: videoID});
+}
+
+function toggleVerified(userID) {
+  var myIcon = document.getElementById('toggle-verified-icon-' + userID);
+  var mSrc = myIcon.src;  
+
+  const regex = new RegExp('verified-badge*');  //really hacky way of doing this probably? idk js!
+  
+  if (regex.test(mSrc)==1)
+    myIcon.src = '/static/img/user2.png'
+  else
+    myIcon.src = "/static/img/verified-badge.png"
+    
+  socket.emit('toggleVerified', {userID: userID});
+}
+
+function editDonationUrl(el) {
+  el.childNodes[0].removeAttribute("disabled");
+  el.childNodes[0].focus();
+  //window.getSelection().removeAllRanges();  
+}
+
+function disableDonationUrl(el, Num) {
+  el.setAttribute("disabled","");
+    
+  socket.emit('changeDonationURL', {userID: Num, theText:el.value});
+}

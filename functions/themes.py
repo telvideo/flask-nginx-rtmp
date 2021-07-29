@@ -10,8 +10,9 @@ from classes import settings
 
 # Checks Theme Override Data and if does not exist in override, use Defaultv2's HTML with theme's layout.html
 def checkOverride(themeHTMLFile):
-    sysSettings = db.session.query(settings.settings).with_entities(settings.settings.systemTheme, settings.settings.maintenanceMode).first()
-
+    #sysSettings = db.session.query(settings.settings).with_entities(settings.settings.systemTheme, settings.settings.maintenanceMode).first()
+    sysSettings = settings.getSettingsFromRedis()    
+    
     # Check for Maintenance Mode
     if sysSettings.maintenanceMode is True:
         if current_user.is_authenticated:
@@ -35,6 +36,20 @@ def checkOverride(themeHTMLFile):
             return "themes/Defaultv2/" + themeHTMLFile
     except:
         return "themes/Defaultv2/" + themeHTMLFile
+
+# Direct version of above used by direct calls to render()
+# Checks Theme Override Data and if does not exist in override, use Defaultv2's HTML with theme's layout.html
+def checkOverrideDirect(themeHTMLFile, thesystemTheme ):
+   
+    # Check if normal theme override exists
+    try:
+        if themeHTMLFile in globalvars.themeData.get('Override',[]):
+
+            return "/templates/themes/" + thesystemTheme + "/" + themeHTMLFile
+        else:
+            return "/templates/themes/Defaultv2/" + themeHTMLFile
+    except:
+        return "/templates/themes/Defaultv2/" + themeHTMLFile
 
 # Code Modified from https://github.com/Hecsall/favicon-generator
 def faviconGenerator(imageLocation):

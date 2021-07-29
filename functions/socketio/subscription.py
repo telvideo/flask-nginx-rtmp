@@ -14,7 +14,9 @@ from functions import templateFilters
 @limiter.limit("10/minute")
 def toggle_chanSub(payload):
     if current_user.is_authenticated:
-        sysSettings = settings.settings.query.first()
+        #sysSettings = settings.settings.query.first()
+        sysSettings = settings.getSettingsFromRedis()
+
         if 'channelID' in payload:
             channelQuery = Channel.Channel.query.filter_by(id=int(payload['channelID'])).first()
             if channelQuery is not None:
@@ -38,8 +40,14 @@ def toggle_chanSub(payload):
                         pictureLocation = '/images/' + pictureLocation
 
                     # Create Notification for Channel Owner on New Subs
-                    newNotification = notifications.userNotification(current_user.username + " has subscribed to " + channelQuery.channelName, "/channel/" + str(channelQuery.id), "/images/" + str(current_user.pictureLocation), channelQuery.owningUser)
+                    newNotification = notifications.userNotification(current_user.username + " has followed " + channelQuery.channelName, "/channel/" + str(channelQuery.id), "/images/" + str(current_user.pictureLocation), channelQuery.owningUser)
                     db.session.add(newNotification)
+
+
+                    totalQuery = subscriptions.channelSubs.query.filter_by(channelID=channelQuery.id).count()
+                    channelQuery.Nsubscriptions = totalQuery #Boggs
+
+
                     db.session.commit()
 
                     webhookFunc.runWebhook(channelQuery.id, 10, channelname=channelQuery.channelName,
@@ -50,6 +58,9 @@ def toggle_chanSub(payload):
                                user=current_user.username, userpicture=sysSettings.siteProtocol + sysSettings.siteAddress + str(pictureLocation))
                 else:
                     db.session.delete(currentSubscription)
+                    totalQuery = subscriptions.channelSubs.query.filter_by(channelID=channelQuery.id).count()
+                    channelQuery.Nsubscriptions = totalQuery #Boggs
+
                 db.session.commit()
                 db.session.close()
                 emit('sendChanSubResults', {'state': subState}, broadcast=False)

@@ -1,4 +1,6 @@
 from classes.settings import settings
+from classes.settings import getSettingsFromRedis
+
 from classes import Channel
 from classes.Sec import User
 
@@ -13,7 +15,10 @@ def sanityCheck():
     return True
 
 def buildMissingRooms():
-    sysSettings = settings.query.first()
+    #sysSettings = settings.query.first()
+    sysSettings = getSettingsFromRedis()
+
+    
     channelQuery = Channel.Channel.query.join(User, Channel.Channel.owningUser == User.id)\
         .with_entities(Channel.Channel.channelLoc, User.uuid.label('userUUID'))
     for channel in channelQuery:
@@ -31,7 +36,9 @@ def buildMissingRooms():
     return True
 
 def verifyExistingRooms():
-    sysSettings = settings.query.first()
+    #sysSettings = settings.query.first()
+    sysSettings = getSettingsFromRedis()
+    
     print({"level": "info", "message": "Verifying existing ejabberd Rooms"})
     channelQuery = Channel.Channel.query.join(User, Channel.Channel.owningUser == User.id) \
         .with_entities(Channel.Channel.channelLoc, Channel.Channel.xmppToken, Channel.Channel.protected, User.uuid.label('userUUID'))
@@ -67,7 +74,9 @@ def verifyExistingRooms():
 
 
 def cleanInvalidRooms():
-    sysSettings = settings.query.first()
+    #sysSettings = settings.query.first()
+    sysSettings = getSettingsFromRedis()
+
     xmppChannels = ejabberd.muc_online_rooms('global')
 
     roomList = []
@@ -82,7 +91,8 @@ def cleanInvalidRooms():
     print({"level": "info", "message": "Completed Pruning Invalid Rooms - " + str(count)})
 
 def getChannelCounts(channelLoc):
-    sysSettings = settings.query.first()
+    #sysSettings = settings.query.first()
+    sysSettings = getSettingsFromRedis()
 
     roomOccupantsJSON = ejabberd.get_room_occupants_number(channelLoc, "conference." + sysSettings.siteAddress)
     currentViewers = roomOccupantsJSON['occupants']
@@ -90,7 +100,9 @@ def getChannelCounts(channelLoc):
     return currentViewers
 
 def getChannelAffiliations(channelLoc):
-    sysSettings = settings.query.first()
+    #sysSettings = settings.query.first()
+    sysSettings = getSettingsFromRedis()
+
     roomAffiliationJSON = ejabberd.get_room_affiliations(channelLoc, 'conference.' + sysSettings.siteAddress)
     userList = {}
     for entry in roomAffiliationJSON['affiliations']:

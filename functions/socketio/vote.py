@@ -7,7 +7,8 @@ from classes import upvotes
 from classes import notifications
 from classes import RecordedVideo
 from classes import comments
-
+from classes import Stream
+#from functions import system
 
 @socketio.on('getUpvoteTotal')
 def handle_upvote_total_request(streamData):
@@ -21,11 +22,10 @@ def handle_upvote_total_request(streamData):
     myVoteQuery = None
 
     if vidType == 'stream':
-        loc = str(loc)
-        channelQuery = Channel.Channel.query.filter_by(channelLoc=loc).first()
-        if channelQuery.stream:
-            stream = channelQuery.stream[0]
-            totalQuery = upvotes.streamUpvotes.query.filter_by(streamID=stream.id).count()
+        stream = Stream.Stream.query.filter_by(linkedChannel=loc).with_entities(Stream.Stream.id,Stream.Stream.NupVotes).first()
+
+        if stream:
+            totalQuery = stream.NupVotes  
             try:
                 myVoteQuery = upvotes.streamUpvotes.query.filter_by(userID=current_user.id, streamID=stream.id).first()
             except:
@@ -94,6 +94,8 @@ def handle_upvoteChange(streamData):
                 db.session.delete(myVoteQuery)
 
             totalQuery = upvotes.streamUpvotes.query.filter_by(streamID=stream.id).count()
+            stream.NupVotes = totalQuery #Boggs
+
             myVoteQuery = upvotes.streamUpvotes.query.filter_by(userID=current_user.id, streamID=stream.id).first()
 
             db.session.commit()
@@ -116,6 +118,8 @@ def handle_upvoteChange(streamData):
                 db.session.delete(myVoteQuery)
 
             totalQuery = upvotes.videoUpvotes.query.filter_by(videoID=loc).count()
+            videoQuery.NupVotes = totalQuery #Boggs
+
             myVoteQuery = upvotes.videoUpvotes.query.filter_by(userID=current_user.id, videoID=loc).first()
 
             db.session.commit()
@@ -137,6 +141,8 @@ def handle_upvoteChange(streamData):
                 db.session.delete(myVoteQuery)
 
             totalQuery = upvotes.commentUpvotes.query.filter_by(commentID=loc).count()
+            videoCommentQuery.NupVotes = totalQuery #Boggs
+
             myVoteQuery = upvotes.commentUpvotes.query.filter_by(userID=current_user.id, commentID=loc).first()
 
             db.session.commit()
@@ -159,6 +165,8 @@ def handle_upvoteChange(streamData):
                 db.session.delete(myVoteQuery)
 
             totalQuery = upvotes.clipUpvotes.query.filter_by(clipID=loc).count()
+
+            clipQuery.NupVotes= totalQuery #Boggs
             myVoteQuery = upvotes.clipUpvotes.query.filter_by(userID=current_user.id, clipID=loc).first()
 
             db.session.commit()
