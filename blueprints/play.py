@@ -14,6 +14,7 @@ from classes import views
 from classes import comments
 from classes import notifications
 from classes import upvotes
+from classes import Sec
 
 from functions import themes
 from functions import system
@@ -143,7 +144,9 @@ def view_vid_page(videoID):
 
         if isEmbedded is None or isEmbedded == "False":
 
-            randomRecorded = RecordedVideo.RecordedVideo.query.filter(RecordedVideo.RecordedVideo.pending == False, RecordedVideo.RecordedVideo.id != recordedVid.id, RecordedVideo.RecordedVideo.published == True).with_entities(RecordedVideo.RecordedVideo.owningUser,
+            randomRecorded = RecordedVideo.RecordedVideo.query.filter(RecordedVideo.RecordedVideo.pending == False, RecordedVideo.RecordedVideo.id != recordedVid.id, RecordedVideo.RecordedVideo.published == True)\
+                .join(Sec.User,Sec.User.id == RecordedVideo.RecordedVideo.owningUser).with_entities(
+                RecordedVideo.RecordedVideo.owningUser,
                 RecordedVideo.RecordedVideo.channelID,
                 RecordedVideo.RecordedVideo.id,                        
                 RecordedVideo.RecordedVideo.channelName,
@@ -153,7 +156,8 @@ def view_vid_page(videoID):
                 RecordedVideo.RecordedVideo.NupVotes,
                 RecordedVideo.RecordedVideo.gifLocation,
                 RecordedVideo.RecordedVideo.thumbnailLocation,
-                RecordedVideo.RecordedVideo.videoDate).order_by(func.random()).limit(4)
+                RecordedVideo.RecordedVideo.videoDate,
+                Sec.User.username).order_by(func.random()).limit(4)
 
             subState = False
             if current_user.is_authenticated:
