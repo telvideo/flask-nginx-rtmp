@@ -4,7 +4,9 @@ from classes.shared import db
 from classes import settings
 from classes import topics
 from classes import Stream
+from classes import Channel
 from classes import RecordedVideo
+from classes import Sec
 from functions import templateFilters
 from functions import themes
 from classes.settings import r
@@ -58,18 +60,82 @@ def topic_page():
 @topics_bp.route('/<topicID>/')
 def topic_view_page(topicID):
     topicID = int(topicID)
-    streamsQuery = Stream.Stream.query.filter_by(topic=topicID).all()
-    recordedVideoQuery = RecordedVideo.RecordedVideo.query.filter_by(topic=topicID, pending=False, published=True).all()
 
-    # Sort Video to Show Newest First
-    recordedVideoQuery.sort(key=lambda x: x.videoDate, reverse=True)
+    streamsQuery = Stream.Stream.query\
+        .join(Channel.Channel,Channel.Channel.id == Stream.Stream.linkedChannel)\
+        .join(Sec.User, Sec.User.id == Channel.Channel.owningUser)\
+        .filter(Channel.Channel.topic == topicID)\
+            .with_entities(
+            Channel.Channel.channelLoc,
+            Channel.Channel.protected,
+            Channel.Channel.id.label('chanID'),
+            Channel.Channel.channelName,
+            Stream.Stream.streamName,
+            Stream.Stream.topic,
+            Stream.Stream.NupVotes,
+            Stream.Stream.currentViewers,
+            Stream.Stream.totalViewers,
+            Stream.Stream.linkedChannel,
+            Sec.User.pictureLocation
+            ).all()
 
-    clipsList = []
-    for vid in recordedVideoQuery:
-        for clip in vid.clips:
-            if clip.published is True:
-                clipsList.append(clip)
-
-    clipsList.sort(key=lambda x: x.views, reverse=True)
+    recordedVideoQuery = RecordedVideo.RecordedVideo.query.filter_by(topic=topicID, pending=False, published=True)\
+        .join(Sec.User,Sec.User.id == RecordedVideo.RecordedVideo.owningUser)\
+        .join(Channel.Channel,Channel.Channel.id == RecordedVideo.RecordedVideo.channelID)\
+        .with_entities(
+        Channel.Channel.protected,
+        Channel.Channel.id.label('chanID'),
+        Channel.Channel.channelName.label('chanchannelName'),
+        RecordedVideo.RecordedVideo.channelName,
+        RecordedVideo.RecordedVideo.id,
+        RecordedVideo.RecordedVideo.gifLocation,
+        RecordedVideo.RecordedVideo.thumbnailLocation,
+        RecordedVideo.RecordedVideo.videoDate,
+        RecordedVideo.RecordedVideo.topic,
+        RecordedVideo.RecordedVideo.owningUser,
+        RecordedVideo.RecordedVideo.length,
+        RecordedVideo.RecordedVideo.views,
+        RecordedVideo.RecordedVideo.NupVotes,
+        Sec.User.username,
+        Sec.User.pictureLocation
+        ).all()
+        
+    clipsList = RecordedVideo.Clips.query\
+        .join(RecordedVideo.RecordedVideo,RecordedVideo.RecordedVideo.id == RecordedVideo.Clips.parentVideo)\
+        .join(Channel.Channel,Channel.Channel.id == RecordedVideo.RecordedVideo.owningUser)\
+        .join(Sec.User,Sec.User.id == RecordedVideo.RecordedVideo.owningUser)\
+        .filter(RecordedVideo.RecordedVideo.topic == topicID, RecordedVideo.Clips.published == True ).with_entities(
+        RecordedVideo.RecordedVideo.gifLocation,
+        RecordedVideo.RecordedVideo.thumbnailLocation,
+        RecordedVideo.RecordedVideo.videoDate,
+        RecordedVideo.RecordedVideo.topic,
+        RecordedVideo.RecordedVideo.owningUser,
+        RecordedVideo.Clips.id,
+        RecordedVideo.Clips.clipName,
+        RecordedVideo.Clips.NupVotes,
+        RecordedVideo.Clips.views,
+        RecordedVideo.Clips.length,
+        Channel.Channel.protected,
+        Channel.Channel.id.label('chanID'),
+        Channel.Channel.channelName,
+        Sec.User.username,
+        Sec.User.pictureLocation
+        ).all()
 
     return render_template(themes.checkOverride('videoListView.html'), openStreams=streamsQuery, recordedVids=recordedVideoQuery, clipsList=clipsList, title="Topics - Videos")
+
+#    streamsQuery = Stream.Stream.query.filter_by(topic=topicID).all()
+#    recordedVideoQuery = RecordedVideo.RecordedVideo.query.filter_by(topic=topicID, pending=False, published=True).all()
+#
+#    # Sort Video to Show Newest First
+#    recordedVideoQuery.sort(key=lambda x: x.videoDate, reverse=True)
+#
+#    clipsList = []
+#    for vid in recordedVideoQuery:
+#        for clip in vid.clips:
+#            if clip.published is True:
+#                clipsList.append(clip)
+#
+#    clipsList.sort(key=lambda x: x.views, reverse=True)
+#
+#    return render_template(themes.checkOverride('videoListView.html'), openStreams=streamsQuery, recordedVids=recordedVideoQuery, clipsList=clipsList, title="Topics - Videos")

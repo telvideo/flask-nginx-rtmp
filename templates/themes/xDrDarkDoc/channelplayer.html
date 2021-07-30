@@ -64,12 +64,12 @@
                             {% if current_user.is_authenticated %}
                                 <button id="chanSubStateButton" class="followingBadge btn btn-sm {% if subState == True %} btn-outline-success {% else %} btn-success {% endif %} " onclick='toggleChannelSub("{{channel.id}}")'>
                                 {% if subState == True %}
-                                    <i class="followingBadge fas fa-star"></i><span class="d-none d-sm-none d-md-inline px-1"> Unfollow</span>
+                                    <i class="followingBadge fas fa-star"></i><span class="d-none d-sm-none d-md-inline px-1"> Unsubscribe</span>
                                 {% else %}
-                                    <i class="followingBadge far fa-star"></i><span class="d-none d-sm-none d-md-inline px-1"> Follow</span>
+                                    <i class="followingBadge far fa-star"></i><span class="d-none d-sm-none d-md-inline px-1"> Subscribe</span>
                                 {% endif %}</button>
                                 {% else %}
-                                    <button class="followingBadge btn btn-sm btn-outline-secondary disabled" disabled><i class="followingBadge far fa-star"></i><span class="d-none d-sm-none d-md-inline chan-liveBadge">Follow</span></button>
+                                    <button class="followingBadge btn btn-sm btn-outline-secondary disabled" disabled><i class="followingBadge far fa-star"></i><span class="d-none d-sm-none d-md-inline chan-liveBadge">Subscribe</span></button>
                             {% endif %}
                         
                     </span>
@@ -1046,10 +1046,10 @@
     socket.on('sendChanSubResults', function (msg) {
         var subButton = document.getElementById('chanSubStateButton');
         if (msg['state'] === true) {
-            subButton.innerHTML = "<i class='followingBadge fas fa-star'></i><span class='d-none d-sm-none d-md-inline'> UnFollow</span>";
+            subButton.innerHTML = "<i class='followingBadge fas fa-star'></i><span class='d-none d-sm-none d-md-inline'> Unsubscribe</span>";
             subButton.className = "followingBadge btn btn-sm btn-outline-success";
         } else {
-            subButton.innerHTML = "<i class='followingBadge far fa-star'></i><span class='d-none d-sm-none d-md-inline'> Follow</span>";
+            subButton.innerHTML = "<i class='followingBadge far fa-star'></i><span class='d-none d-sm-none d-md-inline'> Subscribe</span>";
             subButton.className = "followingBadge btn btn-sm btn-success";
         }
       });

@@ -1038,7 +1038,7 @@
                         videoJSObj.pause();
                         videoJSObj.reset();
 
-                        onlineBadge.className = 'float-right badge badge-secondary';
+                        onlineBadge.className = 'float-left m-2 badge badge-secondary';
                         onlineBadge.innerHTML = '<i class="fas fa-video-slash"></i><span class="d-none d-sm-none d-md-inline"> Offline</span>';
                     
                         videoContainer.style.display = "none";
@@ -1064,7 +1064,7 @@
                 videoContainer.style.display = "block";
                 offlineWindow.style.display = "none";
 
-                onlineBadge.className = 'float-right badge badge-danger';
+                onlineBadge.className = 'float-left m-2 badge badge-danger';
                 onlineBadge.innerHTML = '<i class="fas fa-video"></i><span class="d-none d-sm-none d-md-inline"> Live</span>';
             }
 

@@ -13,7 +13,14 @@
   src: url("/static/fonts/Oliciy.ttf"); 
 }
 
+body::-webkit-scrollbar {
+  width: 0 !important;
+  display: none !important; 
+}
+
 body {
+  scrollbar-width: none;
+
 /*    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;*/
 }
 a:link {
