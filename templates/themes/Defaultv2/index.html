@@ -9,9 +9,8 @@
 <meta property="og:url" content="{{request.url|normalize_url}}" />
 <meta property="og:image" content="{{request.url_root|normalize_urlroot}}/{{sysSettings.systemLogo}}" />
 {% endblock %}
-
 {% block body %}
-
+<span id="carouseltestText"></span> 
 
 <div class="container-fluid p-2" id="index-live-container">
     {% if sysSettings.serverMessage != "" and sysSettings.serverMessage != None %}
@@ -27,49 +26,51 @@
             </div>
         </div>
     </div>
-
     {% endif %}
 </div>
 <div class="container-fluid p-2" id="index-streams-container">
     <div class="row mx-4">
         <div class="index-video-title"><b>Live Now</b></div>
-        {% if streamList == [] %}
-        No Live Streams Online...
-        {% endif %}
+        <span id="liveNowtestText"></span> 
     </div>
-    <div class="row mx-1">
-        <ul id="streamList" class="itemList d-flex flex-wrap justify-content-start" style="width:100%"><!--Manually Defined Due to Mobile Strangeness-->
-            {% for stream in streamList %}
-            <li class="displayCard mx-4 my-3">
-              <a href="/view/{{stream.channel.channelLoc}}/">
-                <div class="displayCard-thumbnail zoom">
-                  <div class="video-badges">
-                    <span class="badge badge-danger mx-1"><i class="fas fa-video"></i> Live</span>
-                    {% if stream.channel.protected and sysSettings.protectionEnabled %}<span class="badge badge-warning mx-1"><i class="fas fa-user-lock"></i> Protected</span>{% endif %}
+</div>
+<div class="container-fluid p-2" id="index-videos-container" style="background-color: var(--PDSlateDark);">
+  <div class="row mx-4">
+      <div class="index-video-title"><b>Recent</b></div>
+  </div>
+  <div class="row mx-4">
+      <ul id="recordedVideosList" class="itemList d-flex flex-wrap justify-content-start">
+          {% for video in recentQuery %}
+              <li class="displayCard mx-2 my-1">
+                <a href="/play/{{video.id}}">
+                  <div class="displayCard-thumbnail zoom">
+                    <div class="video-badges">
+                      {% if video.protected and sysSettings.protectionEnabled %}<span class="badge badge-warning mx-2"><i class="fas fa-user-lock"></i> Protected</span>{% endif %}
+                    </div>
+                    <img class="shadow {% if video.gifLocation != None %}gif{% endif %} lazy" src="/static/img/video-placeholder.jpg" data-src="/videos/{{video.thumbnailLocation}}" onerror="this.src='/static/img/video-placeholder.jpg';">
+                    <div class="displayCard-counts">
+                      <span class="displayCard-left align-left" style="color:white;">
+                        <span class="px-2 flex-fill upvotes"><i class="fas fa-thumbs-up"></i> <b>{{video.NupVotes}}</b></span>
+                      </span>
+                      <span class="displayCard-right" style="float:right;color:white;">
+                        <span class="px-2 flex-fill views"><i class="fas fa-users"></i> <b>{{video.views}}</b></span>
+                        <span class="px-2 flex-fill length"><i class="fas fa-clock"></i> <b>{{video.length|hms_format}}</b></span>
+                      </span>
+                    </div>
                   </div>
-                  <img class="shadow gif lazy" {% if stream.channel.protected and sysSettings.protectionEnabled %} src="/static/img/video-locked.jpg" onerror="this.src='/static/img/video-locked.jpg';" {% else %} src="/static/img/video-placeholder.jpg" onerror="this.src='/static/img/video-placeholder.jpg';" {% endif %} data-src="/stream-thumb/{{stream.channel.channelLoc}}.png">
-                  <div class="displayCard-counts">
-                    <span class="displayCard-left align-left" style="color:white;">
-                      <span class="px-2 flex-fill upvotes"><i class="fas fa-thumbs-up"></i> <b>{{stream.id|get_Stream_Upvotes}}</b></span>
-                    </span>
-                    <span class="displayCard-right" style="float:right;color:white;">
-                      <span class="px-2 flex-fill liveviews"><i class="fas fa-eye"></i> <b>{{stream.currentViewers}}</b></span>
-                      <span class="px-2 flex-fill views"><i class="fas fa-users"></i> <b>{{stream.totalViewers}}</b></span>
-                    </span>
+                  <div class="card-data">
+                    <img class="rounded" src="/images/{{video.pictureLocation}}" onerror="this.src='/static/img/user2.png';">
+                    <div class="metadata">
+                      <div class="card-cut-text name ml-2"><h5>{{video.channelName|limit_title}}</h5></div>
+                      <div class="topic ml-2" style="padding-top: 5px;font-size: large;">{{video.topic|get_topicName}}</div>
+                      <span class="date" style="display:none;">{{video.videoDate|normalize_date}}</span>
+                    </div>
                   </div>
-                </div>
-                <div class="card-data">
-                  <img class="rounded" src="/images/{{stream.channel.owner.pictureLocation}}" onerror="this.src='/static/img/user2.png';">
-                  <div class="metadata">
-                    <div class="card-cut-text name ml-2"><b>{{stream.streamName|limit_title}}</b></div>
-                    <div class="card-cut-text topic ml-2">{{stream.topic|get_topicName}}</div>
-                  </div>
-                </div>
-              </a>
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
+                </a>
+              </li>
+          {% endfor %}
+      </ul>
+  </div>
 </div>
 
 <div class="container-fluid p-2" id="index-videos-container">
@@ -88,7 +89,7 @@
                       <img class="shadow {% if video.gifLocation != None %}gif{% endif %} lazy" src="/static/img/video-placeholder.jpg" data-src="/videos/{{video.thumbnailLocation}}" onerror="this.src='/static/img/video-placeholder.jpg';">
                       <div class="displayCard-counts">
                         <span class="displayCard-left align-left" style="color:white;">
-                          <span class="px-2 flex-fill upvotes"><i class="fas fa-thumbs-up"></i> <b>{{video.id|get_Video_Upvotes}}</b></span>
+                          <span class="px-2 flex-fill upvotes"><i class="fas fa-thumbs-up"></i> <b>{{video.NupVotes}}</b></span>
                         </span>
                         <span class="displayCard-right" style="float:right;color:white;">
                           <span class="px-2 flex-fill views"><i class="fas fa-users"></i> <b>{{video.views}}</b></span>
@@ -128,7 +129,7 @@
                             onerror="this.src='/static/img/video-placeholder.jpg';" {% endif %} data-src="/videos/{{clip.thumbnailLocation}}">
                   <div class="displayCard-counts">
                     <span class="displayCard-left align-left" style="color:white;">
-                      <span class="px-2 flex-fill upvotes"><i class="fas fa-thumbs-up"></i> <b>{{clip.id|get_Clip_Upvotes}}</b></span>
+                      <span class="px-2 flex-fill upvotes"><i class="fas fa-thumbs-up"></i> <b>{{clip.NupVotes}}</b></span>
                     </span>
                     <span class="displayCard-right" style="float:right;color:white;">
                       <span class="px-2 flex-fill views"><i class="fas fa-users"></i> <b>{{clip.views}}</b></span>

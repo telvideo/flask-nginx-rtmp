@@ -1,0 +1,1170 @@
+{% extends "themes/" + sysSettings.systemTheme + "/layout.html" %}
+
+{% block head %}
+<title>{{sysSettings.siteName}} - {{channel.channelName}}</title>
+<meta name="twitter:card" content="player" />
+<meta property="og:site_name" content="{{sysSettings.siteName}}" />
+<meta property="og:title" content="{{channel.channelName}}" />
+<meta property="og:type" content="video.other" />
+<meta property="og:url" content="{{sysSettings.siteProtocol}}{{sysSettings.siteAddress}}/view/{{channel.channelLoc}}" />
+<meta property="og:image" content="{{sysSettings.siteProtocol}}{{sysSettings.siteAddress}}/images/{{channel.imageLocation}}" />
+<meta property="og:description" content="{{channel.description}}" />
+<meta property="og:video" content="{{sysSettings.siteProtocol}}{{sysSettings.siteAddress}}{{streamURL}}" />
+<meta property="og:video:type" content="application/x-mpegURL" />
+
+<script type="text/javascript" src="/static/vendor/socketio/js/socket.io.js"></script>
+<script type="text/javascript" src="/static/vendor/popper/js/popper.min.js"></script>
+<link href="/static/vendor/videojs/css/video-js.css" rel="stylesheet">
+<script src="/static/vendor/videojs/js/video.js"></script>
+<script src="/static/vendor/videojs-contrib-quality-levels/js/videojs-contrib-quality-levels.js"></script>
+<link href="/static/vendor/videojs-http-source-selector/videojs-http-source-selector.css" rel="stylesheet">
+<script src="/static/vendor/videojs-http-source-selector/videojs-http-source-selector.js"></script>
+<script src="/static/vendor/momentjs/js/moment.js" type="text/javascript"></script>
+<script src='/static/vendor/strophe/js/strophe.min.js' type="text/javascript"></script>
+<script src='/static/vendor/strophe/js/strophe.disco.js' type="text/javascript"></script>
+<script src="/static/vendor/strophe/js/strophe.muc.min.js" type="text/javascript"></script>
+<script src="/static/vendor/strophe/js/strophe.vcard.min.js" type="text/javascript"></script>
+<script src="/static/vendor/strophe/js/strophe.ping.js" type="text/javascript"></script>
+
+<script src="/static/js/chat.js" type="text/javascript"></script>
+
+<META HTTP-EQUIV="Pragma" CONTENT="no-cache">
+<META HTTP-EQUIV="Expires" CONTENT="-1">
+
+{% endblock %}
+
+{% block body %}
+<!-- dochatLinks is grabbed by chat.js  -->
+<label id="dochatLinks" name="{{channel.chatLinks}}" style="display: none;"></label>
+
+    <div class="container-fluid pl-0" id="tmain">
+        <div class="row">
+            <div class="col chanTopBar ">
+                    <span style=" white-space: nowrap;" class="index-video-title " >
+                        
+                        <a href="/streamer/{{channel.owningUser}}">
+                            <img src="/images/{{streamer.pictureLocation}}" class="rounded chanTopBarImage" onerror="this.src='/static/img/user2.png'">
+                        </a>
+
+                        <a href="/channel/{{channel.id}}">{{channel.channelName}}</a>
+                        
+                        {% if streamer.verified == 1 %}
+                            <img src="/static/img/verified-badge.png" class="chanTopBarImage"  >
+                        {% endif %}
+                        
+                        <span id="liveIndicatorBadge"
+                            class="mx-0 px-1 liveindicator badge badge-secondary chan-liveBadge"><b><i
+                                    class="fas fa-video-slash"></i><span class="d-none d-sm-none d-md-inline">
+                                    Offline</span></b></span> 
+                      
+                        {% if channel.protected and sysSettings.protectionEnabled %}
+                            <span class="mx-0 px-1 liveindicator badge badge-info "><i class="fas fa-user-lock"></i><span class="d-none d-sm-none d-md-inline"> Protected</span></span></h6>
+                        {% endif %}
+
+                            {% if current_user.is_authenticated %}
+                                <button id="chanSubStateButton" class="followingBadge btn btn-sm {% if subState == True %} btn-outline-success {% else %} btn-success {% endif %} " onclick='toggleChannelSub("{{channel.id}}")'>
+                                {% if subState == True %}
+                                    <i class="followingBadge fas fa-star"></i><span class="d-none d-sm-none d-md-inline px-1"> Unfollow</span>
+                                {% else %}
+                                    <i class="followingBadge far fa-star"></i><span class="d-none d-sm-none d-md-inline px-1"> Follow</span>
+                                {% endif %}</button>
+                                {% else %}
+                                    <button class="followingBadge btn btn-sm btn-outline-secondary disabled" disabled><i class="followingBadge far fa-star"></i><span class="d-none d-sm-none d-md-inline chan-liveBadge">Follow</span></button>
+                            {% endif %}
+                        
+                    </span>
+           
+            </div>
+        </div>
+
+        <div class="row  ml-0"> <!-- add padding here to add space between video and sidebar-->
+            <div class="{% if channel.chatEnabled == True %}col{% else %} col-12{% endif %} px-0 mr-1" id="videoWindow">
+                <div class="videoPanel">
+                    <div class="player">
+                        <div id="videoContainer">
+                            <video id="video" class="shadow videoStream video-js vjs-big-play-centered"
+                                poster="/stream-thumb/{{channel.channelLoc}}.png" autoplay playsinline controls
+                                preload="auto" data-setup='{"fluid": true, "liveui": true}'>
+                                <p class="vjs-no-js">
+                                    To view this video please enable JavaScript, and consider upgrading to a web
+                                    browser that
+                                    <a href="https://videojs.com/html5-video-support/" target="_blank">supports
+                                        HTML5 video</a>
+                                </p>
+                            </video>
+                        </div>
+                        <div id="offlineImage" style="display:none;" class="mPannel">
+                            <img class="videoStream shadow mPannel" {% if channel.offlineImageLocation !=None %}
+                                src="/images/{{channel.offlineImageLocation}}" {% else %}
+                                src="/static/img/video-placeholder.jpg" {% endif %}
+                                onerror="this.onerror=null;this.src='/static/img/video-placeholder.jpg';">
+                        </div>
+                    </div>
+
+                    <div class="row p-0 m-0">
+                        <div class="video-buttons-row chpText">
+                                    
+                        {% if channel.owningUser == current_user.id %}
+                        <span class="float-left" >
+                            <button type="button" class="btn btn-primary btnSizer" data-toggle="modal"
+                                title="Edit Stream" data-target="#editModal">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </span>
+                        {% endif %}
+                        <span class="float-left pl-1">
+                            <span id="streamMetadataName" class="stream-title"><b><i
+                                        class="fas fa-video"></i>{% if
+                                    stream != None %}
+                                    {{stream.streamName|limit_title}} {% else %} No Stream
+                                    {% endif %}</b></span><br> 
+                            <span id="streamMetadataTopic"><b><i class="fas fa-hashtag"></i></b> 
+                                {% if stream != None %} 
+                                    <a href="/topic/{{stream.topic}}/"> {{stream.topic|get_topicName}}</a> 
+                                {% else %} 
+                                    <a href="/topic/{{channel.topic}}/"> {{channel.topic|get_topicName}}</a>
+                                {% endif %}
+                            </span>
+                            <i class="fas fa-clock mx-1"></i> <span id="streamTime"> 00:00:00</span>
+                        </span>
+
+                        {% if streamer.donationURL != None and streamer.donationURL != "" %} 
+                        <a href={{streamer.donationURL}} class="float-right" target="_blank">                        
+                            <button id="give1000Button" title="Donate to {{channel.channelName}}" type="button" 
+                            class="btn  MoneySizer btn-primary">$</button>
+                        </a>
+                        {% endif %}
+
+                        <span class="float-right mr-0" >
+                            <button id="popButton" type="button" class="btn btn-primary btnSizer"
+                                onClick="popoutChat();return false;"
+                                {% if channel.chatEnabled == False %}disabled {% endif %}"
+                                title="Pop-out Chat" href="#"><i class="fas fa-comment "></i>
+                            </button>
+                        </span>
+                        
+                        <!-- <span class="float-right pl-1">
+                            {#  {% if channel.chatEnabled == True %} %}
+                            <button id="toggleButton" type="button" class="btn  btn-primary" onclick="toggleChat()"
+                                title="Toggle Chat" href="#"><i class="fas fa-eye-slash"></i>
+                            </button>
+                            {#    {% else %} #}
+                            <button id="dtoggleButton" type="button" disabled class="btn  btn-primary"
+                                onclick="toggleChat()" title="Toggle Chat" href="#"><i class="fas fa-eye-slash"></i>
+                            </button>
+                            {#    {% endif %}  #}
+                        </span> -->                        
+                        
+                        <span class="float-right">
+                            <i class="fas fa-users px-1"></i><span id="totalViewers">{{channel.views}}</span>
+                            <i class="fas fa-star px-1"></i><span id="Nsubscriptions">{{channel.Nsubscriptions}}</span><br/>
+                            <i class="fas fa-eye px-1"></i><span id="currentViewers">{{channel.currentViewers}}</span>
+                        </span>
+                        
+                        <span class="float-right">
+                            <button id="upvoteButton" type="button" class="btn btn-primary pl-1 btnSizer"
+                                onclick="changeUpvote();" title="Like" {% if current_user.is_authenticated==false
+                                %} disabled aria-disabled="true" {% endif %}>
+
+                                <!--if (document.getElementById("upVoteIcon").classList.contains('far')) {
+                                    document.getElementById("upVoteIcon").classList.remove('far');
+                                    document.getElementById("upVoteIcon").classList.add('fas');
+                                -->
+                                {% if myUpvote == True %}
+                                    <i id="upVoteIcon" class="fas fa-thumbs-up"> <span id="totalUpvotes">{{stream.NupVotes}}</span></i>
+                                {% else %}
+                                    <i id="upVoteIcon" class="far fa-thumbs-up"> <span id="totalUpvotes">{{stream.NupVotes}}</span></i>
+                                {% endif %}
+
+                            </button>
+                        </span>
+                        <span class="float-right">
+                            <button id="shareButton" type="button" class="btn btn-primary btnSizer" data-toggle="modal"
+                                data-target="#shareModal" title="Share Stream" aria-pressed="false"
+                                autocomplete="off" href="#"><i class="fas fa-share-alt"></i>
+                            </button>
+                        </span>
+
+                    </div>
+                </div>
+                <div class="row m-2">
+                    <div class="channeldescription">{% if channel.description != None
+                        %}{{channel.description|markdown}}{% else %}No Description Available {% endif %}</div>
+  
+                    </div>
+                </div>
+            </div>
+            {% if channel.chatEnabled == True %}
+            <div id="chatside" class="col-4">
+                <div>
+                    <div id="loader" class="chatloader">
+                        <div class="chatloader-view">
+                            <h2>Connecting...</h2>
+                            <div class="d-flex justify-content-center">
+                                <div class="spinner-border" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="unavailable" class="chatloader">
+                        <div class="chatloader-view">
+                            <h2>You have been disconnected from the chat.</h2><br>
+                            <br>
+                            <div id="disconnectReason">Reason: (<span id="reasonCode"></span>) - <span
+                                    id="reasonText"></span></div><br><br>
+                            <h1><i class="fas fa-exclamation-triangle"></i></h1><br>
+                            <br>
+                            <button class="btn btn-success" onclick="connectChat();">Reconnect</button>
+                        </div>
+                    </div>
+                    <div id="chatPanel" class="chatPanel">
+                        <div class="chatHeader">
+                            <div class="chatCounts">
+                            <!--    <img  src="/static/img/P_COIN.png" alt="PCoin" class="center btnSizer">
+                                <img src="/static/img/Mascot_3.png" alt="Prosmile2" class="center btnSizer"> 
+                            -->
+                                <span class="float-right"><button type="button" class="btn btn-outline-primary btnSizer"
+                                        onclick="showOccupants();"><i class="fas fa-user-friends"></i> <span
+                                            id="chatTotal"></span></button></span>
+                                <span id="modDisplayButton" class="float-right" style="display:none;"><button
+                                        type="button" class="btn btn-outline-warning btnSizer" onclick="openModDisplay();"><i
+                                            class="fas fa-user-shield"></i></button></span>
+                            </div>
+                        </div>
+                        <div id="chatContentWindow" class="chatContent">
+                            <div id="modDisplay" class="modDisplayOverlay">
+                                <div class="membersList card my-1">
+                                    <div class="card-header bg-primary"><b>Banned Users</b></div>
+                                    <div id="OutcastList" class="card-body"></div>
+                                </div>
+                            </div>
+                            <div id="chatMembers" class="chatMembersOverlay">
+                                <div class="membersList card my-1">
+                                    <div class="card-header bg-primary"><b>Moderator</b></div>
+                                    <div id="ModeratorList" class="card-body"></div>
+                                </div>
+                                <div class="membersList card my-1">
+                                    <div class="card-header bg-primary"><b>Participant</b></div>
+                                    <div id="ParticipantList" class="card-body"></div>
+                                </div>
+                                <div class="membersList card my-1">
+                                    <div class="card-header bg-primary"><b>Guest</b></div>
+                                    <div id="VisitorList" class="card-body"></div>
+                                </div>
+                            </div>
+                            <div id="chat" class="chatSection"></div>
+                        </div>
+                        <div class="chatFooter">
+                            <div class="chatFooterTop"></div>
+                            <div class="chatFooterInput">
+                                <div class="input-group">
+                                    <input id="chatinput" type="text" class="form-control btnSizer" maxlength="420"
+                                        autocomplete="off">
+                                    <div class="input-group-append">
+                                           <button type="button" class=" btn btn-success MoneySizer"
+                                            id="openEmojiButton"><i class="far fa-smile"></i></button>
+                                     <!---
+                                        <button type="button" class=" btn form-control btnSizer" id="openEmojiButton"> 
+                                            <img class="btnSizer" src="/static/img/Mascot_1.png" alt="Emoji">
+                                        </button>
+                                    -->
+                                        <!---<button type="button" class=" btn btn-primary form-control" id="sendChat"
+                                       onclick="sendMessage();"><i class="fas fa-paper-plane"></i></button>
+-->
+                                    </div>
+                                    <div class="chatsticker-composer-popover chatsticker-composer-emoji-popover shadow">
+                                        <div class="chatsticker-emoji-picker w-100">
+                                            <div class="chatsticker-composer-popover-header"><input
+                                                    class="chatsticker-composer-popover-input" placeholder="Search..."
+                                                    aria-label="Search" value="" oninput="searchSticker();"
+                                                    style="background-color:#ffffff;"></div>
+                                            <div class="chatsticker-composer-popover-body-container">
+                                                <div class="chatsticker-composer-popover-body">
+                                                    <div class="chatsticker-emoji-picker-groups">
+                                                        <div class="chatsticker-emoji-picker-group">
+                                                            <div class="chatsticker-emoji-picker-group-title">Default
+                                                            </div>
+                                                            {% for sticker in stickerSelectorList['builtin'] %}
+                                                            <span class="chatsticker-emoji-picker-emoji"
+                                                                title="{{ sticker.name }}"><img src="{{ sticker.file }}"
+                                                                    height="32px" alt="{{ sticker.name }}"
+                                                                    title="{{ sticker.name }}" /></span>
+                                                            {% endfor %}
+                                                        </div>
+                                                        <div class="chatsticker-emoji-picker-group">
+                                                            <div class="chatsticker-emoji-picker-group-title">Global
+                                                            </div>
+                                                            {% for sticker in stickerSelectorList['global'] %}
+                                                            <span class="chatsticker-emoji-picker-emoji"
+                                                                title="{{ sticker.name }}"><img src="{{ sticker.file }}"
+                                                                    height="32px" alt="{{ sticker.name }}"
+                                                                    title="{{ sticker.name }}" /></span>
+                                                            {% endfor %}
+                                                        </div>
+                                                        <div class="chatsticker-emoji-picker-group">
+                                                            <div class="chatsticker-emoji-picker-group-title">Channel
+                                                            </div>
+                                                            {% for sticker in stickerSelectorList['channel'] %}
+                                                            <span class="chatsticker-emoji-picker-emoji"
+                                                                title="{{ sticker.name }}"><img src="{{ sticker.file }}"
+                                                                    height="32px" alt="{{ sticker.name }}"
+                                                                    title="{{ sticker.name }}" /></span>
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="chatsticker-composer-popover-caret"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="chatFooterBottom"></div>
+                            <div id='log' style="display:none;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chatEntryContainer" data-type="chatmessagetemplate" style="display:none;">
+                    <div class="chatEntry flexbox">
+                        <!--<span class="chatImage float-left">
+                            <img class="avatar rounded shadow" src="https://picsum.photos/48">
+                          </span>-->
+                        <span class="chatInfo chatFont">
+                            <span style="color:darkgreen" class="chatTimestamp float-right mr-1"></span>
+                            <span class="chatUsername"> </span> <span style="color:white" class="chatMessage"> </span>
+                            <!----                            <span class="chatTimestamp"></span><span class="chatUsername ml-1"></span>:
+                            <span class="chatMessage ml-1"></span> -->
+                        </span>
+                    </div>
+                </div>
+
+                <div id="profileBox" class="rounded profileBox m-2" data-type="profileBoxTemplate"
+                    style="display:none;">
+                    <div class="profileBoxHeader">
+                        <button type="button" class="close mr-2" data-dismiss="" aria-label="Close"
+                            onclick="closeProfileBox();">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <img id="profileBox-photo" src="/static/img/user2.png"
+                            class="profileBoxPic rounded shadow m-2 float-left">
+                        <span id="profileBox-username" class="py-2 font-weight-bold"></span><br>
+                        <div id="iconBar">
+                            <span class="iconBarIcon" id="iconBar-owner" style="display:none;"><i class="fas fa-crown"
+                                    data-toggle="tooltip" data-placement="bottom" title="Owner"></i></span>
+                            <span class="iconBarIcon" id="iconBar-admin" style="display:none;"><i
+                                    class="fas fa-user-tie" data-toggle="tooltip" data-placement="bottom"
+                                    title="Admin"></i></span>
+                            <span class="iconBarIcon" id="iconBar-member" style="display:none;"><i
+                                    class="iconBarIcon fas fa-award" data-toggle="tooltip" data-placement="bottom"
+                                    title="Member"></i></span>
+                            <span class="iconBarIcon" id="iconBar-mod" style="display:none;"><i
+                                    class="iconBarIcon fas fa-user-shield" data-toggle="tooltip" data-placement="bottom"
+                                    title="Moderator"></i></span>
+                            <span class="iconBarIcon" id="iconBar-voice" style="display:none;"><i
+                                    class="iconBarIcon fas fa-bullhorn" data-toggle="tooltip" data-placement="bottom"
+                                    title="Participant"></i></span>
+                            <span class="iconBarIcon" id="iconBar-visitor" style="display:none;"><i class="fas fa-user"
+                                    data-toggle="tooltip" data-placement="bottom" title="Visitor"></i></span>
+                            <span class="iconBarIcon" id="iconBar-muted" style="display:none;"><i
+                                    class="iconBarIcon fas fa-comment-slash" data-toggle="tooltip"
+                                    data-placement="bottom" title="Muted"></i></span>
+                        </div>
+                    </div>
+                    <div class="profileBoxBottom mt-2 mx-2">
+                        <button id="profileBox-openProfileButton" type="button"
+                            class="btn btn-sm btn-primary shadow">Profile</button>
+                        <button id="profileBox-muteButton" class="btn btn-sm btn-primary" onclick="toggleMute();"><i
+                                class="fas fa-toggle-off"></i> Mute</button>
+                        <div id="profileBox-modControls" class="dropdown dropleft float-right" style="display:none;">
+                            <button class="btn btn-sm btn-secondary dropdown-toggle" type="button"
+                                id="dropdownMenuButtonProfileBox" data-toggle="dropdown" aria-haspopup="true"
+                                aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <h6 class="dropdown-header">Mod Controls</h6>
+                                <button class="dropdown-item" type="button" onclick="modKick();">Kick</button>
+                                <button class="dropdown-item" type="button" onclick="modBan();">Ban</button>
+                                <div class="dropdown-divider"></div>
+                                <h6 class="dropdown-header">Change Role</h6>
+                                <button class="dropdown-item" type="button" onclick="modSetAffiliation('admin');">Set as
+                                    Moderator</button>
+                                <button class="dropdown-item" type="button" onclick="modSetAffiliation('member');">Set
+                                    as
+                                    Participant</button>
+                                <button class="dropdown-item" type="button" onclick="modSetAffiliation('none');">Set as
+                                    Guest</button>
+                                <div class="dropdown-divider"></div>
+                                <h6 class="dropdown-header">Channel Voice Controls</h6>
+                                <!--<button class="dropdown-item" type="button" onclick="modSetRole('moderator');">Set as Moderator</button>-->
+                                <button class="dropdown-item" type="button"
+                                    onclick="modSetRole('participant');">Voice</button>
+                                <button class="dropdown-item" type="button"
+                                    onclick="modSetRole('visitor');">Devoice</button>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% if channel.owningUser == current_user.id %}
+<!-- Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalTitle">Edit Stream Info</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form>
+                <div class="modal-body">
+                    <h5>Name of the Stream:</h5>
+                    <input type="text" id="editStreamNameInput" class="form-control" value="{{stream.streamName}}"
+                        name="newStreamName" required>
+                    <br>
+                    <h5>Stream Topic:</h5>
+                    <select class="form-control" name="newStreamTopic" id="editChannelTopicInput"
+                        style="font-family: FontAwesome, sans-serif;" required>
+                        {% for topic in topics %}
+                        <option value={{topic.id}} {% if stream.topic==topic.id %} selected {% endif %}>{{topic.name}}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal"
+                        onClick="submitStreamChanges()">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endif %}
+
+<div class="modal fade" id="shareModal" tabindex="-1" role="dialog" aria-labelledby="shareModalTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="shareModalTitle">Share stream</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div style="margin: 0 auto;width: 99%; text-align: center;">
+                    <button type="button" id="FBShareBtn" class="btn" style="background-color:#4267B2;color:white;"
+                        onclick="window.open('https://www.facebook.com/sharer/sharer.php?u={{request.url}}','facebook-share-dialog','width=626,height=436');return false;">Share
+                        on Facebook</button>
+                    <button type="button" id="TwitterShareBtn" class="btn" style="background-color:#1dcaff;color:white;"
+                        onclick="window.open('https://twitter.com/share?url={{request.url}}&text=Check out this Stream! - {{stream.streamName}}','twitter-share-dialog','width=626,height=436');return false;">Share
+                        on Twitter</button>
+                </div>
+                <br>
+                <div class="form-group row">
+                    <label for="embedURLInput" class="col-sm-2 col-form-label"><b>Embed</b></label>
+                    <div class="col-sm-10">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <button type="button" class="btn btn-primary" onclick="CopyDiv('embedURLInput')"><i
+                                        class="fas fa-copy"></i></button>
+                            </div>
+                            <input class="form-control" id="embedURLInput" type="text"
+                                value="<iframe src='{{request.url}}?embedded=True' width=600 height=345></iframe>"
+                                readonly onClick="this.select();">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="linkShareInput" class="col-sm-2 col-form-label"><b>Link</b></label>
+                    <div class="col-sm-10">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <button type="button" class="btn btn-primary" onclick="CopyDiv('linkShareInput')"><i
+                                        class="fas fa-copy"></i></button>
+                            </div>
+                            <input class="form-control" id="linkShareInput" type="text" value="{{request.url}}" readonly
+                                onClick="this.select();">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="rtmpURI" class="col-sm-2 col-form-label"><b>RTMP Link</b></label>
+                    <div class="col-sm-10">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <button type="button" class="btn btn-primary" onclick="CopyDiv('rtmpURI')"><i
+                                        class="fas fa-copy"></i></button>
+                            </div>
+                            <input class="form-control" id="rtmpURI" type="text" value="{{rtmpURI}}" readonly
+                                onClick="this.select();">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+
+
+<script>
+
+    function createPlayer(){
+        player = videojs('video', {
+            autoplay: true,
+            errorDisplay: false,
+            liveui: true,
+            liveTracker: {
+                trackingThreshold: 5,
+                liveTolerance: 15
+            },
+            html5:
+            {
+                nativeAudioTracks: false,
+                nativeVideoTracks: false,
+                hls:
+                {
+                    overrideNative: true
+                }
+            },
+            plugins: {
+                httpSourceSelector: {
+                    default: 'auto'
+                }
+            }
+        });
+        
+
+        qualityLevels = player.qualityLevels();
+        httpSelector = player.httpSourceSelector();
+
+        player.ready(function () {
+            this.src({
+                src: '{{streamURL}}',
+                type: 'application/x-mpegURL'
+            });
+        });
+
+    }
+
+    $(document).ready(function () {
+        //monitor_vid(player);
+    });
+
+
+    var player;
+    createPlayer();
+/*    var player = videojs('video', {
+        autoplay: true,
+        errorDisplay: false,
+        liveui: true,
+        liveTracker: {
+            trackingThreshold: 5,
+            liveTolerance: 15
+        },
+        html5:
+        {
+            nativeAudioTracks: false,
+            nativeVideoTracks: false,
+            hls:
+            {
+                overrideNative: true
+            }
+        },
+        plugins: {
+            httpSourceSelector: {
+                default: 'auto'
+            }
+        }
+    }); 
+
+    qualityLevels = player.qualityLevels();
+    httpSelector = player.httpSourceSelector();
+
+    player.ready(function () {
+        this.src({
+            src: '{{streamURL}}',
+            type: 'application/x-mpegURL'
+        });
+    });
+
+    */
+
+//    var pcookieVolume = getCookie('ospvolume');
+//    console.log('XXXXXplay: ' + pcookieVolume)
+//    if (!(pcookieVolume == null)) {
+//        player.volume(pcookieVolume);
+//    }
+//    player.play();
+</script>
+
+<!--
+    <script>
+    $(document).ready(function () {
+        //monitor_vid(player);
+    });
+</script> !-->
+
+<script type="text/javascript" charset="utf-8">
+    var conn_options = {
+        'sync disconnect on unload': true
+    };
+
+    var socket = io("/", { reconnection: true, forceNew: false });
+</script>
+
+<script>
+    socket.on('connect', function () {
+        //newViewerandaddUserCount        
+        socket.emit('newViewerandaddUserCount', { data: '{{channel.id}}' });
+        //socket.emit('newViewer', { data: '{{channel.channelLoc}}' });
+        //socket.emit('addUserCount', { data: '{{channel.channelLoc}}' });
+    });
+</script>
+
+<script>
+    socket.on('disconnect', function () {
+        socket.emit('removeViewer', { data: '{{channel.channelLoc}}' });
+    });
+</script>
+
+
+<script>
+    window.addEventListener("beforeunload", function (e) {
+        socket.emit('removeViewer', { data: '{{channel.channelLoc}}' });
+        return null;
+    });
+</script>
+
+<!--
+<script type="text/javascript" charset="utf-8">
+    socket.on('viewerTotalResponse', function (msg) {
+        console.log('XXXXXXXXXXXXXXXXXsocket.on(viewerTotalResponse')
+        document.getElementById("currentViewers").innerHTML = msg['data'];
+    });
+</script>
+-->
+<script>
+    // Handing of Stream Timer
+    function convertToHMS(timestamp) {
+        var sec_num = parseInt(timestamp, 10); // don't forget the second param
+        var hours = Math.floor(sec_num / 3600);
+        var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+        var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+        if (hours < 10) { hours = "0" + hours; }
+        if (minutes < 10) { minutes = "0" + minutes; }
+        if (seconds < 10) { seconds = "0" + seconds; }
+        return hours + ':' + minutes + ':' + seconds;
+    }
+
+    var streamTimeStamp = new Date('{{ stream.startTimestamp }} UTC');
+
+    var timer = setInterval(updateTimer, 1000);
+    function updateTimer() {
+        if (isNaN(streamTimeStamp.getTime())) {
+            document.getElementById('streamTime').innerHTML = '--:--:--';
+        } else {
+            var currentTimestamp = new Date()
+            var timerDif = Math.floor((currentTimestamp.getTime() - streamTimeStamp.getTime()) / 1000);
+            var timerDifParsed = convertToHMS(timerDif);
+            document.getElementById('streamTime').innerHTML = timerDifParsed;
+        }
+    }
+</script>
+
+<script>
+    // Settings and Event Hooks for XMPP
+    var bannedWords = {{ bannedWords| safe}};
+    {% if current_user.is_authenticated %}
+    var username = "{{current_user.username}}";
+    var userUUID = "{{current_user.uuid}}";
+    var xmppPassword = "{{current_user.xmppToken}}";
+    {% else %}
+    var username = "Guest" + (Math.floor(Math.random() * 50000) + 1).toString();
+    var userUUID = "{{session['guestUUID']}}";
+    var xmppPassword = "fakepw";
+    {% endif %}
+    var serverproto = '{{sysSettings.siteProtocol}}';
+    var server = '{{sysSettings.siteAddress}}';
+    var BOSH_SERVICE = serverproto + '{{xmppserver}}' + '/http-bind/';
+    var ROOM_SERVICE = 'conference.' + server;
+    var ROOMNAME = '{{channel.channelLoc}}';
+    var CHANNELPROTECTED = {{ channel.protected| lower}};
+    {% if channel.protected %}
+    var CHANNELTOKEN = '{{channel.xmppToken}}';
+    {% else %}
+    var CHANNELTOKEN = null;
+    {% endif %}
+    var CHATSTATUS = { jid: null, username: null, role: null, affiliation: null, muteList: [] };
+
+    var username = username.replace(/ /g, "_");
+    var ChatContentWindow = document.getElementById("chatContentWindow");
+    var ChatInputBar = document.getElementById('chatinput');
+    ChatInputBar.placeholder = "Send Message As " + username + "...";
+
+    var stickerList = {{ stickerList | safe }}
+
+    var videoContainer = document.getElementById('videoContainer');
+    var offlineWindow = document.getElementById('offlineImage');
+    var onlineBadge = document.getElementById('liveIndicatorBadge');
+    var streamnameDiv = document.getElementById('streamMetadataName');
+    var streamcurrentViewers = document.getElementById("currentViewers");
+
+    $('#chatinput').on('keyup', function (e) {
+        if (e.keyCode === 13) {
+            sendMessage();
+        }
+    });
+
+    // Hide Profile Box on Click Outside
+    $(document).mouseup(function (e) {
+        var container = $("#newProfileBox");
+        if (!container.is(e.target) && container.has(e.target).length === 0) {
+            container.remove();
+        }
+    });
+
+    // Start Connection on Load
+    $(window).bind('load', function () {
+        var url = BOSH_SERVICE;
+        connection = new Strophe.Connection(url);
+        connection.rawInput = rawInput;
+        connection.rawOutput = rawOutput;
+        connection.connect(userUUID + '@' + server, xmppPassword, onConnect);
+    });
+
+    // Disconnect XMPP on Page Unload
+    $(window).bind('unload', function () {
+        // Leave Room First
+        exitRoom(ROOMNAME + '@' + ROOM_SERVICE);
+        // Execute XMPP Disconnection Process
+        //connection.options.sync = true; // Switch to using synchronous requests since this is typically called onUnload.
+        connection.flush();
+        connection.disconnect();
+        // Disconnect from SocketIO
+        socket.emit('removeViewer', { data: '{{channel.channelLoc}}' });
+        socket.close();
+    });
+</script>
+
+<script>
+    $(function () {
+        $('[data-toggle="popover"]').popover()
+    })
+    $('.popover-dismiss').popover({
+        trigger: 'focus'
+    })
+</script>
+
+<!--<script>
+    socket.on('connect', function () {
+//        socket.emit('khgetUpvoteTotal', { loc: '{{channel.id}}', vidType: 'stream' });
+    });
+</script> -->
+
+<script type="text/javascript" charset="utf-8">
+    socket.on('upvoteTotalResponse', function (msg) {
+        document.getElementById("totalUpvotes").innerHTML = msg['totalUpvotes'];
+        if (msg['myUpvote'] === 'True') {
+            if (document.getElementById("upVoteIcon").classList.contains('far')) {
+                document.getElementById("upVoteIcon").classList.remove('far');
+                document.getElementById("upVoteIcon").classList.add('fas');
+            }
+        }
+        else if (msg['myUpvote'] === 'False') {
+            if (document.getElementById("upVoteIcon").classList.contains('fas')) {
+                document.getElementById("upVoteIcon").classList.remove('fas');
+                document.getElementById("upVoteIcon").classList.add('far');
+            }
+        }
+    });
+
+    var oldTopic=0;
+    var needsReset=true;
+    var needsDisplayBlock =true;
+    var oldStreamName = "";
+    var oldtotalUpvotes = 0;
+    var oldcurrentViewers = 0;
+    var oldtotalViewers = 0;
+    var oldNsubscriptions = 0;
+
+    socket.on('getStreamStuffResponse', function (msg) {
+        var inStreamName            = msg['streamName'];
+        var inStreamTopic           = msg['streamTopic'];
+        var inStreamTimeStamp       = msg['startTimestamp'];
+        var inStreamViewers         = msg['viewers'];
+        var inStreamNupVotes        = msg['NupVotes'];
+        var inStreamViews           = msg['views'];
+        var inStreamNsubscriptions  = msg['Nsubscriptions'];
+        
+        console.log("getResponse " + inStreamName + " T: " + inStreamTopic + " TS: " + inStreamTimeStamp +" V: " + inStreamViewers);
+
+        if (inStreamTopic == -1 ){
+            console.log("***************** No stream needReset= " + needsReset)
+
+            if (needsReset==true){
+                needsReset = false;
+                needsDisplayBlock = true;                
+
+                videoJSObj = player;
+                try {
+                        videoJSObj.pause();
+                        videoJSObj.reset();
+                        onlineBadge.className = 'mx-0 px-1 liveindicator badge badge-secondary chan-liveBadge';
+                        onlineBadge.innerHTML = '<i class="fas fa-video-slash"></i><span class="d-none d-sm-none d-md-inline"> Offline</span>';
+                        videoContainer.style.display = "none";
+                        offlineWindow.style.display = "block";
+                        var currentStreamName = "No Stream";
+                       
+                        streamTimeStamp = new Date('UTC');
+
+                        streamnameDiv.innerHTML = '<span><b> ' + currentStreamName + '</b></span>';
+                        streamcurrentViewers.innerHTML = '0';
+
+                    } catch (e) {
+                        console.log("OSP tried pause reset but had an issue:" + e)
+                }                
+            } // if (needsReset==true)
+        }
+        else{
+            videoJSObj = player;
+            currentReadyState = videoJSObj.readyState();
+           
+            if (needsDisplayBlock == true){
+                needsDisplayBlock = false;                
+                videoContainer.style.display = "block";
+                offlineWindow.style.display = "none";
+
+                onlineBadge.className = 'mx-0 px-1 liveindicator badge badge-danger chan-liveBadge';
+                onlineBadge.innerHTML = '<i class="fas fa-video"></i><span class="d-none d-sm-none d-md-inline"> Live</span>';
+            }
+
+            console.log('currentReady = ' + currentReadyState);
+
+            if (currentReadyState <= 2) {
+                try {
+                    needsReset = true;
+
+                    console.log('**************** RESTARTING (currentReadyState <2)');
+
+
+                  //  var bcookieVolume = getCookie('ospvolume');
+                  //  console.log('XXXXXRESTARTplay: ' + bcookieVolume)
+                 //   if (!(bcookieVolume == null)) {
+                 //       player.volume(bcookieVolume);
+                 //   }
+
+                    videoJSObj.reset();
+                    videoJSObj.src('{{streamURL}}');
+                    videoJSObj.pause();
+                    videoJSObj.trigger('loadstart');
+                    videoJSObj.play();
+                } catch (e) {
+                    console.log("OSP tried restarting the stream but had an issue:" + e)
+                }
+            }
+
+            //var currentStreamTopic = inStreamTopic;
+            var currentStreamName = inStreamName
+            streamTimeStamp = new Date(inStreamTimeStamp + ' UTC');
+
+            if (oldTopic != inStreamTopic){
+                var topicDiv = document.getElementById('streamMetadataTopic');
+
+                var topicJSList = [];
+                {% for x in topics %}
+                topicJSList["{{x.id}}"] = "{{x.name}}";
+                {% endfor %}
+
+                var topicDivHTML = '<b><i class="fas fa-hashtag"></i> <a href="/topic/' + inStreamTopic + '"><span>' + topicJSList[inStreamTopic] + '</span></a></b>';
+             
+                topicDiv.innerHTML = topicDivHTML;
+                oldTopic = inStreamTopic;
+            }
+            
+            if (currentStreamName != oldStreamName){
+                streamnameDiv.innerHTML = '<b><i class="fas fa-video"></i> <span> ' + currentStreamName + '</span></b>';
+                oldStreamName = currentStreamName;
+            }
+
+            
+            if (inStreamViewers != oldcurrentViewers){
+                streamcurrentViewers.innerHTML = inStreamViewers;
+                oldcurrentViewers = inStreamViewers;
+            }
+        }
+
+        if (inStreamNupVotes != oldtotalUpvotes ){
+            document.getElementById("totalUpvotes").innerHTML = inStreamNupVotes;
+            oldtotalUpvotes = inStreamNupVotes;
+        }
+
+        if (inStreamViews != oldtotalViewers){
+            document.getElementById("totalViewers").innerHTML = inStreamViews;
+            oldtotalViewers = inStreamViews;
+        }
+
+        if (inStreamNsubscriptions != oldNsubscriptions){
+            document.getElementById("Nsubscriptions").innerHTML = inStreamNsubscriptions;
+            oldNsubscriptions = inStreamNsubscriptions;
+        }
+
+        console.log('ENDgetStreamStuffResponse');
+    });
+
+
+</script>
+
+<script>
+    function changeUpvote() {
+        socket.emit('changeUpvote', { loc: '{{channel.channelLoc}}', vidType: 'stream' });
+    }
+</script>
+
+<script>
+    function toggleChat() {
+        var chatbox = document.getElementById("chatside");
+        if (chatbox.style.display === "none") {
+            chatbox.style.display = "block";
+        } else {
+            chatbox.style.display = "none";
+        }
+    }
+</script>
+
+<script>
+    function popoutChat() {
+        {% if current_user.is_authenticated %}
+        MyWindows = window.open('/view/{{channel.channelLoc}}/?chatOnly=True', 'myWindow', 'width=500,height=500');
+        {% else %}
+        MyWindows = window.open('/view/{{channel.channelLoc}}/?chatOnly=True&guestUser=' + username, 'myWindow', 'width=500,height=500');
+        {% endif %}
+        //var chatbox = document.getElementById("chatside");
+        //chatbox.style.display = "none";
+    }
+</script>
+
+<script>
+    function submitStreamChanges() {
+        var newStreamNameDiv = document.getElementById("editStreamNameInput");
+        var newStreamTopicDiv = document.getElementById("editChannelTopicInput");
+
+        socket.emit('updateStreamData', { name: newStreamNameDiv.value, topic: newStreamTopicDiv.value, channel: "{{channel.channelLoc}}" });
+    }
+</script>
+
+
+<script>
+    
+    //main database / redis polling function is called from here 
+    setInterval(function () {
+        socket.emit('getStreamStuff', { data: "{{channel.id}}", channelLoc: "{{channel.channelLoc}}" }); 
+        console.log("Sending getStreamStuff for channel: " + "{{channel.id}}");
+      
+        //var currentVolume = player.volume();
+
+        //console.log("CurrentVolume from timer = " + currentVolume)
+        //setCookie('ospvolume', currentVolume, 365);
+
+        //var fcookieVolume = getCookie('ospvolume');
+        //console.log("MMMMMMMCookie read Volume = " + fcookieVolume)
+
+
+    }, 2500);  // how often we poll...  must be more than the redis timeout set in  r.expire(myRedisID, 2) in  handle_getStream_Stuff
+
+</script>
+
+<script>
+    function CopyDiv(divVal) {
+        var copyText = document.getElementById(divVal);
+        copyText.select();
+        document.execCommand("copy");
+    }
+</script>
+
+<script>
+    function toggleChannelSub(chanID) {
+        socket.emit('toggleChannelSubscription', { channelID: chanID });
+    }
+</script>
+
+<script>
+    function getBanList() {
+        console.log("Requesting Ban List");
+        socket.emit('getBanList', { channelLoc: '{{channel.channelLoc}}' });
+    }
+
+    function clearBan(username) {
+        unban(username);
+        setTimeout(function () {
+            getBanList();
+        }, 2000);
+        return true;
+    }
+
+    socket.on('returnBanList', function (msg) {
+        console.log("Receiving Ban List");
+
+        document.getElementById('modDisplay').style.display = 'block';
+        document.getElementById('chatMembers').style.display = 'none';
+        document.getElementById('chat').style.display = 'none';
+
+        banList = document.getElementById('OutcastList');
+        banList.innerHTML = "";
+        for (let i = 0; i < msg['results'].length; i++) {
+            var iDiv = document.createElement('div');
+            iDiv.className = 'bannedUser';
+            var username = msg["results"][i]["username"];
+            var useruuid = msg["results"][i]["useruuid"];
+            var onclickCmd = "clearBan('" + useruuid + "');"
+            iDiv.innerHTML = '<span class="my-2" id="bannedUser-' + username + '">' + username + '<button class="btn btn-sm btn-danger mx-2" onclick=' + onclickCmd + '><i class="fas fa-trash"></i></button></span>';
+            banList.appendChild(iDiv);
+        }
+        console.log(msg);
+    });
+</script>
+
+<script>
+    socket.on('sendChanSubResults', function (msg) {
+        var subButton = document.getElementById('chanSubStateButton');
+        if (msg['state'] === true) {
+            subButton.innerHTML = "<i class='followingBadge fas fa-star'></i><span class='d-none d-sm-none d-md-inline'> UnFollow</span>";
+            subButton.className = "followingBadge btn btn-sm btn-outline-success";
+        } else {
+            subButton.innerHTML = "<i class='followingBadge far fa-star'></i><span class='d-none d-sm-none d-md-inline'> Follow</span>";
+            subButton.className = "followingBadge btn btn-sm btn-success";
+        }
+      });
+</script>
+
+<script>
+    $(document).ready(function () {
+
+//        var dcookieVolume = getCookie('ospvolume');
+//        console.log("HHHHCookie Volume = " + dcookieVolume)
+});
+</script>
+<script>
+
+    const video = document.querySelector('video');
+    video.addEventListener('play', (event) => {
+        var cookieVolume = getCookie('ospvolume');
+        console.log('XXXXXplay cookieVolue: ' + cookieVolume)
+        if (!(cookieVolume == null)) {
+            player.volume(cookieVolume);
+        }
+    });
+
+    video.addEventListener('volumechange', (event) => {
+        var currentVolume = player.volume();
+
+        console.log("CurrentVolume = " + currentVolume)
+        setCookie('ospvolume', currentVolume, 365);
+  //      mcookieVolume = getCookie('ospvolume');
+  //      console.log("READCookie Volume = " + mcookieVolume)
+
+    });
+</script>
+
+{% endblock %}
+
+/*
+
+//videoContainer = document.getElementById('videoContainer');
+
+//Fixes for VideoJS on Disconnect to Force a Reconnect when the readyState is stuck at 2
+function monitor_vid(vidplayer) {
+    videoJSObj = vidplayer;
+    currentReadyState = videoJSObj.readyState();
+
+
+    $.getJSON('/apiv1/channel/{{channel.channelLoc}}', function (data) {
+        var channelList = data['results'][0];
+        var streamIDList = channelList['stream'];
+
+        if (streamIDList.length > 0) {
+            var currentStreamID = streamIDList[0];
+
+            videoContainer.style.display = "block";
+            offlineWindow.style.display = "none";
+
+            if (currentReadyState <= 2) {
+                try {
+                    videoJSObj.reset();
+                    videoJSObj.src('{{streamURL}}');
+                    videoJSObj.pause();
+                    videoJSObj.trigger('loadstart');
+                    videoJSObj.play();
+                } catch (e) {
+                    console.log("OSP tried restarting the stream but had an issue:" + e)
+                }
+            }
+
+
+            $.getJSON('/apiv1/stream/' + currentStreamID, function (data) {
+                var streamData = data['results'][0];
+                var currentStreamTopic = streamData['topic'];
+                var currentStreamName = streamData['streamName'];
+                streamTimeStamp = new Date(streamData['startTimestamp'] + ' UTC');
+
+                var topicDiv = document.getElementById('streamMetadataTopic');
+                var nameDiv = document.getElementById('streamMetadataName');
+
+                var topicJSList = [];
+                {% for x in topics %}
+                topicJSList["{{x.id}}"] = "{{x.name}}";
+                {% endfor %}
+
+
+                var nameDivHTML = '<b><i class="fas fa-video"></i> <span> ' + currentStreamName + '</span></b>';
+                var topicDivHTML = '<b><i class="fas fa-hashtag"></i> <a href="/topic/' + currentStreamTopic + '"><span>' + topicJSList[currentStreamTopic] + '</span></a></b>';
+
+                onlineBadge.className = 'mx-0 px-1 liveindicator badge badge-danger chan-liveBadge';
+                onlineBadge.innerHTML = '<i class="fas fa-video"></i><span class="d-none d-sm-none d-md-inline"> Live</span>';
+
+                nameDiv.innerHTML = nameDivHTML;
+                topicDiv.innerHTML = topicDivHTML;
+
+            });
+
+        } else {
+            try {
+                videoJSObj.pause();
+                videoJSObj.reset();
+                onlineBadge.className = 'mx-0 px-1 liveindicator badge badge-secondary chan-liveBadge';
+                onlineBadge.innerHTML = '<i class="fas fa-video-slash"></i><span class="d-none d-sm-none d-md-inline"> Offline</span>';
+                videoContainer.style.display = "none";
+                offlineWindow.style.display = "block";
+
+                var nameDiv = document.getElementById('streamMetadataName');
+                streamTimeStamp = new Date('UTC');
+                var nameDivHTML = '<span><b> ' + "No Stream" + '</b></span>';
+                nameDiv.innerHTML = nameDivHTML;
+
+            } catch (e) {
+                console.log("OSP tried restarting the stream but had an issue:" + e)
+            }
+        }
+    });
+
+}
+
+*/

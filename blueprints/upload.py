@@ -29,7 +29,9 @@ upload_bp = Blueprint('upload', __name__, url_prefix='/upload')
 def upload():
     videos_root = globalvars.videoRoot + 'videos/'
 
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
+    
     if not sysSettings.allowUploads:
         db.session.close()
         return "Video Uploads Disabled", 501
@@ -81,7 +83,8 @@ def upload():
 @login_required
 @roles_required('Uploader')
 def upload_vid():
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
     if not sysSettings.allowUploads:
         db.session.close()
         flash("Video Upload Disabled", "error")
@@ -172,11 +175,12 @@ def upload_vid():
         system.newLog(4, "File Upload Successful - Username:" + current_user.username)
 
         if ChannelQuery.autoPublish is True:
+            theStreamerName = templateFilters.get_userName(ChannelQuery.owningUser)
 
             webhookFunc.runWebhook(ChannelQuery.id, 6, channelname=ChannelQuery.channelName,
                        channelurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/channel/" + str(ChannelQuery.id)),
                        channeltopic=templateFilters.get_topicName(ChannelQuery.topic),
-                       channelimage=channelImage, streamer=templateFilters.get_userName(ChannelQuery.owningUser),
+                       channelimage=channelImage, streamer=theStreamerName,
                        channeldescription=str(ChannelQuery.description), videoname=newVideo.channelName,
                        videodate=newVideo.videoDate, videodescription=newVideo.description,
                        videotopic=templateFilters.get_topicName(newVideo.topic),
@@ -186,7 +190,7 @@ def upload_vid():
             subscriptionQuery = subscriptions.channelSubs.query.filter_by(channelID=ChannelQuery.id).all()
             for sub in subscriptionQuery:
                 # Create Notification for Channel Subs
-                newNotification = notifications.userNotification(templateFilters.get_userName(ChannelQuery.owningUser) + " has posted a new video to " + ChannelQuery.channelName + " titled " + newVideo.channelName, '/play/' + str(newVideo.id),
+                newNotification = notifications.userNotification(theStreamerName + " has posted a new video to " + ChannelQuery.channelName + " titled " + newVideo.channelName, '/play/' + str(newVideo.id),
                                                                  "/images/" + ChannelQuery.owner.pictureLocation, sub.userID)
                 db.session.add(newNotification)
             db.session.commit()

@@ -12,29 +12,29 @@ from functions import votes
 from functions import commentsFunc
 
 def init(context):
-    context.jinja_env.filters['normalize_uuid'] = normalize_uuid
-    context.jinja_env.filters['normalize_urlroot'] = normalize_urlroot
-    context.jinja_env.filters['normalize_url'] = normalize_url
-    context.jinja_env.filters['normalize_date'] = normalize_date
-    context.jinja_env.filters['limit_title'] = limit_title
-    context.jinja_env.filters['format_kbps'] = format_kbps
-    context.jinja_env.filters['hms_format'] = hms_format
-    context.jinja_env.filters['get_topicName'] = get_topicName
-    context.jinja_env.filters['get_userName'] = get_userName
-    context.jinja_env.filters['get_Video_Upvotes'] = get_Video_Upvotes_Filter
-    context.jinja_env.filters['get_Stream_Upvotes'] = get_Stream_Upvotes_Filter
-    context.jinja_env.filters['get_Clip_Upvotes'] = get_Clip_Upvotes_Filter
-    context.jinja_env.filters['get_Video_Comments'] = get_Video_Comments_Filter
-    context.jinja_env.filters['get_pictureLocation'] = get_pictureLocation
-    context.jinja_env.filters['get_diskUsage'] = get_diskUsage
-    context.jinja_env.filters['testList'] = testList
-    context.jinja_env.filters['get_webhookTrigger'] = get_webhookTrigger
-    context.jinja_env.filters['get_logType'] = get_logType
-    context.jinja_env.filters['format_clipLength'] = format_clipLength
-    context.jinja_env.filters['processClientCount'] = processClientCount
-    context.jinja_env.filters['formatSpace'] = formatSpace
-    context.jinja_env.filters['uuid_to_username'] = uuid_to_username
-    context.jinja_env.filters['format_keyType'] = format_keyType
+    context.filters['normalize_uuid'] = normalize_uuid
+    context.filters['normalize_urlroot'] = normalize_urlroot
+    context.filters['normalize_url'] = normalize_url
+    context.filters['normalize_date'] = normalize_date
+    context.filters['limit_title'] = limit_title
+    context.filters['format_kbps'] = format_kbps
+    context.filters['hms_format'] = hms_format
+    context.filters['get_topicName'] = get_topicName
+    context.filters['get_userName'] = get_userName
+    context.filters['get_Video_Upvotes'] = get_Video_Upvotes_Filter
+    context.filters['get_Stream_Upvotes'] = get_Stream_Upvotes_Filter
+    context.filters['get_Clip_Upvotes'] = get_Clip_Upvotes_Filter
+    context.filters['get_Video_Comments'] = get_Video_Comments_Filter
+    context.filters['get_pictureLocation'] = get_pictureLocation
+    context.filters['get_diskUsage'] = get_diskUsage
+    context.filters['testList'] = testList
+    context.filters['get_webhookTrigger'] = get_webhookTrigger
+    context.filters['get_logType'] = get_logType
+    context.filters['format_clipLength'] = format_clipLength
+    context.filters['processClientCount'] = processClientCount
+    context.filters['formatSpace'] = formatSpace
+    context.filters['uuid_to_username'] = uuid_to_username
+    context.filters['format_keyType'] = format_keyType
 
 #----------------------------------------------------------------------------#
 # Template Filters
@@ -118,7 +118,7 @@ def get_topicName(topicID):
     return "None"
 
 def get_userName(userID):
-    userQuery = Sec.User.query.filter_by(id=int(userID)).first()
+    userQuery = Sec.User.query.filter_by(id=int(userID)).with_entities(Sec.User.username).first()
     if userQuery is None:
         return "Unknown User"
     else:
@@ -141,7 +141,7 @@ def get_Video_Comments_Filter(videoID):
     return result
 
 def get_pictureLocation(userID):
-    userQuery = Sec.User.query.filter_by(id=int(userID)).first()
+    userQuery = Sec.User.query.filter_by(id=int(userID)).with_entities(Sec.User.pictureLocation).first()
     pictureLocation = None
     if userQuery.pictureLocation is None:
         pictureLocation = '/static/img/user2.png'
@@ -183,7 +183,7 @@ def uuid_to_username(uuid):
         JID=uuid.split('@')[0]
     else:
         JID = uuid
-    userQuery = Sec.User.query.filter_by(uuid=JID).first()
+    userQuery = Sec.User.query.filter_by(uuid=JID).with_entities(Sec.User.username).first()
     if userQuery is not None:
         result = userQuery.username
     else:

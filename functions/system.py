@@ -29,7 +29,8 @@ def asynch(func):
     return async_func
 
 def check_existing_settings():
-    settingsQuery = settings.settings.query.all()
+    settingsQuery = settings.settings.query.all() # don't call settings.getSettingsFromRedis()
+
     if settingsQuery != []:
         db.session.close()
         return True
@@ -159,7 +160,9 @@ def systemFixes(app):
     return True
 
 def initializeThemes():
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
+
 
     print({"level": "info", "message": "Importing Theme Data into Global Cache"})
     # Import Theme Data into Theme Dictionary
@@ -168,7 +171,8 @@ def initializeThemes():
     return True
 
 def checkOSPEdgeConf():
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
 
     print({"level": "info", "message": "Rebuilding OSP Edge Conf File"})
     # Initialize the OSP Edge Configuration - Mostly for Docker

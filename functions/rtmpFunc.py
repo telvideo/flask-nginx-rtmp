@@ -25,7 +25,8 @@ from functions import videoFunc
 from functions import xmpp
 
 def rtmp_stage1_streamkey_check(key, ipaddress):
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
 
     channelRequest = Channel.Channel.query.filter_by(streamKey=key).first()
 
@@ -75,7 +76,8 @@ def rtmp_stage1_streamkey_check(key, ipaddress):
         return returnMessage
 
 def rtmp_stage2_user_auth_check(channelLoc, ipaddress, authorizedRTMP):
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
 
     currentTime = datetime.datetime.utcnow()
 
@@ -90,34 +92,44 @@ def rtmp_stage2_user_auth_check(channelLoc, ipaddress, authorizedRTMP):
 
             authedStream.currentViewers = int(xmpp.getChannelCounts(requestedChannel.channelLoc))
             authedStream.totalViewers = int(xmpp.getChannelCounts(requestedChannel.channelLoc))
-            db.session.commit()
-
+            
             if requestedChannel.imageLocation is None:
                 channelImage = (sysSettings.siteProtocol + sysSettings.siteAddress + "/static/img/video-placeholder.jpg")
             else:
                 channelImage = (sysSettings.siteProtocol + sysSettings.siteAddress + "/images/" + requestedChannel.imageLocation)
+            db.session.commit()
+                
+            #only send out notifications, webhooks and emails once every 600 seconds or 10 mins
+            timeDiff = currentTime - requestedChannel.notificationsLastSentTime
+            if requestedChannel.autoPublish is True and timeDiff.total_seconds() > 600 :
 
-            webhookFunc.runWebhook(requestedChannel.id, 0, channelname=requestedChannel.channelName, channelurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/channel/" + str(requestedChannel.id)), channeltopic=requestedChannel.topic,
-                       channelimage=channelImage, streamer=templateFilters.get_userName(requestedChannel.owningUser), channeldescription=str(requestedChannel.description),
+                requestedChannel.notificationsLastSentTime = currentTime
+
+                theStreamerName = templateFilters.get_userName(requestedChannel.owningUser)
+
+                webhookFunc.runWebhook(requestedChannel.id, 0, channelname=requestedChannel.channelName, channelurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/channel/" + str(requestedChannel.id)), channeltopic=requestedChannel.topic,
+                       channelimage=channelImage, streamer=theStreamerName, channeldescription=str(requestedChannel.description),
                        streamname=authedStream.streamName, streamurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/view/" + requestedChannel.channelLoc), streamtopic=templateFilters.get_topicName(authedStream.topic),
                        streamimage=(sysSettings.siteProtocol + sysSettings.siteAddress + "/stream-thumb/" + requestedChannel.channelLoc + ".png"))
 
-            subscriptionQuery = subscriptions.channelSubs.query.filter_by(channelID=requestedChannel.id).all()
-            for sub in subscriptionQuery:
-                # Create Notification for Channel Subs
-                newNotification = notifications.userNotification(templateFilters.get_userName(requestedChannel.owningUser) + " has started a live stream in " + requestedChannel.channelName, "/view/" + str(requestedChannel.channelLoc),
-                                                                 "/images/" + str(requestedChannel.owner.pictureLocation), sub.userID)
-                db.session.add(newNotification)
-            db.session.commit()
+                subscriptionQuery = subscriptions.channelSubs.query.filter_by(channelID=requestedChannel.id).all()
 
-            try:
-                subsFunc.processSubscriptions(requestedChannel.id,
-                                 sysSettings.siteName + " - " + requestedChannel.channelName + " has started a stream",
-                                 "<html><body><img src='" + sysSettings.siteProtocol + sysSettings.siteAddress + sysSettings.systemLogo + "'><p>Channel " + requestedChannel.channelName +
-                                 " has started a new video stream.</p><p>Click this link to watch<br><a href='" + sysSettings.siteProtocol + sysSettings.siteAddress + "/view/" + str(requestedChannel.channelLoc)
-                                 + "'>" + requestedChannel.channelName + "</a></p>")
-            except:
-                system.newLog(0, "Subscriptions Failed due to possible misconfiguration")
+                tpictureLocation = str(requestedChannel.owner.pictureLocation)
+                for sub in subscriptionQuery:
+                    # Create Notification for Channel Subs
+                    newNotification = notifications.userNotification(theStreamerName + " has started a live stream in " + requestedChannel.channelName, "/view/" + str(requestedChannel.channelLoc),
+                                                                    "/images/" + tpictureLocation, sub.userID)
+                    db.session.add(newNotification)
+                db.session.commit()
+
+                try:
+                    subsFunc.processSubscriptions(requestedChannel.id,
+                                    sysSettings.siteName + " - " + requestedChannel.channelName + " has started a stream",
+                                    "<html><body><img src='" + sysSettings.siteProtocol + sysSettings.siteAddress + sysSettings.systemLogo + "'><p>Channel " + requestedChannel.channelName +
+                                    " has started a new video stream.</p><p>Click this link to watch<br><a href='" + sysSettings.siteProtocol + sysSettings.siteAddress + "/view/" + str(requestedChannel.channelLoc)
+                                    + "'>" + requestedChannel.channelName + "</a></p>")
+                except:
+                    system.newLog(0, "Subscriptions Failed due to possible misconfiguration")
 
             returnMessage = {'time': str(currentTime), 'request': 'Stage2', 'success': True, 'channelLoc': requestedChannel.channelLoc, 'ipAddress': str(ipaddress), 'message': 'Success - Stream Authenticated & Initialized'}
             db.session.close()
@@ -133,7 +145,9 @@ def rtmp_stage2_user_auth_check(channelLoc, ipaddress, authorizedRTMP):
 
 def rtmp_record_auth_check(channelLoc):
 
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
+
     channelRequest = Channel.Channel.query.filter_by(channelLoc=channelLoc).first()
     currentTime = datetime.datetime.utcnow()
 
@@ -167,15 +181,26 @@ def rtmp_record_auth_check(channelLoc):
     return returnMessage
 
 def rtmp_user_deauth_check(key, ipaddress):
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
 
     currentTime = datetime.datetime.utcnow()
 
     authedStream = Stream.Stream.query.filter_by(streamKey=key).all()
-
-    channelRequest = Channel.Channel.query.filter_by(streamKey=key).first()
+    
+    #system.newLog(0, "NEW CODE Before")
 
     if authedStream is not []:
+        channelRequest = Channel.Channel.query.with_entities(
+            Channel.Channel.id,
+            Channel.Channel.imageLocation,
+            Channel.Channel.channelName,
+            Channel.Channel.topic,
+            Channel.Channel.description,
+            Channel.Channel.owningUser,
+            Channel.Channel.channelLoc).filter_by(streamKey=key).first()
+
+       
         for stream in authedStream:
             streamUpvotes = upvotes.streamUpvotes.query.filter_by(streamID=stream.id).all()
             pendingVideo = RecordedVideo.RecordedVideo.query.filter_by(channelID=channelRequest.id, videoLocation="", originalStreamID=stream.id).first()
@@ -196,17 +221,22 @@ def rtmp_user_deauth_check(key, ipaddress):
                 for upvote in streamUpvotes:
                     newVideoUpvote = upvotes.videoUpvotes(upvote.userID, pendingVideo.id)
                     db.session.add(newVideoUpvote)
-                db.session.commit()
 
-            topicName = "Unknown"
-            topicQuery = topics.topics.query.filter_by(id=stream.topic).first()
-            if topicQuery is not None:
-                topicName = topicQuery.name
+                pendingVideo.NupVotes = stream.NupVotes #copy over from stream
+                #db.session.commit()
+
+            #system.newLog(0, "NEW CODE Middle.")        
+#            topicName = "Unknown"
+
+            topicName = templateFilters.get_topicName(stream.topic)
+#            topicQuery = topics.topics.query.filter_by(id=stream.topic).first()
+#            if topicQuery is not None:
+#                topicName = topicQuery.name
 
             newStreamHistory = logs.streamHistory(stream.uuid, stream.channel.owningUser, stream.channel.owner.username, stream.linkedChannel, stream.channel.channelName, stream.streamName,
-                                                  stream.startTimestamp, endTimestamp, stream.totalViewers, stream.get_upvotes(), wasRecorded, stream.topic, topicName, recordingID)
+                                                  stream.startTimestamp, endTimestamp, stream.totalViewers, stream.NupVotes, wasRecorded, stream.topic, topicName, recordingID)
             db.session.add(newStreamHistory)
-            db.session.commit()
+            #db.session.commit()
 
             for vid in streamUpvotes:
                 db.session.delete(vid)
@@ -225,10 +255,13 @@ def rtmp_user_deauth_check(key, ipaddress):
                        channeldescription=str(channelRequest.description),
                        streamname=stream.streamName,
                        streamurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/view/" + channelRequest.channelLoc),
-                       streamtopic=templateFilters.get_topicName(stream.topic),
+                       streamtopic=topicName,
                        streamimage=(sysSettings.siteProtocol + sysSettings.siteAddress + "/stream-thumb/" + str(channelRequest.channelLoc) + ".png"))
         returnMessage = {'time': str(currentTime), 'request': 'StreamClose', 'success': True, 'channelLoc': channelRequest.channelLoc, 'ipAddress': str(ipaddress), 'message': 'Success - Stream Closed'}
         db.session.close()
+
+        #system.newLog(0, "NEW CODE DONE!!")
+
         return returnMessage
     else:
         returnMessage = {'time': str(currentTime), 'request': 'StreamClose', 'success': False, 'channelLoc': None, 'ipAddress': str(ipaddress), 'message': 'Failed - No Stream Listed Under Key'}
@@ -236,11 +269,23 @@ def rtmp_user_deauth_check(key, ipaddress):
         return returnMessage
 
 def rtmp_rec_Complete_handler(channelLoc, path):
-    sysSettings = settings.settings.query.first()
+    #sysSettings = settings.settings.query.first()
+    sysSettings = settings.getSettingsFromRedis()
+
 
     currentTime = datetime.datetime.utcnow()
 
     requestedChannel = Channel.Channel.query.filter_by(channelLoc=channelLoc).first()
+
+#    requestedChannel = Channel.Channel.query.with_entities(
+#            Channel.Channel.id,
+#            Channel.Channel.imageLocation,
+#            Channel.Channel.channelName,
+#            Channel.Channel.topic,
+#            Channel.Channel.description,
+#            Channel.Channel.channelLoc).filter_by(streamKey=key).first()
+
+
 
     if requestedChannel is not None:
 
@@ -272,7 +317,13 @@ def rtmp_rec_Complete_handler(channelLoc, path):
         else:
             channelImage = (sysSettings.siteProtocol + sysSettings.siteAddress + "/images/" + requestedChannel.imageLocation)
 
-        if requestedChannel.autoPublish is True:
+
+        #only send out notifications, webhooks and emails once every 600 seconds or 10 mins         
+        timeDiff = currentTime - requestedChannel.notificationsLastSentTime
+        if requestedChannel.autoPublish is True and timeDiff.total_seconds() > 600 :    
+            
+            requestedChannel.notificationsLastSentTime = currentTime
+
             webhookFunc.runWebhook(requestedChannel.id, 6, channelname=requestedChannel.channelName,
                    channelurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/channel/" + str(requestedChannel.id)),
                    channeltopic=templateFilters.get_topicName(requestedChannel.topic),
@@ -282,11 +333,12 @@ def rtmp_rec_Complete_handler(channelLoc, path):
                    videourl=(sysSettings.siteProtocol + sysSettings.siteAddress + '/play/' + str(pendingVideo.id)),
                    videothumbnail=(sysSettings.siteProtocol + sysSettings.siteAddress + '/videos/' + str(pendingVideo.thumbnailLocation)))
 
+            tpictureLocation = str(requestedChannel.owner.pictureLocation)
             subscriptionQuery = subscriptions.channelSubs.query.filter_by(channelID=requestedChannel.id).all()
             for sub in subscriptionQuery:
                 # Create Notification for Channel Subs
                 newNotification = notifications.userNotification(templateFilters.get_userName(requestedChannel.owningUser) + " has posted a new video to " + requestedChannel.channelName + " titled " + pendingVideo.channelName, '/play/' + str(pendingVideo.id),
-                                                                 "/images/" + str(requestedChannel.owner.pictureLocation), sub.userID)
+                                                                 "/images/" + tpictureLocation, sub.userID)
                 db.session.add(newNotification)
             db.session.commit()
 
@@ -294,11 +346,13 @@ def rtmp_rec_Complete_handler(channelLoc, path):
                              "<html><body><img src='" + sysSettings.siteProtocol + sysSettings.siteAddress + sysSettings.systemLogo + "'><p>Channel " + requestedChannel.channelName + " has posted a new video titled <u>" + pendingVideo.channelName +
                              "</u> to the channel.</p><p>Click this link to watch<br><a href='" + sysSettings.siteProtocol + sysSettings.siteAddress + "/play/" + str(pendingVideo.id) + "'>" + pendingVideo.channelName + "</a></p>")
 
-        while not os.path.exists(fullVidPath):
+        returnMessage = {'time': str(currentTime), 'request': 'RecordingClose', 'success': True, 'channelLoc': requestedChannel.channelLoc, 'ipAddress': None, 'message': 'Success - Recorded Video Processing Complete'}
+
+        db.session.close()
+        while not os.path.exists(fullVidPath): # WTF is this ???
             time.sleep(1)
 
-        returnMessage = {'time': str(currentTime), 'request': 'RecordingClose', 'success': True, 'channelLoc': requestedChannel.channelLoc, 'ipAddress': None, 'message': 'Success - Recorded Video Processing Complete'}
-        db.session.close()
+        
         return returnMessage
     else:
         returnMessage = {'time': str(currentTime), 'request': 'RecordingClose', 'success': False, 'channelLoc': channelLoc, 'ipAddress': None, 'message': 'Failed - Requested Channel Does Not Exist'}

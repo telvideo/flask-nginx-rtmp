@@ -8,6 +8,7 @@ class videoComments(db.Model):
     timestamp = db.Column(db.DateTime)
     comment = db.Column(db.String(2048))
     videoID = db.Column(db.Integer,db.ForeignKey('RecordedVideo.id'))
+    NupVotes = db.Column(db.Integer)
     upvotes = db.relationship('commentUpvotes', backref='videoComment', cascade="all, delete-orphan", lazy="joined")
 
     def __init__(self, userID, comment, videoID):
@@ -15,6 +16,7 @@ class videoComments(db.Model):
         self.timestamp = datetime.utcnow()
         self.comment = comment
         self.videoID = videoID
-
+        self.NupVotes = 0
+        
     def __repr__(self):
         return '<id %r>' % self.id

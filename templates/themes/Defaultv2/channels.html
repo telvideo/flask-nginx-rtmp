@@ -5,6 +5,8 @@
 {% endblock %}
 
 {% block body %}
+{{renderedchannels|safe}}
+<!---
 <div class="container-fluid p-2" id="index-videos-container">
     <div class="row m-2">
 
@@ -44,13 +46,13 @@
                             <span class="displayCard-left align-left" style="color:white;">
                             </span>
                             <span class="displayCard-right" style="float:right;color:white;">
-                              <span class="px-2 flex-fill subs"><i class="fas fa-star"></i> <b>{{channel.subscriptions|length}}</b></span>
+                              <span class="px-2 flex-fill subs"><i class="fas fa-star"></i> <b>{{channel.Nsubscriptions}}</b></span>
                               <span class="px-2 flex-fill views"><i class="fas fa-users"></i> <b>{{channel.views}}</b></span>
                             </span>
                           </div>
                         </div>
                         <div class="card-data">
-                          <img class="rounded" src="/images/{{channel.owner.pictureLocation}}" onerror="this.src='/static/img/user2.png';">
+                          <img class="rounded" src="/images/{{channel.pictureLocation}}" onerror="this.src='/static/img/user2.png';">
                           <div class="metadata">
                             <div class="card-cut-text name ml-2"><b>{{channel.channelName}}</b></div>
                             <div class="card-cut-text topic ml-2">{{channel.topic|get_topicName}}</div>
@@ -63,6 +65,7 @@
         </div>
     </div>
 </div>
+-->
 
 {% endblock %}
 

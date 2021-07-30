@@ -279,6 +279,14 @@ install_redis() {
   sudo apt-get install redis -y >> $OSPLOG 2>&1
   echo 25 | dialog --title "Installing Redis" --gauge "Configuring Redis" 10 70 0
   sudo sed -i 's/appendfsync everysec/appendfsync no/' /etc/redis/redis.conf >> $OSPLOG 2>&1
+
+  # Install new Different Redis used by Boggs code, this needs to be merged with the above after talking to Deamos about it...
+  sudo apt install python3-pip >> $OSPLOG 2>&1
+
+  echo "install flask verion of redis..."
+  sudo pip install flask-redis >> $OSPLOG 2>&1
+  echo "install pottery which is used to critical section startup"
+  sudo pip3 install pottery >> $OSPLOG 2>&1
 }
 
 install_osp_proxy() {
@@ -443,6 +451,9 @@ install_osp() {
   then
           sudo cp $DIR/setup/gunicorn/osp.target /etc/systemd/system/ >> $OSPLOG 2>&1
           sudo cp $DIR/setup/gunicorn/osp-worker@.service /etc/systemd/system/ >> $OSPLOG 2>&1
+
+          sudo cp $DIR/setup/gunicorn/osp-onetime.service /etc/systemd/system/ >> $OSPLOG 2>&1
+          
           sudo systemctl daemon-reload >> $OSPLOG 2>&1
           sudo systemctl enable osp.target >> $OSPLOG 2>&1
   else

@@ -10,40 +10,148 @@ from classes import Channel
 from classes import RecordedVideo
 from classes import Stream
 from classes import Sec
-
 from functions import themes
+from functions import templateFilters
+from classes.settings import r
+
+import jinja2 
 
 streamers_bp = Blueprint('streamers', __name__, url_prefix='/streamer')
 
 @streamers_bp.route('/')
 def streamers_page():
-    sysSettings = settings.settings.query.first()
-    streamerIDs = []
+    renderedstreamers = r.get('renderedstreamers')
 
-    if sysSettings.showEmptyTables:
-        for channel in db.session.query(Channel.Channel.owningUser).distinct():
-            if channel.owningUser not in streamerIDs:
-                streamerIDs.append(channel.owningUser)
-    else:
-        openStreams = Stream.Stream.query.all()
-        for stream in openStreams:
-            if stream.channel.owningUser not in streamerIDs:
-                streamerIDs.append(stream.channel.owningUser)
-        for recordedVidInstance in db.session.query(RecordedVideo.RecordedVideo.owningUser).distinct():
-            if recordedVidInstance.owningUser not in streamerIDs:
-                streamerIDs.append(recordedVidInstance.owningUser)
+    # if there is nothing in redis we need to get it and set it for everyone else
+    if (renderedstreamers == None):
 
-    streamerList = []
-    for userID in streamerIDs:
-        userQuery = Sec.User.query.filter_by(id=userID).first()
-        if userQuery is not None:
-            streamerList.append(userQuery)
+        sysSettings = settings.getSettingsFromRedis()
+        streamerIDs = []
 
-    return render_template(themes.checkOverride('streamers.html'), streamerList=streamerList)
+        if sysSettings.showEmptyTables:
+            for channel in db.session.query(Channel.Channel.owningUser).distinct():
+                if channel.owningUser not in streamerIDs:
+                    streamerIDs.append(channel.owningUser)
+        else:
+            openStreams = Stream.Stream.query.all()
+            for stream in openStreams:
+                if stream.channel.owningUser not in streamerIDs:
+                    streamerIDs.append(stream.channel.owningUser)
+            for recordedVidInstance in db.session.query(RecordedVideo.RecordedVideo.owningUser).distinct():
+                if recordedVidInstance.owningUser not in streamerIDs:
+                    streamerIDs.append(recordedVidInstance.owningUser)
+
+        streamerList = []
+        for userID in streamerIDs:
+            userQuery = Sec.User.query.filter_by(id=userID).first()
+            if userQuery is not None:
+                streamerList.append(userQuery)
+
+        mtemplateLoader = jinja2.FileSystemLoader(searchpath="./")
+        templateEnv = jinja2.Environment(loader=mtemplateLoader)
+        templateFilters.init(templateEnv)     
+        streamerstemplate = templateEnv.get_template(themes.checkOverrideDirect('redisstreamers.html',sysSettings.systemTheme))
+
+        renderedstreamers = streamerstemplate.render(streamerList=streamerList)  
+
+        #print("rendered")
+        r.set('renderedstreamers',renderedstreamers)
+        r.expire('renderedstreamers', 60)  # timeout for redis 
+
+
+    streamerList = [] # it's already set by render above
+
+    return render_template(themes.checkOverride('streamers.html'), streamerList=streamerList, renderedstreamers = renderedstreamers)
 
 @streamers_bp.route('/<userID>/')
 def streamers_view_page(userID):
     userID = int(userID)
+
+
+  #  chans = Channel.Channel.query.join(Sec.User,Sec.User.id == userID).with_entities(
+  #      Channel.Channel.protected,
+  #      Channel.Channel.Nsubscriptions,
+  #      Channel.Channel.views,
+  #      Channel.Channel.channelName,
+  #      Channel.Channel.imageLocation,
+  #      Channel.Channel.owningUser,
+  #      Channel.Channel.description,
+  #      Channel.Channel.topic,
+  #      Channel.Channel.id,
+  #      Sec.User.username,
+  #      Sec.User.pictureLocation,
+  #      Channel.Channel.id).filter(Channel.Channel.owningUser == userID).all()
+
+ #   openStreams = Stream.Stream.query\
+ #       .join(Channel.Channel,Channel.Channel.id == Stream.Stream.linkedChannel)\
+ #       .join(Sec.User, Sec.User.id == userID ).with_entities(
+ #           Channel.Channel.channelLoc,
+ #           Channel.Channel.protected,
+ #           #Channel.Channel.id,
+ #           Channel.Channel.id.label('chanID'),
+ #           Channel.Channel.channelName,
+ #           Stream.Stream.streamName,
+ #           Stream.Stream.topic,
+ #           Stream.Stream.NupVotes,
+ #           Stream.Stream.currentViewers,
+ #           Stream.Stream.totalViewers,
+ #           Stream.Stream.linkedChannel
+ #           ).all()
+
+#    userChannels = []
+#    strSet = set()
+#    for stre in openStreams:
+#        strSet.add(stre.linkedChannel)
+
+#    for chan in chans:
+#        if chan.id in strSet:
+#            isStreaming = True
+#        else:
+#            isStreaming = False
+            
+#        channelData = {"protected":chan.protected,
+#            "id":chan.id,
+#            "owningUser":chan.owningUser,
+#            "Nsubscriptions":chan.Nsubscriptions,
+#            "views":chan.views,
+#            "imageLocation":chan.imageLocation,
+#            "channelName":chan.channelName,
+#            "username":chan.username,
+#            "isStreaming":isStreaming,
+#            "pictureLocation":chan.pictureLocation,
+#            "description":chan.description,
+#            "topic":chan.topic
+#            }
+        
+#        userChannels.append(channelData)
+
+
+#    clipsList = RecordedVideo.Clips.query\
+#            .join(RecordedVideo.RecordedVideo,RecordedVideo.RecordedVideo.id == RecordedVideo.Clips.parentVideo)\
+#            .join(Channel.Channel,Channel.Channel.id == RecordedVideo.RecordedVideo.owningUser)\
+#            .join(Sec.User,Sec.User.id == Channel.Channel.id)\
+#            .filter(Sec.User.id == userID, RecordedVideo.Clips.published == True ).with_entities(
+#            RecordedVideo.RecordedVideo.videoDate,
+#            RecordedVideo.RecordedVideo.topic,
+#            RecordedVideo.RecordedVideo.owningUser,
+#            RecordedVideo.Clips.id,
+#            RecordedVideo.Clips.clipName,
+#            RecordedVideo.Clips.NupVotes,
+#            RecordedVideo.Clips.views,
+#            RecordedVideo.Clips.length,
+#            Channel.Channel.protected,
+#            Channel.Channel.id.label('chanID'),
+#            Channel.Channel.channelName,
+#            Sec.User.username
+#            ).all()
+
+
+ #   recordedVideoQuery = []
+#    clipsList = []
+#    streams = []
+#    streamerQuery = Sec.User.query.filter_by(id=userID).first()
+    
+#    return render_template(themes.checkOverride('videoListView.html'), openStreams=openStreams, recordedVids=recordedVideoQuery, userChannels=userChannels, clipsList=clipsList, title=streamerQuery.username, streamerData=streamerQuery)
 
     streamerQuery = Sec.User.query.filter_by(id=userID).first()
     if streamerQuery is not None:

@@ -6,22 +6,54 @@ from classes import Channel
 from classes import RecordedVideo
 from classes import Stream
 from classes import subscriptions
+from classes import Sec
+from classes import topics
+from globals import globalvars
+from functions import templateFilters
 
 from functions import themes
 
 channels_bp = Blueprint('channel', __name__, url_prefix='/channel')
 
+
+from classes.settings import r
+
+import jinja2  # we can't just use standard render_template() cos that will fire all our global injects and other stuff
+    
+
 @channels_bp.route('/')
 def channels_page():
-    sysSettings = settings.settings.query.first()
-    if sysSettings.showEmptyTables:
-        channelList = Channel.Channel.query.all()
-    else:
-        channelList = []
-        for channel in Channel.Channel.query.all():
-            if len(channel.recordedVideo) > 0:
-                channelList.append(channel)
-    return render_template(themes.checkOverride('channels.html'), channelList=channelList)
+
+    renderedchannels = r.get('renderedchannels')
+
+    # if there is nothing in redis we need to get it and set it for everyone else
+    if (renderedchannels == None):
+        sysSettings = settings.getSettingsFromRedis()
+            
+        if sysSettings.showEmptyTables:
+            channelList = Channel.Channel.query.all()
+        else:
+            channelList = []
+            for channel in Channel.Channel.query.all():
+                if len(channel.recordedVideo) > 0:
+                    channelList.append(channel)
+
+        mtemplateLoader = jinja2.FileSystemLoader(searchpath="./")
+        templateEnv = jinja2.Environment(loader=mtemplateLoader)
+        templateFilters.init(templateEnv)
+     
+        channelstemplate = templateEnv.get_template(themes.checkOverrideDirect('redischannels.html',sysSettings.systemTheme))
+
+        renderedchannels = channelstemplate.render(channelList=channelList)  
+
+        #print("rendered")
+        r.set('renderedchannels',renderedchannels)
+        r.expire('renderedchannels', 60)  # timeout for redis 
+
+    channelList = []
+
+    return render_template(themes.checkOverride('channels.html'), channeldList=channelList, renderedchannels = renderedchannels)
+
 
 @channels_bp.route('/<int:chanID>/')
 def channel_view_page(chanID):
@@ -31,11 +63,10 @@ def channel_view_page(chanID):
     if channelData is not None:
 
         openStreams = Stream.Stream.query.filter_by(linkedChannel=chanID).all()
-        recordedVids = RecordedVideo.RecordedVideo.query.filter_by(channelID=chanID, pending=False, published=True).all()
+        recordedVids = RecordedVideo.RecordedVideo.query.filter_by(channelID=chanID, pending=False, published=True).order_by(
+            RecordedVideo.RecordedVideo. videoDate.desc()).all()
 
-        # Sort Video to Show Newest First
-        recordedVids.sort(key=lambda x: x.videoDate, reverse=True)
-
+       
         clipsList = []
         for vid in recordedVids:
             for clip in vid.clips:

@@ -39,3 +39,5 @@ ejabberdServer = "127.0.0.1"
 recaptchaEnabled = False
 RECAPTCHA_PUBLIC_KEY = ''
 RECAPTCHA_PRIVATE_KEY = ''
+
+GlobalfirstRunCheck = False

@@ -17,6 +17,10 @@
     "clipplayer.html",
     "search.html",
     "subscriptions.html",
-    "notifications.html"
+    "notifications.html",
+    "redisliveNow.html",
+    "redischannels.html",
+    "redisstreamers.html",
+    "redistopics.html"
   ]
 }

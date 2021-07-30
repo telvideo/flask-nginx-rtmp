@@ -6,6 +6,7 @@ from flask import abort, current_app
 from flask_socketio import emit
 from flask_security import current_user
 from sqlalchemy.sql.expression import func
+from sqlalchemy.sql import text
 
 from classes.shared import db, socketio, limiter
 from classes import Sec
@@ -88,7 +89,9 @@ def deleteChannelAdmin(message):
                 shutil.rmtree(filePath, ignore_errors=True)
 
             from app import ejabberd
-            sysSettings = settings.settings.query.first()
+            #sysSettings = settings.settings.query.first()
+            sysSettings = settings.getSettingsFromRedis()
+            
             ejabberd.destroy_room(channelQuery.channelLoc, 'conference.' + sysSettings.siteAddress)
 
             system.newLog(1, "User " + current_user.username + " deleted Channel " + str(channelQuery.id))
@@ -136,7 +139,8 @@ def get_resource_usage(message):
 
 @socketio.on('testEmail')
 def test_email(info):
-    sysSettings = settings.settings.query.all()
+    #sysSettings = settings.settings.query.all()
+    sysSettings = settings.getSettingsFromRedis()
     validTester = False
     if sysSettings == [] or sysSettings is None:
         validTester = True
@@ -213,3 +217,38 @@ def disable_2fa(msg):
             system.newLog(1, "User " + current_user.username + " disabled 2FA for " + str(userQuery.username))
     db.session.close()
     return 'OK'
+
+@socketio.on('toggleVerified')
+def toggledVerified(msg):
+    db.session.commit()
+         
+    if current_user.has_role('Admin'):
+        userID = int(msg['userID'])
+        userQuery = Sec.User.query.filter_by(id=userID).first()
+        if userQuery is not None:
+            if userQuery.verified == 1:
+                 userQuery.verified = 0
+            else:
+                 userQuery.verified = 1
+
+            db.session.commit()
+            system.newLog(1, "User " + current_user.username + " toggleVerified " + str(userQuery.username))
+    db.session.close()
+    return 'OK'
+
+@socketio.on('changeDonationURL')
+def changeDonationURL(msg):         
+    if current_user.has_role('Admin'):
+        userID = int(msg['userID'])
+        theText = msg['theText']
+
+        # do direct SQL on table to avoid a slow DB call 
+        cmd = 'UPDATE user SET donationURL = :theText  WHERE id = :userID'
+        result = db.engine.execute(text(cmd), theText = theText, userID = userID)
+
+        system.newLog(1, "User "  + current_user.username +" changed DonationURL for user " + str(userID) + " to " + theText)
+
+    db.session.close()
+
+    return 'OK'
+

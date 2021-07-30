@@ -32,9 +32,7 @@
 </head>
 
 <body>
-
-  <div class="main-navbar">
-    <nav class="navbar  navbar-expand-lg navbar-light bg-white">
+    <nav class="main-navbar navbar  navbar-expand-lg sticky-top navbar-light bg-white">
       <a class="navbar-brand" href="/">
         <img src="{{sysSettings.systemLogo}}" width="48" height="48" class="d-inline-block align-top" alt="">
         <span class="navbar-title"><b>{{sysSettings.siteName}}</b></span>
@@ -141,7 +139,26 @@
         {% endif %}
       </div>
     </nav>
-  </div>
+ 
+  <div id="mySidenav" class="sidenav my-0 py-0" onmouseover="openNav();" onmouseout="closeNav();">
+
+    <span id="sidebartestText"></span>
+  
+    {% if subslist != [] %}
+    <span class="following-text">FOLLOWING</span> 
+        {% for chan in sideBarSubslist %}
+        <li class="row m-0 p-0 text-nowrap">
+            <a href="/channel/{{chan.id}}/" class="m-0 p-0 ">
+                    <img class="sidenavPic rounded " src="/images/{{chan.imageLocation}}" onerror="this.src='/static/img/user2.png';">
+                        <span style="font-size:1.5vw">{{chan.channelName|limit_title}}</span>
+            </a>
+        </li>
+        {% endfor %}
+        <br>
+    {% endif %}
+
+  </div> <!--mySidenav -->
+  <div id="main" > <!-- this div goes around ALL pages which include this file and is used to push the page over... -->
 
   <div style="position: absolute; top: 65px; right: 70px;z-index:9999999;" id="toastDiv">
     {%- with messages = get_flashed_messages(with_categories=true) -%}
@@ -380,7 +397,17 @@
   }
 
   </script>
+ <script>
+  function openNav() {
+      document.getElementById("mySidenav").style.width = "20vw";
+      document.getElementById("main").style.marginLeft = "20vw";
+  }
 
+  function closeNav() {
+      document.getElementById("mySidenav").style.width = "5vw";
+      document.getElementById("main").style.marginLeft = "5vw";
+  }
+</script>
   <script>
     $(function () {
       $('[data-toggle="tooltip"]').tooltip()
@@ -608,6 +635,76 @@
     }
 
   </script>
+
+<script type="text/javascript" charset="utf-8">
+  var conn_options = {
+      'sync disconnect on unload': true
+  };
+
+  var Msocket = io("/", { reconnection: true, forceNew: false });
+
+  
+</script>
+  <script>
+    
+var myCarousel = document.getElementById("carouseltestText");
+//    myCarousel = true;
+    carouselValid = false;
+    if (myCarousel != null){
+      carouselValid = true;}
+
+    //console.log("First getViewerStuff carouselValid = ");    console.log(carouselValid);
+    Msocket.emit('getViewerStuff',{doCarouel:carouselValid}); 
+
+    setInterval(function () {
+        //console.log("getViewerStuff carouselValid= ");       console.log(carouselValid);
+        Msocket.emit('getViewerStuff',{doCarouel:carouselValid});
+
+    }, 8000);  // this timeout must be one more second than r.expire('sideBarliveView', 7 in stream.py to sync up correctly.
+  </script>
+
+  <script type="text/javascript" charset="utf-8">
+    Msocket.on('getViewerStuffResponse', function (msg) {
+      //console.log("* getViewerStuffResponse START ")
+    
+      var myCarousel = document.getElementById("carouseltestText");
+      if (myCarousel != null){
+        myCarousel.innerHTML = msg['data'];
+      }
+
+      var myliveNow = document.getElementById("liveNowtestText");
+      if (myliveNow != null){
+        myliveNow.innerHTML = msg['liveNowList'];
+      }
+
+      //console.log("OSPcurrentInde= ")
+     // console.log(carcurrentIndex)
+//      var oldsideBar = document.getElementById("osp_carousel");
+    //  var currentItem = $("#osp_carousel.item.active" );
+	//		var tcurrentIndex = $('#osp_carousel.item').index(currentItem) + 1;
+     // console.log("CurITem= ");
+     // console.log(currentItem);
+     // console.log(tcurrentIndex);
+
+      var mysideBar = document.getElementById("sidebartestText");
+      if (mysideBar != null){
+        mysideBar.innerHTML = msg['sideBarStreamList'];
+      }
+   
+      //$('#osp_carousel').bind('slid', function() {
+      //  carcurrentIndex = $('div.active').index() + 1;
+      //  console.log("Slide ")
+      //  console.log(carcurrentIndex )
+      //});
+      
+      $('#osp_carousel').carousel(1)
+//			$('#osp_carousel').carousel('cycle')
+//			$('#osp_carousel').carousel('next')
+
+      console.log("getViewerStuffResponse.");
+    });
+  </script>
+
 <!-- Removed Due to breaking seeking
 <script>
   (async () => {
