@@ -420,11 +420,10 @@ def inject_recaptchaEnabled():
 
 @app.context_processor
 def inject_oAuthProviders():
-
     #SystemOAuthProviders = db.session.query(settings.oAuthProvider).all()
-    SystemOAuthProviders = settings.getAuthProvider("inject_oAuthProviders")
+    #SystemOAuthProviders = settings.getAuthProvider("inject_oAuthProviders")
 
-    #SystemOAuthProviders = db.session.query(settings.oAuthProvider).with_entities(settings.oAuthProvider.preset_auth_type, settings.oAuthProvider.friendlyName).all()
+    SystemOAuthProviders = db.session.query(settings.oAuthProvider).with_entities(settings.oAuthProvider.preset_auth_type, settings.oAuthProvider.friendlyName).all()
 
     return dict(SystemOAuthProviders=SystemOAuthProviders)
 
