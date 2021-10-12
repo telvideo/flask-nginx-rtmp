@@ -1,0 +1,72 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ template "app.fullname" . }}
+  labels:
+    app: {{ template "app.fullname" . }}
+    chart: {{ template "app.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "app.fullname" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "app.fullname" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: REDIS_HOST
+          value: "{{ .Values.appsettings.redis.host }}"
+        - name: REDIS_PORT
+          value: "{{ .Values.appsettings.redis.port }}"
+        - name: DB_URL
+          value: "{{ .Values.appsettings.db.url }}"
+        # - name: FLASK_SECRET
+        #   value: 
+        # - name: FLASK_SALT
+        #   value: 
+        # - name: OSP_ALLOWREGISTRATION
+        #   value: 
+        # - name: OSP_REQUIREVERIFICATION
+        #   value: 
+        ports:
+          - name: http
+            containerPort: 80
+            protocol: TCP
+        # readinessProbe:
+        #   httpGet:
+        #     path: /health
+        #     port: 80
+        #   initialDelaySeconds: 30
+        #   timeoutSeconds: 3
+        #   successThreshold: 1
+        #   failureThreshold: 10
+        # livenessProbe:
+        #   httpGet:
+        #     path: /health
+        #     port: 80
+        #   initialDelaySeconds: 30
+        #   timeoutSeconds: 3
+        #   successThreshold: 1
+        #   failureThreshold: 10
+        resources:
+{{ toYaml .Values.resources | indent 12 }}
+        volumeMounts:
+{{ toYaml .Values.volumeMounts | indent 12 }}
+      volumes:
+{{ toYaml .Values.volumes | indent 9 }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 2
+  minReadySeconds: 5
