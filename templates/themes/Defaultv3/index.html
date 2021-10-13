@@ -1,0 +1,48 @@
+{% extends "themes/" + sysSettings.systemTheme + "/layout.html" %}
+
+{% import "themes/" + sysSettings.systemTheme + "/macros/cards.html" as cards with context %}
+{% import "themes/" + sysSettings.systemTheme + "/macros/panels.html" as panels with context %}
+
+
+{% block head %}
+<title>{{sysSettings.siteName}}</title>
+<meta name="twitter:card" content="app" />
+<meta property="og:site_name" content="{{sysSettings.siteName}}" />
+<meta property="og:title" content="{{sysSettings.siteName}}" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="{{request.url|normalize_url}}" />
+<meta property="og:image" content="{{request.url_root|normalize_urlroot}}/{{sysSettings.systemLogo}}" />
+{% endblock %}
+
+{% block body %}
+        <!-- Content Block Here-->
+
+        <!--Announcement Macro-->
+        {%  if sysSettings.serverMessage != "" and sysSettings.serverMessage != None %}
+            {{ panels.announcement_panel(sysSettings.serverMessageTitle, sysSettings.serverMessage) }}
+        {%  endif %}
+
+        <!--Featured Streamer Macro-->
+        {# {{ featured_streamer_panel(data) }} #}
+
+        <!--Top Live Streams Macro-->
+        {{ panels.live_streams_panel(streamList, title="Top Live Streams") }}
+
+        <!--Currently Live Macro-->
+        {{ panels.live_streams_panel(streamList, title="Currently Live") }}
+
+        <!--Trending Topics Macro-->
+        {{ panels.topics_panel(uploadTopics, title="Trending Topics") }}
+
+        <!--Popular Videos Macro-->
+        {{ panels.videos_panel(videoList, title="Popular Videos") }}
+
+        <!--Popular Clips Macro-->
+        {{ panels.clips_panel(clipList, title="Popular Clips") }}
+
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+

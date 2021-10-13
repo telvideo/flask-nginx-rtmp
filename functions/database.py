@@ -34,12 +34,13 @@ def checkDefaults(user_datastore):
 
     log.info({"level": "info", "message": "Setting Default Topics"})
     topicList = [("Other", "None")]
-    for topic in topicList:
-        existingTopic = topics.topics.query.filter_by(name=topic[0]).first()
-        if existingTopic is None:
-            newTopic = topics.topics(topic[0], topic[1])
-            db.session.add(newTopic)
-    db.session.commit()
+    if topics.topics.query.all() == []:
+        for topic in topicList:
+            existingTopic = topics.topics.query.filter_by(name=topic[0]).first()
+            if existingTopic is None:
+                newTopic = topics.topics(topic[0], topic[1])
+                db.session.add(newTopic)
+        db.session.commit()
     return True
 
 def dbFixes():
@@ -70,6 +71,10 @@ def dbFixes():
     # Sets allowUploads to False if None is Set - Caused by Moving from Pre-Beta 2
     if sysSettings.allowUploads is None:
         sysSettings.allowUploads = False
+        db.session.commit()
+    # Sets allowRestreams to True if None is Set - Caused by < 0.9.x Upgrade
+    if sysSettings.allowRestream is None:
+        sysSettings.allowRestream = True
         db.session.commit()
     # Sets Blank Server Message to Prevent Crash if set to None
     if sysSettings.serverMessage is None:

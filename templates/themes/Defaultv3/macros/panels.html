@@ -1,0 +1,220 @@
+{% import "themes/" + sysSettings.systemTheme + "/macros/cards.html" as cards with context %}
+{% import "themes/" + sysSettings.systemTheme + "/macros/core_ui.html" as core_ui with context %}
+
+{% macro announcement_panel(title, message) %}
+<div class="announcement-container boxShadow">
+    <div class="float-end">
+      <button type="button" class="btn-close" aria-label="Close"></button>
+    </div>
+    <h3 class="textShadow"><b>{{ title }}</b></h3>
+    <p>{{ message }}</p>
+</div>
+{% endmacro %}
+
+{% macro live_streams_panel(streamList, title="Currently Live") %}
+<div class="live-container boxShadow">
+  <h3 class="textShadow"><b>{{ title }}</b></h3>
+  <ul id="topStreamList" class="mb-2 itemList d-flex flex-wrap justify-content-start" style="width:100%">
+      {% for stream in streamList %}
+        {{ cards.live_stream_card(stream) }}
+      {% endfor %}
+  </ul>
+</div>
+{% endmacro %}
+
+{% macro topics_panel(topicList, title="Topics" ) %}
+<div class="topics-container insetBoxShadow">
+  <h3 class="textShadow"><b>{{ title }}</b></h3>
+  <ul id="topicList" class="itemList d-flex flex-wrap justify-content-start" style="width:100%">
+  {% for topic in topicList %}
+    {{ cards.topic_card(topic) }}
+  {% endfor %}
+  </ul>
+</div>
+{% endmacro %}
+
+{% macro streamer_panel(streamerList, title="Streamers" ) %}
+<div class="streamer-container insetBoxShadow">
+  <h3 class="textShadow"><b>{{ title }}</b></h3>
+  <ul id="streamerList" class="itemList d-flex flex-wrap justify-content-start" style="width:100%">
+  {% for streamer in streamerList %}
+    {{ cards.streamer_card(streamer) }}
+  {% endfor %}
+  </ul>
+</div>
+{% endmacro %}
+
+{% macro channels_panel(channelList, title="Channels" ) %}
+<div class="channels-container insetBoxShadow">
+  <h3 class="textShadow"><b>{{ title }}</b></h3>
+  <ul id="channelList" class="itemList d-flex flex-wrap justify-content-start" style="width:100%">
+  {% for channel in channelList %}
+    {{ cards.channel_card(channel) }}
+  {% endfor %}
+  </ul>
+</div>
+{% endmacro %}
+
+{% macro videos_panel(videoList, title="Videos") %}
+<div class="videos-container boxShadow">
+  <h3 class="textShadow"><b>{{ title }}</b></h3>
+  <ul id="videoList" class="mb-2 itemList d-flex flex-wrap justify-content-start" style="width:100%">
+      {% for video in videoList %}
+          {{ cards.video_card(video) }}
+      {% endfor %}
+  </ul>
+</div>
+{% endmacro %}
+
+{% macro clips_panel(clipsList, title="Clips") %}
+<div class="clips-container boxShadow">
+  <h3 class="textShadow"><b>{{ title }}</b></h3>
+  <ul id="clipList" class="mb-2 itemList d-flex flex-wrap justify-content-start" style="width:100%">
+      {% for clip in clipsList %}
+          {{ cards.clip_card(clip) }}
+      {% endfor %}
+  </ul>
+</div>
+{% endmacro %}
+
+{% macro featured_streamer_panel(data) %}
+<div class="featured-stream-container insetBoxShadow">
+  <h1 class="textShadow"><b>Featured Stream</b></h1>
+  <div class="row">
+    <div class="col-sm-12 col-md-5">
+      <img class="w-100 boxShadow" src="/static/img/sample/fakelive.gif">
+    </div>
+    <div class="col-sm-12 col-md-7">
+      <div class="stream-metadata ms-4">
+        <div class="card mb-3" style="max-width: 540px;">
+          <div class="row g-0">
+            <div class="col-2">
+              <img class="mt-3 userImage boxShadow img-fluid rounded-circle" src="https://i.pravatar.cc/62?u=theuser2pravatar.com" alt="Username Picture">
+            </div>
+            <div class="col-10">
+              <div class="card-body">
+                <p class="card-text textShadow">
+                  <b>Stream Name</b><br>
+                  Streamer Username<br>
+                  Stream Topic
+                </p>
+                <span class="live-badge boxShadow textShadow"><b>Live</b></span>
+                <span class="live-viewers-badge boxShadow textShadow ms-1"><i class="bi bi-eye-fill pe-1"></i> <b class="justify-content-end">40201</b></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stream-metadata-description">
+          Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quisquam nostrum deserunt beatae possimus autem aspernatur, temporibus dolore labore laudantium quaerat, ducimus neque fuga, repellat dolorem et earum corporis odit! Blanditiis.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endmacro %}
+
+{% macro user_bio_panel(userData) %}
+<div class="streamer-info-container insetBoxShadow">
+  <div class="row">
+    <div class="col-auto">
+      <img class="steamer-info-picture-img rounded-circle boxShadow" src="/images/{{userData.pictureLocation}}" alt="User Photo">
+    </div>
+    <div class="col">
+      <div class="user-metadata align-top">
+        <span class="fs-4 textShadow"><b>{{userData.username}}</b></span><br>
+        <span class="socialIcons">
+            <a href="#"><img class="socialIcon boxShadow" src="https://cdn3.iconfinder.com/data/icons/popular-services-brands/512/facebook-512.png"></a>
+            <a href="#"><img class="socialIcon boxShadow" src="https://cdn4.iconfinder.com/data/icons/social-media-icons-the-circle-set/48/twitter_circle-512.png"></a>
+            <a href="#"><img class="socialIcon boxShadow" src="https://cdn.fastly.picmonkey.com/content4/previews/social/social_53_550.png"></a>
+            <a href="#"><img class="socialIcon boxShadow" src="https://icons-for-free.com/iconfiles/png/512/instagram+photos+round+icon+social+media+social+network+icon-1320190505735536578.png"></a>
+        </span>
+      </div>
+    </div>
+    {% if userData.biography != None and userData.biography != "" and userData.biography != "None" %}
+    <span class="fs-5 mt-4 textShadow">{{userData.biography|markdown}}</span>
+    {% endif %}
+  </div>
+</div>
+{% endmacro %}
+
+{% macro channel_metadata_panel(channelData) %}
+<div class="channel-info-container insetBoxShadow">
+  <div class="row">
+    <div class="col-auto">
+      <img class="channel-info-picture-img boxShadow" src="/images/{{channelData.imageLocation}}" width="100%" onerror="this.src='/static/img/video-placeholder.jpg';">
+    </div>
+    <div class="col">
+      <div class="channel-metadata align-top">
+        <div class="fs-4 textShadow"><b>{{ channelData.channelName }}</b></div>
+        <div class="textShadow"><a href="#"><b>{{ channelData.owningUser|get_userName }}</b></a></div>
+        <div class="channelBadges">
+          {% if channelData.id | get_channelLiveStatus %}
+            {{ core_ui.live_badge() }}
+          {% else %}
+            {{ core_ui.offline_badge() }}
+          {% endif %}
+          {% if channelData.protected and sysSettings.protectionEnabled %}
+            {{ core_ui.protected_badge() }}
+          {% endif %}
+        </div>
+        <div class="channelButtons">
+          <a href="/view/{{ channelData.channelLoc }}" class="btn btn-primary btn-sm boxShadow textShadow me-2"><b>View Live Channel</b></a>
+          {% if current_user.is_authenticated %}
+          <button type="button" class="btn btn-success btn-sm boxShadow textShadow"><b><i class="bi bi-star-fill"></i> Subscribe</b></button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% if channelData.description != None and channelData.description != "" and channelData.description != "None" %}
+    <span class="fs-5 mt-4 textShadow">{{channelData.description|markdown}}</span>
+    {% endif %}
+  </div>
+</div>
+{% endmacro %}
+
+{% macro video_metadata_panel(video) %}
+<div class="video-metadata">
+  <div class="row">
+    <div class="channelImg-sm col-auto">
+      <img src="/images/{{ video.channelID | get_channelPicture}}">
+    </div>
+    <div class="col-5">
+      <div class="video-name">{{ video.channelName }}</div>
+      <div class="video-channelName">{{ video.channelID | get_channelName }}</div>
+      <div class="video-topic">{{ video.topic | get_topicName }}</div>
+    </div>
+    <div class="col">
+      <div class="float-end mx-1">
+        <i class="bi bi-people-fill"></i> {{ video.views }}
+      </div>
+    </div>
+  </div>
+</div>
+{% endmacro %}
+
+{% macro video_player(videoURL, videoThumbnail, isAutoPlay=True) %}
+<div class="player">
+    <video id="video" class="shadow video-js vjs-big-play-centered" poster="/videos/{{videoThumbnail}}" {% if isAutoPlay == True %}autoplay{% endif %} controls playsinline preload="auto" data-setup='{"fluid": true}'>
+        <source src="{{videoURL}}" type="video/mp4">
+        <p class="vjs-no-js">
+          To view this video please enable JavaScript, and consider upgrading to a web browser that
+          <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+        </p>
+    </video>
+</div>
+{% endmacro %}
+
+{% macro comments_panel(commentList, videoAllowComments, systemAllowComments) %}
+<div class="comments-container boxShadow">
+  <div class="comments-header-container boxShadow">
+    <span class="float-start ms-4 mt-1"><i class="text-center fs-4  bi-arrow-bar-right"></i></span>
+    <span class="fs-3 textShadow"><b>Comments</b></span>
+    <span class="float-end me-3 mt-1" onclick="openModal('commentModal');"><i class="text-center fs-4 bi bi-plus-square"></i></span>
+  </div>
+  <div class="comments-content-container">
+    {% for comment in commentList %}
+        {{ cards.comment_card(comment) }}
+    {% endfor %}
+  </div>
+</div>
+{% endmacro %}

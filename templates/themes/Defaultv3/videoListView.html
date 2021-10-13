@@ -1,0 +1,37 @@
+{% extends "themes/" + sysSettings.systemTheme + "/layout.html" %}
+
+{% import "themes/" + sysSettings.systemTheme + "/macros/core_ui.html" as core_ui with context %}
+{% import "themes/" + sysSettings.systemTheme + "/macros/cards.html" as cards with context %}
+{% import "themes/" + sysSettings.systemTheme + "/macros/panels.html" as panels with context %}
+
+
+{% block head %}
+<title>{{sysSettings.siteName}} - {{ title }}</title>
+<meta name="twitter:card" content="app" />
+<meta property="og:site_name" content="{{sysSettings.siteName}}" />
+<meta property="og:title" content="{{sysSettings.siteName}}" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="{{request.url|normalize_url}}" />
+<meta property="og:image" content="{{request.url_root|normalize_urlroot}}/{{sysSettings.systemLogo}}" />
+{% endblock %}
+
+{% block body %}
+    {% if streamerData is defined %}
+        {{ panels.user_bio_panel(streamerData) }}
+    {% endif %}
+    {% if channelData is defined %}
+        {{ panels.channel_metadata_panel(channelData) }}
+    {% endif %}
+    {% if openStreams %}
+        {{ panels.live_streams_panel(openStreams) }}
+    {% endif %}
+    {% if userChannels %}
+        {{ panels.channels_panel(userChannels) }}
+    {% endif %}
+    {% if recordedVids %}
+        {{ panels.videos_panel(recordedVids) }}
+    {% endif %}
+    {% if clipsList %}
+        {{ panels.clips_panel(clipsList) }}
+    {% endif %}
+{% endblock %}
