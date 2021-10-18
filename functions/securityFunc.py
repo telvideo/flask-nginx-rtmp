@@ -2,15 +2,21 @@ from flask import session
 from flask_security import current_user
 import datetime
 import bleach
+import logging
 
 from classes.shared import db, limiter
 from classes import Channel
 from classes import Sec
 from classes import invites
+from classes import views
+from classes import comments
+from classes import apikey
 
 from globals import globalvars
 
-from functions import cache
+from functions import cache, system
+
+log = logging.getLogger('app.functions.securityFunctions')
 
 @limiter.limit("100/second")
 def check_isValidChannelViewer(channelID):
@@ -70,6 +76,68 @@ def check_isUserValidRTMPViewer(userID,channelID):
                         db.session.commit()
                         db.session.close()
     return False
+
+
+def delete_user(userID):
+    """
+    Deletes Channel Data, Comments, Videos, Clips, and Userdata for a given userID
+    """
+    userQuery = Sec.User.query.filter_by(id=userID).first()
+    if userQuery != None:
+        channelQuery = Channel.Channel.query.filter_by(owningUser=userQuery.id).all()
+        username = userQuery.username
+
+        # Delete any existing Invites
+        inviteQuery = invites.invitedViewer.query.filter_by(userID=int(userID)).all()
+        for invite in inviteQuery:
+            db.session.delete(invite)
+        db.session.commit()
+
+        # Delete any existing User Comments
+        commentQuery = comments.videoComments.query.filter_by(userID=int(userID)).all()
+        for comment in commentQuery:
+            db.session.delete(comment)
+        db.session.commit()
+
+        # Delete any existing API Keys
+        apikeyQuery = apikey.apikey.query.filter_by(userID=userID).all()
+        for key in apikeyQuery:
+            db.session.delete(key)
+        db.session.commit()
+
+        # Delete Channels and all Channel Data
+        for channel in channelQuery:
+            videoQuery = channel.recordedVideo
+            for video in videoQuery:
+                video.remove()
+                for clip in video.clips:
+                    for upvotes in clip:
+                        db.session.delete(upvotes)
+                    clip.remove()
+                    db.session.delete(clip)
+                for upvote in video.upvotes:
+                    db.session.delete(upvote)
+                for comment in video.comments:
+                    db.session.delete(comment)
+                vidViews = views.views.query.filter_by(viewType=1, itemID=video.id).all()
+                for view in vidViews:
+                    db.session.delete(view)
+                db.session.delete(video)
+            db.session.delete(channel)
+
+        # Clear All Role Entries for a User Prior to Deletion
+        from app import user_datastore
+        roleQuery = Sec.Role.query.all()
+        for role in roleQuery:
+            user_datastore.remove_role_from_user(userQuery, role)
+
+        db.session.delete(userQuery)
+        db.session.commit()
+        log.warning({"level": "warning", "message": "User Deleted - " + username})
+        system.newLog(1, "User " + current_user.username + " deleted User " + username)
+        return True
+    else:
+        return False
 
 def uia_username_mapper(identity):
     # we allow pretty much anything - but we bleach it.

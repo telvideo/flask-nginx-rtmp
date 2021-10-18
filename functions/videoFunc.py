@@ -23,6 +23,8 @@ from functions import webhookFunc
 from functions import templateFilters
 from functions import cachedDbCalls
 
+from functions.scheduled_tasks import message_tasks
+
 log = logging.getLogger('app.functions.database')
 
 # Checks Length of a Video at path and returns the length
@@ -33,7 +35,7 @@ def getVidLength(input_video):
 def deleteVideo(videoID):
     recordedVid = RecordedVideo.RecordedVideo.query.filter_by(id=videoID).first()
 
-    if current_user.id == recordedVid.owningUser and recordedVid.videoLocation is not None:
+    if recordedVid.videoLocation is not None:
         videos_root = globalvars.videoRoot + 'videos/'
         filePath = videos_root + recordedVid.videoLocation
         thumbnailPath = videos_root + recordedVid.videoLocation[:-4] + ".png"
@@ -99,7 +101,7 @@ def changeVideoMetadata(videoID, newVideoName, newVideoTopic, description, allow
         else:
             channelImage = (sysSettings.siteProtocol + sysSettings.siteAddress + "/images/" + recordedVidQuery.channel.imageLocation)
 
-        webhookFunc.runWebhook(recordedVidQuery.channel.id, 9, channelname=recordedVidQuery.channel.channelName,
+        message_tasks.send_webhook.delay(recordedVidQuery.channel.id, 9, channelname=recordedVidQuery.channel.channelName,
                    channelurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/channel/" + str(recordedVidQuery.channel.id)),
                    channeltopic=templateFilters.get_topicName(recordedVidQuery.channel.topic),
                    channelimage=channelImage, streamer=templateFilters.get_userName(recordedVidQuery.channel.owningUser),
@@ -170,7 +172,7 @@ def createClip(videoID, clipStart, clipStop, clipName, clipDescription):
     settingsQuery = cachedDbCalls.getSystemSettings()
 
     # TODO Add Webhook for Clip Creation
-    recordedVidQuery = RecordedVideo.RecordedVideo.query.filter_by(id=int(videoID), owningUser=current_user.id).first()
+    recordedVidQuery = RecordedVideo.RecordedVideo.query.filter_by(id=int(videoID)).first()
 
     if recordedVidQuery is not None:
 
@@ -252,7 +254,7 @@ def deleteClip(clipID):
     clipQuery = RecordedVideo.Clips.query.filter_by(id=int(clipID)).first()
     videos_root = globalvars.videoRoot + 'videos/'
 
-    if current_user.id == clipQuery.recordedVideo.owningUser and clipQuery is not None:
+    if clipQuery is not None:
         videoPath = videos_root + clipQuery.videoLocation
         thumbnailPath = videos_root + clipQuery.thumbnailLocation
         gifPath = videos_root + clipQuery.gifLocation
@@ -267,10 +269,48 @@ def deleteClip(clipID):
             if os.path.exists(videoPath) and (clipQuery.videoLocation is not None or videoPath != ""):
                 os.remove(videoPath)
 
+        upvoteQuery = upvotes.clipUpvotes.query.filter_by(clipID=clipQuery.id).all()
+        for vote in upvoteQuery:
+            db.session.delete(vote)
+
         db.session.delete(clipQuery)
 
         db.session.commit()
         system.newLog(6, "Clip Deleted - ID #" + str(clipID))
+        return True
+    else:
+        return False
+
+def setVideoThumbnail(videoID, timeStamp):
+    videos_root = globalvars.videoRoot + 'videos/'
+
+    videoQuery = RecordedVideo.RecordedVideo.query.filter_by(id=videoID).first()
+    if videoQuery is not None:
+        videoLocation = videos_root + videoQuery.videoLocation
+        newThumbnailLocation = videoQuery.videoLocation[:-3] + "png"
+        newGifThumbnailLocation = videoQuery.videoLocation[:-3] + "gif"
+        videoQuery.thumbnailLocation = newThumbnailLocation
+        fullthumbnailLocation = videos_root + newThumbnailLocation
+        newGifFullThumbnailLocation = videos_root + newGifThumbnailLocation
+
+        videoQuery.thumbnailLocation = newThumbnailLocation
+        videoQuery.gifLocation = newGifThumbnailLocation
+
+        db.session.commit()
+        db.session.close()
+        try:
+            os.remove(fullthumbnailLocation)
+        except OSError:
+            pass
+        try:
+            os.remove(newGifFullThumbnailLocation)
+        except OSError:
+            pass
+        result = subprocess.call(
+            ['ffmpeg', '-ss', str(timeStamp), '-i', videoLocation, '-s', '384x216', '-vframes', '1', fullthumbnailLocation])
+        gifresult = subprocess.call(['ffmpeg', '-ss', str(timeStamp), '-t', '3', '-i', videoLocation, '-filter_complex',
+                                     '[0:v] fps=30,scale=w=384:h=-1,split [a][b];[a] palettegen=stats_mode=single [p];[b][p] paletteuse=new=1',
+                                     '-y', newGifFullThumbnailLocation])
         return True
     else:
         return False

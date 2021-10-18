@@ -39,7 +39,6 @@ WTForms==2.3.3
 requests==2.20.0
 flask-markdown==0.3
 xmltodict==0.12.0
-apscheduler==3.6.1
 redis==3.3.11
 flask-limiter==1.1.0
 gunicorn==20.0.4
@@ -47,9 +46,10 @@ flask-session==0.3.2
 flask-debugtoolbar==0.11.0
 psycopg2-binary==2.8.5
 flask-cors==3.0.9
-Pillow==8.2.0
+Pillow==8.3.2
 pilkit==2.0
 authlib==0.14.1
 bleach==3.3.0
 pyqrcode==1.2.1
 sentry-sdk==1.3.1
+celery==5.1.2

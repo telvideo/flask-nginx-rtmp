@@ -22,6 +22,7 @@ from functions import securityFunc
 from functions import webhookFunc
 from functions import templateFilters
 from functions import cachedDbCalls
+from functions.scheduled_tasks import video_tasks, message_tasks
 
 from globals import globalvars
 
@@ -121,14 +122,13 @@ def vid_clip_page(videoID):
     clipName = str(request.form['clipName'])
     clipDescription = str(request.form['clipDescription'])
 
-    result = videoFunc.createClip(videoID, clipStart, clipStop, clipName, clipDescription)
-
-    if result[0] is True:
-        flash("Clip Created", "success")
-        return redirect(url_for("clip.view_clip_page", clipID=result[1]))
+    videoQuery = cachedDbCalls.getVideo(videoID)
+    if videoQuery.owningUser == current_user.id:
+        result = video_tasks.create_video_clip.delay(videoID, clipStart, clipStop, clipName, clipDescription)
+        flash("Clip Queued for Creation", "success")
     else:
-        flash("Unable to create Clip", "error")
-        return redirect(url_for(".view_vid_page", videoID=videoID))
+        flash("Current Video Owner is not current owner","error")
+    return redirect(url_for(".view_vid_page", videoID=videoID))
 
 @play_bp.route('/<videoID>/move', methods=['POST'])
 @login_required
@@ -171,12 +171,12 @@ def vid_change_page(videoID):
 @play_bp.route('/<videoID>/delete')
 @login_required
 def delete_vid_page(videoID):
+    videoQuery = cachedDbCalls.getVideo(videoID)
+    if videoQuery.owningUser == current_user.id:
+        result = video_tasks.delete_video.delay(videoID)
 
-    result = videoFunc.deleteVideo(videoID)
-
-    if result is True:
         cache.delete_memoized(cachedDbCalls.getVideo, videoID)
-        flash("Video deleted")
+        flash("Video Scheduled for Deletion", "success")
         return redirect(url_for('root.main_page'))
     else:
         flash("Error Deleting Video")
@@ -218,7 +218,7 @@ def comments_vid_page(videoID):
             db.session.add(newNotification)
             db.session.commit()
 
-            webhookFunc.runWebhook(channelQuery.id, 7, channelname=channelQuery.channelName,
+            message_tasks.send_webhook.delay(channelQuery.id, 7, channelname=channelQuery.channelName,
                        channelurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/channel/" + str(channelQuery.id)),
                        channeltopic=templateFilters.get_topicName(channelQuery.topic),
                        channelimage=channelImage, streamer=templateFilters.get_userName(channelQuery.owningUser),

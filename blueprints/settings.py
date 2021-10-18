@@ -11,7 +11,7 @@ import psutil
 
 import requests
 from flask import request, flash, render_template, redirect, url_for, Blueprint, current_app, Response, session, abort
-from flask_security import Security, SQLAlchemyUserDatastore, current_user, login_required, roles_required
+from flask_security import Security, SQLAlchemyUserDatastore, current_user, login_required, roles_required, logout_user
 from flask_security.utils import hash_password
 from flask_mail import Mail
 from sqlalchemy.sql.expression import func
@@ -41,6 +41,7 @@ from classes.shared import cache
 from functions import system
 from functions import themes
 from functions import cachedDbCalls
+from functions import securityFunc
 
 from globals import globalvars
 
@@ -130,6 +131,19 @@ def subscription_page():
     channelSubList = subscriptions.channelSubs.query.filter_by(userID=current_user.id).all()
 
     return render_template(themes.checkOverride('subscriptions.html'), channelSubList=channelSubList)
+
+
+@settings_bp.route('/user/deleteSelf')
+@login_required
+def user_delete_own_account():
+    """
+    Endpoint to allow user to delete own account and all associated data.
+    Not to be called directly without confirmation UI
+    """
+    securityFunc.delete_user(current_user.id)
+    flash('Account and Associated Data Deleted', 'error')
+    logout_user()
+    return redirect(url_for("main_page"))
 
 
 @settings_bp.route('/user/addInviteCode')
@@ -223,53 +237,13 @@ def admin_page():
 
                 elif setting == "users":
                     userID = int(request.args.get("userID"))
-
                     userQuery = Sec.User.query.filter_by(id=userID).first()
 
                     if userQuery is not None:
 
-                        commentQuery = comments.videoComments.query.filter_by(userID=int(userID)).all()
-                        for comment in commentQuery:
-                            db.session.delete(comment)
-                        db.session.commit()
-
-                        inviteQuery = invites.invitedViewer.query.filter_by(userID=int(userID)).all()
-                        for invite in inviteQuery:
-                            db.session.delete(invite)
-                        db.session.commit()
-
-                        channelQuery = Channel.Channel.query.filter_by(owningUser=userQuery.id).all()
-
-                        for chan in channelQuery:
-
-                            for vid in chan.recordedVideo:
-                                for upvote in vid.upvotes:
-                                    db.session.delete(upvote)
-
-                                vidComments = vid.comments
-                                for comment in vidComments:
-                                    db.session.delete(comment)
-
-                                vidViews = views.views.query.filter_by(viewType=1, itemID=vid.id)
-                                for view in vidViews:
-                                    db.session.delete(view)
-
-                                for clip in vid.clips:
-                                    db.session.delete(clip)
-
-                                db.session.delete(vid)
-                            for upvote in chan.upvotes:
-                                db.session.delete(upvote)
-
-                            filePath = videos_root + chan.channelLoc
-
-                            if filePath != videos_root:
-                                shutil.rmtree(filePath, ignore_errors=True)
-
-                            db.session.delete(chan)
+                        securityFunc.delete_user(userQuery.id)
 
                         flash("User " + str(userQuery.username) + " Deleted")
-                        system.newLog(1, "User " + current_user.username + " deleted User " + str(userQuery.username))
 
                         db.session.delete(userQuery)
                         db.session.commit()
@@ -360,7 +334,7 @@ def admin_page():
         userList = Sec.User.query.all()
         roleList = Sec.Role.query.all()
         channelList = Channel.Channel.query.all()
-        streamList = Stream.Stream.query.all()
+        streamList = Stream.Stream.query.filter_by(active=True).all()
         topicsList = topics.topics.query.all()
         rtmpServers = settings.rtmpServer.query.all()
         edgeNodes = settings.edgeStreamer.query.all()
@@ -463,7 +437,7 @@ def admin_page():
             serverMessageTitle = request.form['serverMessageTitle']
             serverMessage = request.form['serverMessage']
             theme = request.form['theme']
-            mainPageSort = request.form['mainPageSort']
+
             restreamMaxBitrate = request.form['restreamMaxBitrate']
             clipMaxLength = request.form['maxClipLength']
 
@@ -565,7 +539,15 @@ def admin_page():
             sysSettings.showEmptyTables = showEmptyTables
             sysSettings.allowComments = allowComments
             sysSettings.systemTheme = theme
-            sysSettings.sortMainBy = int(mainPageSort)
+            if 'mainPageSort' in request.form:
+                sysSettings.sortMainBy = int(request.form['mainPageSort'])
+            if 'maxVideoRetention' in request.form:
+                sysSettings.maxVideoRetention = int(request.form['maxVideoRetention'])
+            # Check enableRTMPRestream - Workaround to pre 0.9.x themes, by checking for the existance of 'mainPageSort' which does not exist in >= 0.9.x
+            if 'enableRTMPRestream' in request.form:
+                sysSettings.allowRestream = True
+            elif 'mainPageSort' not in request.form:
+                sysSettings.allowRestream = False
             sysSettings.serverMessageTitle = serverMessageTitle
             sysSettings.serverMessage = serverMessage
             sysSettings.protectionEnabled = protectionEnabled
@@ -936,6 +918,13 @@ def admin_page():
             return redirect(url_for('.admin_page', page="users"))
 
         return redirect(url_for('.admin_page'))
+
+@settings_bp.route('/admin/create_test_task')
+@login_required
+@roles_required('Admin')
+def createtestask():
+    result = system.testCelery.apply_async(countdown=1)
+    return str(result)
 
 @settings_bp.route('/admin/rtmpstat/<node>')
 @login_required

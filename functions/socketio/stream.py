@@ -14,6 +14,8 @@ from functions import templateFilters
 from functions import xmpp
 from functions import cachedDbCalls
 
+from functions.scheduled_tasks import message_tasks
+
 from app import r
 
 @socketio.on('getViewerTotal')
@@ -23,7 +25,7 @@ def handle_viewer_total_request(streamData, room=None):
     viewers = xmpp.getChannelCounts(channelLoc)
     ChannelUpdateStatement = Channel.Channel.query.filter_by(channelLoc=channelLoc).update(dict(currentViewers=viewers))
     channelQuery = Channel.Channel.query.filter_by(channelLoc=channelLoc).with_entities(Channel.Channel.id).first()
-    StreamUpdateStatement = Stream.Stream.query.filter_by(linkedChannel=channelQuery.id).update(dict(currentViewers=viewers))
+    StreamUpdateStatement = Stream.Stream.query.filter_by(active=True, linkedChannel=channelQuery.id).update(dict(currentViewers=viewers))
 
     db.session.commit()
     db.session.close()
@@ -51,7 +53,7 @@ def updateStreamData(message):
         else:
             channelImage = (sysSettings.siteProtocol + sysSettings.siteAddress + "/images/" + channelQuery.imageLocation)
 
-        webhookFunc.runWebhook(channelQuery.id, 4, channelname=channelQuery.channelName,
+        message_tasks.send_webhook.delay(channelQuery.id, 4, channelname=channelQuery.channelName,
                    channelurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/channel/" + str(channelQuery.id)),
                    channeltopic=channelQuery.topic,
                    channelimage=channelImage, streamer=templateFilters.get_userName(channelQuery.owningUser),

@@ -13,6 +13,7 @@ from functions import templateFilters
 from functions import videoFunc
 from functions import subsFunc
 from functions import cachedDbCalls
+from functions.scheduled_tasks import video_tasks, message_tasks
 
 from app import r
 
@@ -20,19 +21,15 @@ from app import r
 def deleteVideoSocketIO(message):
     if current_user.is_authenticated:
         videoID = int(message['videoID'])
-        result = videoFunc.deleteVideo(videoID)
-        if result is True:
+        videoQuery = cachedDbCalls.getVideo(videoID)
+        if videoQuery.owningUser == current_user.id:
+            result = video_tasks.delete_video.delay(videoID)
             db.session.commit()
             db.session.close()
             return 'OK'
-        else:
-            db.session.commit()
-            db.session.close()
-            return abort(500)
-    else:
-        db.session.commit()
-        db.session.close()
-        return abort(401)
+    db.session.commit()
+    db.session.close()
+    return abort(401)
 
 @socketio.on('editVideo')
 def editVideoSocketIO(message):
@@ -67,19 +64,16 @@ def createclipSocketIO(message):
         clipDescription = message['clipDescription']
         startTime = float(message['clipStart'])
         stopTime = float(message['clipStop'])
-        result = videoFunc.createClip(videoID, startTime, stopTime, clipName, clipDescription)
-        if result[0] is True:
+        videoQuery = cachedDbCalls.getVideo(videoID)
+        if videoQuery.owningUser == current_user.id:
+            result = video_tasks.create_video_clip.delay(videoID, startTime, stopTime, clipName, clipDescription)
             db.session.commit()
             db.session.close()
             return 'OK'
         else:
             db.session.commit()
             db.session.close()
-            return abort(500)
-    else:
-        db.session.commit()
-        db.session.close()
-        return abort(401)
+            return abort(401)
 
 @socketio.on('moveVideo')
 def moveVideoSocketIO(message):
@@ -118,7 +112,7 @@ def togglePublishedSocketIO(message):
 
             if newState is True:
 
-                webhookFunc.runWebhook(videoQuery.channel.id, 6, channelname=videoQuery.channel.channelName,
+                message_tasks.send_webhook.delay(videoQuery.channel.id, 6, channelname=videoQuery.channel.channelName,
                            channelurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/channel/" + str(videoQuery.channel.id)),
                            channeltopic=templateFilters.get_topicName(videoQuery.channel.topic),
                            channelimage=channelImage, streamer=templateFilters.get_userName(videoQuery.channel.owningUser),
@@ -209,17 +203,16 @@ def changeClipMetadataSocketIO(message):
 def deleteClipSocketIO(message):
     if current_user.is_authenticated:
         clipID = int(message['clipID'])
-
-        result = videoFunc.deleteClip(clipID)
-
-        if result is True:
+        clipQuery = RecordedVideo.Clips.query.filter_by(id=clipID).first()
+        if clipQuery.recordedVideo.owningUser == current_user.id:
+            result = video_tasks.delete_video_clip.delay(clipID)
             db.session.commit()
             db.session.close()
             return 'OK'
         else:
             db.session.commit()
             db.session.close()
-            return abort(500)
+            return abort(401)
     else:
         db.session.commit()
         db.session.close()

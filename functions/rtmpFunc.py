@@ -5,7 +5,7 @@ import datetime
 
 from flask import Blueprint, request, redirect, current_app, abort
 
-from classes.shared import db
+from classes.shared import db, celery
 from classes import Sec
 from classes import RecordedVideo
 from classes import subscriptions
@@ -24,6 +24,7 @@ from functions import subsFunc
 from functions import videoFunc
 from functions import xmpp
 from functions import cachedDbCalls
+from functions.scheduled_tasks import message_tasks
 
 def rtmp_stage1_streamkey_check(key, ipaddress):
     sysSettings = cachedDbCalls.getSystemSettings()
@@ -41,7 +42,15 @@ def rtmp_stage1_streamkey_check(key, ipaddress):
                     returnMessage = {'time': str(currentTime), 'request': 'Stage1', 'success': False, 'channelLoc': channelRequest.channelLoc, 'type': None, 'ipAddress': str(ipaddress), 'message': 'Unauthorized User - User has been disabled'}
                     return returnMessage
 
-                existingStreamQuery = Stream.Stream.query.filter_by(linkedChannel=channelRequest.id).all()
+                # Checks for is there are any existing live streams and terminates them
+                existingStreamQuery = Stream.Stream.query.filter_by(active=True, linkedChannel=channelRequest.id).all()
+                if existingStreamQuery:
+                    for stream in existingStreamQuery:
+                        db.session.delete(stream)
+                    db.session.commit()
+
+                # Checks for is there are any pending live streams and terminates them
+                existingStreamQuery = Stream.Stream.query.filter_by(pending=True, linkedChannel=channelRequest.id).all()
                 if existingStreamQuery:
                     for stream in existingStreamQuery:
                         db.session.delete(stream)
@@ -83,7 +92,7 @@ def rtmp_stage2_user_auth_check(channelLoc, ipaddress, authorizedRTMP):
     requestedChannel = Channel.Channel.query.filter_by(channelLoc=channelLoc).first()
 
     if requestedChannel is not None:
-        authedStream = Stream.Stream.query.filter_by(streamKey=requestedChannel.streamKey).first()
+        authedStream = Stream.Stream.query.filter_by(pending=True, streamKey=requestedChannel.streamKey).first()
 
         if authedStream is not None:
             if authorizedRTMP is not None:
@@ -91,6 +100,8 @@ def rtmp_stage2_user_auth_check(channelLoc, ipaddress, authorizedRTMP):
 
             authedStream.currentViewers = int(xmpp.getChannelCounts(requestedChannel.channelLoc))
             authedStream.totalViewers = int(xmpp.getChannelCounts(requestedChannel.channelLoc))
+            authedStream.active = True
+            authedStream.pending = False
             db.session.commit()
 
             if requestedChannel.imageLocation is None:
@@ -98,7 +109,7 @@ def rtmp_stage2_user_auth_check(channelLoc, ipaddress, authorizedRTMP):
             else:
                 channelImage = (sysSettings.siteProtocol + sysSettings.siteAddress + "/images/" + requestedChannel.imageLocation)
 
-            webhookFunc.runWebhook(requestedChannel.id, 0, channelname=requestedChannel.channelName, channelurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/channel/" + str(requestedChannel.id)), channeltopic=requestedChannel.topic,
+            message_tasks.send_webhook.delay(requestedChannel.id, 0, channelname=requestedChannel.channelName, channelurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/channel/" + str(requestedChannel.id)), channeltopic=requestedChannel.topic,
                        channelimage=channelImage, streamer=templateFilters.get_userName(requestedChannel.owningUser), channeldescription=str(requestedChannel.description),
                        streamname=authedStream.streamName, streamurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/view/" + requestedChannel.channelLoc), streamtopic=templateFilters.get_topicName(authedStream.topic),
                        streamimage=(sysSettings.siteProtocol + sysSettings.siteAddress + "/stream-thumb/" + requestedChannel.channelLoc + ".png"))
@@ -150,13 +161,17 @@ def rtmp_record_auth_check(channelLoc):
                     db.session.commit()
 
             streamID = None
-            existingStream = Stream.Stream.query.filter_by(linkedChannel=channelRequest.id).first()
+            existingStream = Stream.Stream.query.filter_by(complete=False, linkedChannel=channelRequest.id).first()
             if existingStream is not None:
                 streamID = existingStream.id
 
             newRecording = RecordedVideo.RecordedVideo(userQuery.id, channelRequest.id, channelRequest.channelName, channelRequest.topic, 0, "", currentTime, channelRequest.allowComments, False)
             newRecording.originalStreamID = streamID
             db.session.add(newRecording)
+            db.session.commit()
+
+            pendingVideo = RecordedVideo.RecordedVideo.query.filter_by(channelID=channelRequest.id, videoLocation="", pending=True).first()
+            existingStream.recordedVideoId = pendingVideo.id
             db.session.commit()
 
             returnMessage = {'time': str(currentTime), 'request': 'RecordCheck', 'success': True, 'channelLoc': channelRequest.channelLoc, 'ipAddress': None, 'message': 'Success - Starting Recording'}
@@ -172,7 +187,7 @@ def rtmp_user_deauth_check(key, ipaddress):
 
     currentTime = datetime.datetime.utcnow()
 
-    authedStream = Stream.Stream.query.filter_by(streamKey=key).all()
+    authedStream = Stream.Stream.query.filter_by(active=True, complete=False, streamKey=key).all()
 
     channelRequest = Channel.Channel.query.filter_by(streamKey=key).first()
 
@@ -209,9 +224,12 @@ def rtmp_user_deauth_check(key, ipaddress):
             db.session.add(newStreamHistory)
             db.session.commit()
 
-            for vid in streamUpvotes:
-                db.session.delete(vid)
-            db.session.delete(stream)
+            #for vid in streamUpvotes:
+            #    db.session.delete(vid)
+            stream.endTimeStamp = currentTime
+            stream.active = False
+            stream.pending = False
+            stream.complete = True
             db.session.commit()
 
             if channelRequest.imageLocation is None:
@@ -219,7 +237,7 @@ def rtmp_user_deauth_check(key, ipaddress):
             else:
                 channelImage = (sysSettings.siteProtocol + sysSettings.siteAddress + "/images/" + channelRequest.imageLocation)
 
-            webhookFunc.runWebhook(channelRequest.id, 1, channelname=channelRequest.channelName,
+            message_tasks.send_webhook.delay(channelRequest.id, 1, channelname=channelRequest.channelName,
                        channelurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/channel/" + str(channelRequest.id)),
                        channeltopic=channelRequest.topic,
                        channelimage=channelImage, streamer=templateFilters.get_userName(channelRequest.owningUser),
@@ -236,6 +254,7 @@ def rtmp_user_deauth_check(key, ipaddress):
         db.session.close()
         return returnMessage
 
+@celery.task()
 def rtmp_rec_Complete_handler(channelLoc, path):
     sysSettings = cachedDbCalls.getSystemSettings()
 
@@ -274,7 +293,7 @@ def rtmp_rec_Complete_handler(channelLoc, path):
             channelImage = (sysSettings.siteProtocol + sysSettings.siteAddress + "/images/" + requestedChannel.imageLocation)
 
         if requestedChannel.autoPublish is True:
-            webhookFunc.runWebhook(requestedChannel.id, 6, channelname=requestedChannel.channelName,
+            message_tasks.send_webhook.delay(requestedChannel.id, 6, channelname=requestedChannel.channelName,
                    channelurl=(sysSettings.siteProtocol + sysSettings.siteAddress + "/channel/" + str(requestedChannel.id)),
                    channeltopic=templateFilters.get_topicName(requestedChannel.topic),
                    channelimage=channelImage, streamer=templateFilters.get_userName(requestedChannel.owningUser),

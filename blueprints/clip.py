@@ -13,6 +13,7 @@ from functions import themes
 from functions import videoFunc
 from functions import securityFunc
 from functions import cachedDbCalls
+from functions.scheduled_tasks import video_tasks
 
 from globals import globalvars
 
@@ -71,15 +72,15 @@ def view_clip_page(clipID):
                         subState = True
 
                 return render_template(themes.checkOverride('clipplayer.html'), video=recordedVid, streamURL=streamURL, topics=topicList, randomClips=randomClips, subState=subState, clip=clipQuery)
-            #else:
-            #    isAutoPlay = request.args.get("autoplay")
-            #    if isAutoPlay == None:
-            #        isAutoPlay = False
-            #    elif isAutoPlay.lower() == 'true':
-            #        isAutoPlay = True
-            #    else:
-            #        isAutoPlay = False
-            #    return render_template(themes.checkOverride('vidplayer_embed.html'), video=recordedVid, streamURL=streamURL, topics=topicList, isAutoPlay=isAutoPlay, startTime=startTime)
+            else:
+                isAutoPlay = request.args.get("autoplay")
+                if isAutoPlay == None:
+                    isAutoPlay = False
+                elif isAutoPlay.lower() == 'true':
+                    isAutoPlay = True
+                else:
+                    isAutoPlay = False
+                return render_template(themes.checkOverride('vidplayer_embed.html'), video=clipQuery, streamURL=streamURL, topics=topicList, isAutoPlay=isAutoPlay)
     else:
         flash("No Such Clip at URL","error")
         return redirect(url_for("root.main_page"))
@@ -88,13 +89,13 @@ def view_clip_page(clipID):
 @login_required
 def delete_clip_page(clipID):
 
-    result = videoFunc.deleteClip(int(clipID))
-
-    if result is True:
-        flash("Clip deleted")
+    clipQuery = RecordedVideo.Clips.query.filter_by(id=clipID).first()
+    if clipQuery.recordedVideo.owningUser == current_user.id:
+        result = video_tasks.delete_video_clip.delay(int(clipID))
+        flash("Clip scheduled for deletion", "success")
         return redirect(url_for('root.main_page'))
     else:
-        flash("Error Deleting Clip")
+        flash("Error Deleting Clip", "error")
         return redirect(url_for('.view_clip_page', clipID=clipID))
 
 @clip_bp.route('/<clipID>/change', methods=['POST'])

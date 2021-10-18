@@ -30,7 +30,6 @@ from flask_babelex import Babel
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 import redis
-from apscheduler.schedulers.background import BackgroundScheduler
 
 # Import Paths
 cwp = sys.path[0]
@@ -80,6 +79,13 @@ if hasattr(config, 'sentryIO_Enabled') and hasattr(config, 'sentryIO_DSN'):
 
 coreNginxRTMPAddress = "127.0.0.1"
 
+# Initialize RedisURL Variable
+RedisURL = None
+if config.redisPassword == '' or config.redisPassword is None:
+    RedisURL = "redis://" + config.redisHost + ":" + str(config.redisPort)
+else:
+    RedisURL = "redis://:" + config.redisPassword + "@" + config.redisHost + ":" + str(config.redisPort)
+
 app = Flask(__name__)
 
 # Flask App Environment Setup
@@ -127,6 +133,8 @@ app.config['SECURITY_MSG_USER_DOES_NOT_EXIST'] = ("Invalid Username or Password"
 app.config['SECURITY_MSG_DISABLED_ACCOUNT'] = ("Account Disabled","error")
 app.config['VIDEO_UPLOAD_TEMPFOLDER'] = app.config['WEB_ROOT'] + 'videos/temp'
 app.config["VIDEO_UPLOAD_EXTENSIONS"] = ["PNG", "MP4"]
+app.config['CELERY_BROKER_URL'] = RedisURL
+app.config['CELERY_RESULT_BACKEND'] = RedisURL
 
 #----------------------------------------------------------------------------#
 # Set Logging Configuration
@@ -193,6 +201,7 @@ from functions import votes
 from functions import webhookFunc
 from functions.ejabberdctl import ejabberdctl
 from functions import cachedDbCalls
+from functions.scheduled_tasks import message_tasks
 #----------------------------------------------------------------------------#
 # Begin App Initialization
 #----------------------------------------------------------------------------#
@@ -200,13 +209,6 @@ from functions import cachedDbCalls
 # Initialize Flask-BabelEx
 app.logger.info({"level": "info", "message": "Initializing Flask-BabelEx"})
 babel = Babel(app)
-
-# Initialize RedisURL
-RedisURL = None
-if config.redisPassword == '' or config.redisPassword is None:
-    RedisURL = "redis://" + config.redisHost + ":" + str(config.redisPort)
-else:
-    RedisURL = "redis://" + config.redisPassword + "@" + config.redisHost + ":" + str(config.redisPort)
 
 #Initialize Flask-Limiter
 app.logger.info({"level": "info", "message": "Importing Flask-Limiter"})
@@ -223,6 +225,25 @@ else:
     r = redis.Redis(host=config.redisHost, port=config.redisPort, password=config.redisPassword)
     app.config["SESSION_REDIS"] = r
 r.flushdb()
+
+# Initialize Celery
+app.logger.info({"level": "info", "message": "Initializing Celery"})
+from classes.shared import celery
+
+celery.conf.broker_url = app.config['CELERY_BROKER_URL']
+celery.conf.result_backend = app.config['CELERY_RESULT_BACKEND']
+celery.conf.update(app.config)
+
+class ContextTask(celery.Task):
+    """Make celery tasks work with Flask app context"""
+    def __call__(self, *args, **kwargs):
+        with app.app_context():
+            return self.run(*args, **kwargs)
+
+celery.Task = ContextTask
+
+# Import Celery Beat Scheduled Tasks
+from functions.scheduled_tasks import scheduler
 
 # Initialize Flask-SocketIO
 app.logger.info({"level": "info", "message": "Initializing Flask-SocketIO"})
@@ -529,7 +550,7 @@ def user_registered_sighandler(app, user, confirm_token, form_data=None):
     user.authType = 0
     user.xmppToken = str(os.urandom(32).hex())
     user.uuid = str(uuid.uuid4())
-    webhookFunc.runWebhook("ZZZ", 20, user=user.username)
+    message_tasks.send_webhook.delay("ZZZ", 20, user=user.username)
     app.logger.info({"level": "info", "message": "New User Registered - " + str(user.username) + " - " + str(user.current_login_ip)})
     system.newLog(1, "A New User has Registered - Username:" + str(user.username))
     if config.requireEmailRegistration:
@@ -591,6 +612,7 @@ try:
     app.logger.info({"level": "info", "message": "OSP Core Node Started Successfully-" + str(globalvars.version)})
 except:
     pass
+
 if __name__ == '__main__':
     app.jinja_env.auto_reload = False
     app.config['TEMPLATES_AUTO_RELOAD'] = False

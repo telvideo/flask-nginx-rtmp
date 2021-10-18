@@ -10,6 +10,7 @@ import ipaddress
 import json
 import secrets
 import logging
+import time
 
 from globals import globalvars
 
@@ -20,6 +21,8 @@ from classes import RecordedVideo
 from classes import Sec
 
 from functions import cachedDbCalls
+
+from classes.shared import celery
 
 log = logging.getLogger('app.functions.system')
 
@@ -188,4 +191,10 @@ def checkOSPEdgeConf():
             return False
     else:
         log.info({"level": "info", "message": "Skipping Rebuilding '/opt/osp/conf/osp-edge.conf' per System Setting"})
+    return True
+
+@celery.task()
+def testCelery():
+    print("testing celery")
+    time.sleep(60)
     return True

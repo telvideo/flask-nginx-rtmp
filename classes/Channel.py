@@ -32,6 +32,8 @@ class Channel(db.Model):
     xmppToken = db.Column(db.String(64))
     vanityURL = db.Column(db.String(1024))
     allowGuestNickChange = db.Column(db.Boolean)
+    showHome = db.Column(db.Boolean)
+    maxVideoRetention = db.Column(db.Integer)
     stream = db.relationship('Stream', backref='channel', cascade="all, delete-orphan", lazy="joined")
     recordedVideo = db.relationship('RecordedVideo', backref='channel', cascade="all, delete-orphan", lazy="joined")
     upvotes = db.relationship('channelUpvotes', backref='stream', cascade="all, delete-orphan", lazy="joined")
@@ -41,7 +43,6 @@ class Channel(db.Model):
     webhooks = db.relationship('webhook', backref='channel', cascade="all, delete-orphan", lazy="joined")
     restreamDestinations = db.relationship('restreamDestinations', backref='channelData', cascade="all, delete-orphan", lazy="joined")
     chatStickers = db.relationship('stickers', backref='channel', cascade="all, delete-orphan", lazy="joined")
-    showHome = db.Column(db.Boolean)
 
     def __init__(self, owningUser, streamKey, channelName, topic, record, chatEnabled, allowComments, showHome, description):
         self.owningUser = owningUser
@@ -69,6 +70,7 @@ class Channel(db.Model):
         self.vanityURL = None
         self.allowGuestNickChange = True
         self.showHome = showHome 
+        self.maxVideoRetention = 0
 
     def __repr__(self):
         return '<id %r>' % self.id
@@ -91,13 +93,14 @@ class Channel(db.Model):
             'currentViews': self.currentViewers,
             'recordingEnabled': self.record,
             'chatEnabled': self.chatEnabled,
-            'stream': [obj.id for obj in self.stream],
+            'stream': [obj.id for obj in self.stream if obj.active == True],
             'recordedVideoIDs': [obj.id for obj in self.recordedVideo],
             'upvotes': self.get_upvotes(),
             'protected': self.protected,
             'allowGuestNickChange': self.allowGuestNickChange,
             'vanityURL': self.vanityURL,
-            'showHome': self.showHome
+            'showHome': self.showHome,
+            'maxVideoRetention': self.maxVideoRetention
         }
 
     def authed_serialize(self):
@@ -122,7 +125,8 @@ class Channel(db.Model):
             'streamKey': self.streamKey,
             'allowGuestNickChange': self.allowGuestNickChange,
             'vanityURL': self.vanityURL,
-            'showHome': self.showHome
+            'showHome': self.showHome,
+            'maxVideoRetention': self.maxVideoRetention
         }
 
 class restreamDestinations(db.Model):

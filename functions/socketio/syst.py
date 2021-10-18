@@ -2,6 +2,7 @@ import psutil
 import os
 import time
 import shutil
+import requests
 from flask import abort, current_app
 from flask_socketio import emit
 from flask_security import current_user
@@ -19,8 +20,9 @@ from functions import system
 from functions import cachedDbCalls
 
 from app import user_datastore
+from app import ejabberd
 
-from globals import globalvars
+from conf import config
 
 @socketio.on('checkUniqueUsername')
 def deleteInvitedUser(message):
@@ -102,7 +104,7 @@ def deleteChannelAdmin(message):
 def deleteActiveStream(message):
     if current_user.has_role('Admin'):
         streamID = int(message['streamID'])
-        streamQuery = Stream.Stream.query.filter_by(id=streamID).first()
+        streamQuery = Stream.Stream.query.filter_by(active=True, id=streamID).first()
         if streamQuery is not None:
             pendingVideo = RecordedVideo.RecordedVideo.query.filter_by(pending=True, channelID=streamQuery.linkedChannel).all()
             for pending in pendingVideo:
@@ -214,3 +216,101 @@ def disable_2fa(msg):
             system.newLog(1, "User " + current_user.username + " disabled 2FA for " + str(userQuery.username))
     db.session.close()
     return 'OK'
+
+@socketio.on('admin_get_component_status')
+def get_admin_component_status(msg):
+    if current_user.has_role('Admin'):
+        component = msg['component']
+
+        status = "Failed"
+
+        if component == "osp_core":
+            r = requests.get("http://127.0.0.1/apiv1/server/ping")
+            if r.status_code == 200:
+                response = r.json()
+                if 'results' in response:
+                    if response['results']['message'] == "Pong":
+                        status = "OK"
+                        message = "OSP-Core API Connection Successful"
+        elif component == "osp_rtmp":
+            rtmpServerListingQuery = settings.rtmpServer.query.filter_by(active=True).all()
+            serverLength = len(rtmpServerListingQuery)
+            workingServers = 0
+            for rtmpServer in rtmpServerListingQuery:
+                r = requests.get('http://' + rtmpServer.address + ":5099" + "/api/server/ping")
+                if r.status_code == 200:
+                    response = r.json()
+                    if 'results' in response:
+                        if response['results']['message'] == "pong":
+                            workingServers = workingServers + 1
+            if serverLength == workingServers:
+                status = "OK"
+                message = str(workingServers) + " RTMP Servers Online"
+            elif workingServers > 0:
+                status = "Problem"
+                message = str(workingServers) + "/" + str(serverLength) + "RTMP Servers Online"
+        elif component == "osp_ejabberd_xmlrpc":
+            results = ejabberd.check_password(config.ejabberdAdmin, config.ejabberdHost, config.ejabberdPass)
+            if results['res'] == 0:
+                status = "OK"
+                message = "Ejabberd-XMLRPC Communication Confirmed"
+            else:
+                message = "Ejabberd-XMLRPC Error - Invalid Admin Password"
+        elif component == "osp_ejabberd_chat":
+            sysSettings = cachedDbCalls.getSystemSettings()
+
+            from globals.globalvars import ejabberdServer, ejabberdServerHttpBindFQDN
+
+            xmppserver = sysSettings.siteAddress
+            if ejabberdServerHttpBindFQDN != None:
+                xmppserver = ejabberdServerHttpBindFQDN
+            elif ejabberdServer != "127.0.0.1" and ejabberdServer != "localhost":
+                xmppserver = ejabberdServer
+
+            r = requests.get(sysSettings.siteProtocol + xmppserver + '/http-bind')
+            if r.status_code == 200:
+                status = "OK"
+                message = "BOSH-HTTP Reachable"
+            else:
+                message = "BOSH-HTTP Unreachable"
+        elif component == "osp_database":
+            try:
+                sysSettings = settings.settings.query.first()
+                if sysSettings != None:
+                    status = "OK"
+                    message = "DB Connection Successful"
+                else:
+                    status = "Problem"
+                    message = "DB Connection Successful, but Settings Table Null"
+            except:
+                message = "DB Connection Failure"
+        elif component == "osp_redis":
+            from app import r
+            try:
+                r.ping()
+                status = "OK"
+                message = "Redis Ping Successful"
+            except:
+                message = "Redis Ping Failed"
+        elif component == "osp_celery":
+            from classes.shared import celery
+            workerStatus = celery.control.ping()
+            if workerStatus == []:
+                message = "No OSP-Celery Instances Connected"
+            else:
+                if len(workerStatus) > 0:
+                    verifiedWorker = 0
+                    for worker in workerStatus:
+                        for workerName in worker:
+                            if 'ok' in worker[workerName]:
+                                if worker[workerName]['ok'] == 'pong':
+                                    verifiedWorker = verifiedWorker + 1
+                    if len(workerStatus) == verifiedWorker:
+                        status = "OK"
+                        message = "All OSP-Celery Instances Online"
+                    else:
+                        status = "Problem"
+                        message = str(verifiedWorker) + "/" + str(len(workerStatus)) + " OSP-Celery Workers Responded " + str(workerStatus)
+
+        emit('admin_osp_component_status_update', {'component': component, 'status': status, 'message': message}, broadcast=False)
+
