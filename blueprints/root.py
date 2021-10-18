@@ -32,7 +32,7 @@ def main_page():
 
     else:
         sysSettings = cachedDbCalls.getSystemSettings()
-        activeStreams = Stream.Stream.query.order_by(Stream.Stream.currentViewers).all()
+        activeStreams = Stream.Stream.query.filter_by(showHome=True).order_by(Stream.Stream.currentViewers).all()
 
         recordedQuery = None
         clipQuery = None
