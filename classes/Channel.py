@@ -43,7 +43,7 @@ class Channel(db.Model):
     chatStickers = db.relationship('stickers', backref='channel', cascade="all, delete-orphan", lazy="joined")
     showHome = db.Column(db.Boolean)
 
-    def __init__(self, owningUser, streamKey, channelName, topic, record, chatEnabled, allowComments, description):
+    def __init__(self, owningUser, streamKey, channelName, topic, record, chatEnabled, allowComments, showHome, description):
         self.owningUser = owningUser
         self.streamKey = streamKey
         self.channelName = channelName
@@ -68,7 +68,7 @@ class Channel(db.Model):
         self.xmppToken = str(os.urandom(32).hex())
         self.vanityURL = None
         self.allowGuestNickChange = True
-        self.showHome = True
+        self.showHome = showHome 
 
     def __repr__(self):
         return '<id %r>' % self.id
@@ -96,7 +96,8 @@ class Channel(db.Model):
             'upvotes': self.get_upvotes(),
             'protected': self.protected,
             'allowGuestNickChange': self.allowGuestNickChange,
-            'vanityURL': self.vanityURL
+            'vanityURL': self.vanityURL,
+            'showHome': self.showHome
         }
 
     def authed_serialize(self):
@@ -120,7 +121,8 @@ class Channel(db.Model):
             'xmppToken': self.xmppToken,
             'streamKey': self.streamKey,
             'allowGuestNickChange': self.allowGuestNickChange,
-            'vanityURL': self.vanityURL
+            'vanityURL': self.vanityURL,
+            'showHome': self.showHome
         }
 
 class restreamDestinations(db.Model):
