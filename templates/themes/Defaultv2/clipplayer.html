@@ -10,6 +10,7 @@
 <meta property="og:image" content="{{request.url_root|normalize_urlroot}}/videos/{{clip.thumbnailLocation}}" />
 <meta property="og:description" content="{{clip.description}}" />
 <link href="/static/vendor/videojs/css/video-js.css" rel="stylesheet">
+<link rel="stylesheet" href="/static/vendor/videojs-mobile-ui/videojs-mobile-ui.css">
 <script type="text/javascript" src="/static/vendor/socketio/js/socket.io.js"></script>
 
 {% endblock %}
@@ -271,24 +272,36 @@
 
 {% block scripts %}
 <script src="/static/vendor/videojs/js/video.js"></script>
-
+<script src="/static/vendor/videojs-mobile-ui/videojs-mobile-ui.min.js"></script>
 <script>
-    var player = videojs('video', {
-            autoplay: true,
-            errorDisplay: false,
-            liveui: false,
-            liveTracker:true,
-            html5:
-                {
-                    nativeAudioTracks: false,
-                    nativeVideoTracks:false,
-                    hls:
-                        {
-                            overrideNative: true
-                        }
-                }
-        });
-
+  var player = videojs('video', {
+          autoplay: true,
+          errorDisplay: false,
+          liveui: false,
+          liveTracker:true,
+          html5:
+              {
+                  nativeAudioTracks: false,
+                  nativeVideoTracks:false,
+                  hls:
+                      {
+                          overrideNative: true
+                      }
+              }
+      });
+      // MOBILE FUNCTIONS
+      player.mobileUi({
+          fullscreen: {
+              enterOnRotate: true,
+              exitOnRotate: true,
+              lockOnRotate: true
+          },
+          touchControls: {
+              seekSeconds: 10,
+              tapTimeout: 300,
+              disableOnEnd: false
+          }
+      });
 </script>
 
 <script type="text/javascript" charset="utf-8">
