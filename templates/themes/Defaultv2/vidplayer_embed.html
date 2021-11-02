@@ -1,6 +1,7 @@
 
 {% block head %}
     <link href="/static/vendor/videojs/css/video-js.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/vendor/videojs-mobile-ui/videojs-mobile-ui.css">
 {% endblock %}
 
 {% block body %}
@@ -27,23 +28,36 @@
 
 {% block scripts %}
     <script src="/static/vendor/videojs/js/video.js"></script>
-
-<script>
-  var player = videojs('video', {
-            autoplay: {{isAutoPlay|lower}},
-            errorDisplay: false,
-            liveui: false,
-            liveTracker:true,
-            html5:
-                {
-                    nativeAudioTracks: false,
-                    nativeVideoTracks:false,
-                    hls:
-                        {
-                            overrideNative: true
-                        }
+    <script src="/static/vendor/videojs-mobile-ui/videojs-mobile-ui.min.js"></script>
+    <script>
+        var player = videojs('video', {
+                autoplay: true,
+                errorDisplay: false,
+                liveui: false,
+                liveTracker:true,
+                html5:
+                    {
+                        nativeAudioTracks: false,
+                        nativeVideoTracks:false,
+                        hls:
+                            {
+                                overrideNative: true
+                            }
+                    }
+            });
+            // MOBILE FUNCTIONS
+            player.mobileUi({
+                fullscreen: {
+                    enterOnRotate: true,
+                    exitOnRotate: true,
+                    lockOnRotate: true
+                },
+                touchControls: {
+                    seekSeconds: 10,
+                    tapTimeout: 300,
+                    disableOnEnd: false
                 }
-        });
-</script>
+            });
+    </script>
 
 {% endblock %}

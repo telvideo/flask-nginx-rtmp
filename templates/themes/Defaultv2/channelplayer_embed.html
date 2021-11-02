@@ -2,8 +2,10 @@
     <title>{{sysSettings.siteName}} - {{stream.streamName}}</title>
     <script src="/static/vendor/jquery/js/jquery-3.5.1.min.js"></script>
     <script src="/static/vendor/videojs/js/video.js"></script>
+    <script src="/static/vendor/videojs-mobile-ui/videojs-mobile-ui.min.js"></script>
     <script src="/static/vendor/videojs-contrib-quality-levels/js/videojs-contrib-quality-levels.js"></script>
     <link href="/static/vendor/videojs/css/video-js.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/vendor/videojs-mobile-ui/videojs-mobile-ui.css">
     <link href="/static/vendor/videojs-http-source-selector/videojs-http-source-selector.css" rel="stylesheet">
     <script src="/static/vendor/videojs-http-source-selector/videojs-http-source-selector.js"></script>
     <script src="/static/vendor/socketio/js/socket.io.js"></script>
@@ -75,6 +77,19 @@
 
         qualityLevels = player.qualityLevels();
         httpSelector = player.httpSourceSelector();
+
+        player.mobileUi({
+                fullscreen: {
+                    enterOnRotate: true,
+                    exitOnRotate: true,
+                    lockOnRotate: true
+                },
+                touchControls: {
+                    seekSeconds: 10,
+                    tapTimeout: 300,
+                    disableOnEnd: false
+                }
+            });
 
         player.ready(function() {
                this.src({
