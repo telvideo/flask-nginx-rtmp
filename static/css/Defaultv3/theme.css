@@ -540,6 +540,8 @@ table tbody tr {
 }
 
 .item .topicName {
+    word-wrap: break-word;
+    width: 175px;
     text-align: center;
     font-size: 1.25em;
     text-transform: uppercase;
