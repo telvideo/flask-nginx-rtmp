@@ -1158,8 +1158,11 @@ def settings_channels_page():
 
             newUUID = str(uuid.uuid4())
 
+            chatFormat = None
+            chatHistory = None
+
             newChannel = Channel.Channel(current_user.id, newUUID, channelName, topic, record, chatEnabled,
-                                         allowComments, showHome, description)
+                                         allowComments, showHome, description, chatFormat, chatHistory)
 
             if 'photo' in request.files:
                 file = request.files['photo']
