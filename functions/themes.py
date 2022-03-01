@@ -22,12 +22,12 @@ def checkOverride(themeHTMLFile):
                 if "maintenance.html" in globalvars.themeData.get('Override', []):
                     return "themes/" + sysSettings.systemTheme + "/maintenance.html"
                 else:
-                    return "themes/Defaultv2/maintenance.html"
+                    return "themes/Defaultv3/maintenance.html"
         else:
             if "maintenance.html" in globalvars.themeData.get('Override', []):
                 return "themes/" + sysSettings.systemTheme + "/maintenance.html"
             else:
-                return "themes/Defaultv2/maintenance.html"
+                return "themes/Defaultv3/maintenance.html"
 
     # Check if normal theme override exists
     try:
@@ -35,7 +35,7 @@ def checkOverride(themeHTMLFile):
 
             return "themes/" + sysSettings.systemTheme + "/" + themeHTMLFile
         else:
-            return "themes/Defaultv2/" + themeHTMLFile
+            return "themes/Defaultv3/" + themeHTMLFile
     except:
         return "themes/Defaultv2/" + themeHTMLFile
 
