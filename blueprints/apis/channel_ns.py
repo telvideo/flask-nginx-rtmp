@@ -391,6 +391,138 @@ class api_1_GetRestreams(Resource):
             db.session.commit()
             return {"results": {"message": "Request Error"}}, 400
 
+    def post(self, channelEndpointID):
+        """
+        Adds a new restream destination for a channel.
+        The request body should include 'name', 'enabled', and 'url' values for the new restream destination.
+
+        Args:
+            channelEndpointID: The identifier of the channel for which the restream destination should be added.
+
+        Returns:
+            A success message if the restream destination was successfully added, 
+            or an error message if the channel could not be found.
+        """
+        # Parse the request body to get the provided fields
+        args = request.json
+
+        # Perform the authorization checks 
+        channelData = None
+        if "X-API-KEY" in request.headers:
+            requestAPIKey = apikey.apikey.query.filter_by(
+                key=request.headers["X-API-KEY"]
+            ).first()
+            if requestAPIKey is not None and requestAPIKey.isValid():
+                channelData = (
+                    Channel.Channel.query.filter_by(
+                        channelLoc=channelEndpointID,
+                        owningUser=requestAPIKey.userID,
+                    )
+                    .with_entities(Channel.Channel.id)
+                    .first()
+                )
+        else:
+            # Perform RTMP IP Authorization Check
+            authorized = checkRTMPAuthIP(request)
+            if authorized[0] is False:
+                return {
+                    "results": {
+                        "message": "Unauthorized RTMP Server or Missing User API Key - "
+                        + authorized[1]
+                    }
+                }, 400
+            channelData = cachedDbCalls.getChannelByLoc(channelEndpointID)
+
+        # Check if the channel data was found
+        if channelData is not None:
+            # Create a new restream destination with the provided data
+            new_restreamDestination = Channel.restreamDestinations(
+                channel=channelData.id,
+                name=args['name'],
+                enabled=args['enabled'],
+                url=args['url']
+            )
+            # Add the new restream destination to the session and commit the session
+            db.session.add(new_restreamDestination)
+            db.session.commit()
+            # Return a success response
+            return {"results": {"message": "Restream destination successfully added"}}, 200
+        else:
+            # If the channel data could not be found, return an error response
+            db.session.commit()
+            return {"results": {"message": "Request Error"}}, 400
+
+
+
+    def put(self, channelEndpointID):
+        """
+        Updates an existing restream destination for a channel.
+        The request body should include the 'id' of the restream destination to be updated, 
+        along with the new 'name', 'enabled', and 'url' values.
+
+        Args:
+            channelEndpointID: The identifier of the channel for which the restream destination should be updated.
+
+        Returns:
+            A success message if the restream destination was successfully updated, 
+            or an error message if the channel or restream destination could not be found.
+        """
+        # Parse the request body to get the provided fields
+        args = request.json
+
+        # Perform the authorization checks 
+        channelData = None
+        if "X-API-KEY" in request.headers:
+            requestAPIKey = apikey.apikey.query.filter_by(
+                key=request.headers["X-API-KEY"]
+            ).first()
+            if requestAPIKey is not None and requestAPIKey.isValid():
+                channelData = (
+                    Channel.Channel.query.filter_by(
+                        channelLoc=channelEndpointID,
+                        owningUser=requestAPIKey.userID,
+                    )
+                    .with_entities(Channel.Channel.id)
+                    .first()
+                )
+        else:
+            # Perform RTMP IP Authorization Check
+            authorized = checkRTMPAuthIP(request)
+            if authorized[0] is False:
+                return {
+                    "results": {
+                        "message": "Unauthorized RTMP Server or Missing User API Key - "
+                        + authorized[1]
+                    }
+                }, 400
+            channelData = cachedDbCalls.getChannelByLoc(channelEndpointID)
+
+        # Check if the channel data was found
+        if channelData is not None:
+            # Query the database for the restream destination with the provided id
+            restreamDestination = Channel.restreamDestinations.query.filter_by(id=args['id']).first()
+
+            # Check if the restream destination was found
+            if restreamDestination is not None:
+                # Update the fields of the restream destination with the provided values
+                restreamDestination.name = args['name']
+                restreamDestination.enabled = args['enabled']
+                restreamDestination.url = args['url']
+                
+                # Commit the session to save the updates
+                db.session.commit()
+
+                # Return a success response
+                return {"results": {"message": "Restream destination successfully updated"}}, 200
+            else:
+                # If the restream destination could not be found, return an error response
+                db.session.commit()
+                return {"results": {"message": "Request Error - No Such Restream Destination"}}, 400
+        else:
+            # If the channel data could not be found, return an error response
+            db.session.commit()
+            return {"results": {"message": "Request Error - No Such Channel"}}, 400
+
 
 # Invites Endpoint for a Channel
 @api.route("/<string:channelEndpointID>/invites")
