@@ -1563,11 +1563,12 @@ def settings_channels_page():
                 ):
                     if "stickerName" in request.form:
                         stickerName = request.form["stickerName"]
-                        existingStickerNameQuery = [
-                            sticker for sticker in
-                            stickers.stickers.query.filter_by(name=stickerName).all()
-                            if sticker.channelID == channelQuery.id or sticker.channelID is None
-                                                   ]
+                        existingStickerNameQuery = stickers.stickers.query.filter_by(
+                                                    name=stickerName,
+                                                    channelID=channelQuery.id)
+                                                    ).first()
+                                                                                    
+                                                  
 
                         if existingStickerNameQuery is None:
                             if "stickerUpload" in request.files:
