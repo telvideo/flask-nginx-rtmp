@@ -24,6 +24,19 @@ from globals import globalvars
 
 api = Namespace("channel", description="Channels Related Queries and Functions")
 
+channelRestreamPOST = reqparse.RequestParser()
+channelRestreamPOST.add_argument('name', type=str, required=True)
+channelRestreamPOST.add_argument('url', type=str, required=True)
+channelRestreamPOST.add_argument('enabled', type=str)
+
+channelRestreamPUT = reqparse.RequestParser()
+channelRestreamPUT.add_argument('id', type=str, required=True)
+channelRestreamPUT.add_argument('name', type=str, required=True)
+channelRestreamPUT.add_argument('url', type=str, required=True)
+channelRestreamPUT.add_argument('enabled', type=str)
+
+
+
 channelParserPut = reqparse.RequestParser()
 channelParserPut.add_argument("channelName", type=str)
 channelParserPut.add_argument("description", type=str)
@@ -422,7 +435,10 @@ class api_1_GetRestreams(Resource):
         else:
             db.session.commit()
             return {"results": {"message": "Request Error"}}, 400
+        
 
+    @api.expect(channelRestreamPOST)
+    @api.doc(responses={200: "Success", 400: "Request Error"})
     def post(self, channelEndpointID):
         """Add a new restream destination for a channel"""
         # Check API Key
@@ -448,18 +464,19 @@ class api_1_GetRestreams(Resource):
             return {"results": "error", "reason": "channelNotFound"}
 
         # Get request arguments
-        args = request.json
+        # args = request.json
+        args = channelRestreamPOST.parse_args()
 
         # Create new restream destination
         new_restreamDestination = Channel.restreamDestinations(
             channel=channelData.id,
-            name=args['name'],
-            url=args['url']
+            name=args["name"],
+            url=args["url"]
         )
 
         # Convert 'enabled' to a boolean
-        enabled_str = args.get('enabled', 'False')
-        if enabled_str.lower() == 'true':
+        enabled_str = args.get("enabled", "False")
+        if enabled_str.lower() == "true":
             new_restreamDestination.enabled = True
         else:
             new_restreamDestination.enabled = False
@@ -473,11 +490,11 @@ class api_1_GetRestreams(Resource):
 
 
 
-
+    @api.expect(channelRestreamPUT)
     def put(self, channelEndpointID):
         """Updates an existing restream destination for a channel"""
-        # Parse the request arguments
-        args = request.json
+
+        args = channelRestreamPUT.parse_args()
 
         # Check API Key
         if "X-API-KEY" in request.headers:
@@ -504,12 +521,12 @@ class api_1_GetRestreams(Resource):
 
             if restreamDestination is not None:
                 # Update the restream destination fields
-                restreamDestination.name = args['name']
-                restreamDestination.url = args['url']
+                restreamDestination.name = args["name"]
+                restreamDestination.url = args["url"]
 
                 # Convert 'enabled' to a boolean
-                enabled_str = args.get('enabled', 'False')
-                if enabled_str.lower() == 'true':
+                enabled_str = args.get("enabled", "False")
+                if enabled_str.lower() == "true":
                     restreamDestination.enabled = True
                 else:
                     restreamDestination.enabled = False
