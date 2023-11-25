@@ -19,6 +19,8 @@ from functions import system
 from functions import cachedDbCalls
 from functions import channelFunc
 from functions import templateFilters
+from functions import apiFunc
+
 
 from globals import globalvars
 
@@ -28,6 +30,10 @@ channelRestreamPOST = reqparse.RequestParser()
 channelRestreamPOST.add_argument('name', type=str, required=True)
 channelRestreamPOST.add_argument('url', type=str, required=True)
 channelRestreamPOST.add_argument('enabled', type=str)
+
+channelGetParser = reqparse.RequestParser()
+channelGetParser.add_argument('userID', type=int, required=False, help='The unique identifier of the user. **Admin API is required**')
+
 
 channelRestreamPUT = reqparse.RequestParser()
 channelRestreamPUT.add_argument('id', type=str, required=True)
@@ -104,11 +110,30 @@ def checkRTMPAuthIP(requestData):
 @api.route("/")
 class api_1_ListChannels(Resource):
     # Channel - Get all Channels
+    @api.expect(channelGetParser)
     def get(self):
         """
-        Gets a List of all Public Channels
+        Gets a List of all Public Channels or channels by a specific user if requested by an admin. 
         """
-        return {"results": cachedDbCalls.serializeChannels()}
+        args = channelGetParser.parse_args()
+        user_id = args.get('userID')
+
+        if "X-API-KEY" not in request.headers:
+            return {"results": {"message": "Missing API key"}}, 401
+
+        apiKey = request.headers["X-API-KEY"]
+        if not apiFunc.isValidAdminKey(apiKey):
+            return {"results": {"message": "Unauthorized access. Admin only."}}, 403
+
+        if user_id is not None:
+            # Filter channels by user ID
+            channels = Channel.Channel.query.filter_by(owningUser=user_id).all()
+            return {"results": cachedDbCalls.serializeChannels(channels)}
+        else:
+            # Return all channels if no user ID is provided
+            return {"results": cachedDbCalls.serializeChannels()}    
+
+
 
     # Channel - Create Channel
     @api.expect(channelParserPost)
