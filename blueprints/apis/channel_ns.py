@@ -32,7 +32,7 @@ channelRestreamPOST.add_argument('url', type=str, required=True)
 channelRestreamPOST.add_argument('enabled', type=str)
 
 channelGetParser = reqparse.RequestParser()
-channelGetParser.add_argument('userID', type=int, required=False, help='The unique identifier of the user. **Admin API is required**')
+channelGetParser.add_argument('userID', type=int, required=False, help='The unique identifier of the user. **Admin API Key is required**')
 
 
 channelRestreamPUT = reqparse.RequestParser()
