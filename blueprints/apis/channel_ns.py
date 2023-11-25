@@ -111,6 +111,7 @@ def checkRTMPAuthIP(requestData):
 class api_1_ListChannels(Resource):
     # Channel - Get all Channels
     @api.expect(channelGetParser)
+    @api.doc(responses={200: "Success", 400: "Request Error"})
     def get(self):
         """
         Gets a List of all Public Channels or channels by a specific user if requested by an admin
@@ -126,9 +127,9 @@ class api_1_ListChannels(Resource):
                 if serialized_channels:
                     return {"results": serialized_channels}
                 else:
-                    return {"results": {"message": "No channels found for the given user ID"}}, 404
+                    return {"results": {"message": "No channels found for the given user ID"}}, 400
             else:
-                return {"results": {"message": "Unauthorized access. Admin only."}}, 403
+                return {"results": {"message": "Unauthorized access. Admin only."}}, 400
 
         # Return all public channels if no user ID is provided or if not an admin
         return {"results": cachedDbCalls.serializeChannels()}
