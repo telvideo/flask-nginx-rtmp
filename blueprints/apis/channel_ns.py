@@ -113,26 +113,22 @@ class api_1_ListChannels(Resource):
     @api.expect(channelGetParser)
     def get(self):
         """
-        Gets a List of all Public Channels or channels by a specific user if requested by an admin. 
+        Gets a List of all Public Channels or channels by a specific user if requested by an admin
         """
         args = channelGetParser.parse_args()
         user_id = args.get('userID')
 
-        if "X-API-KEY" not in request.headers:
-            return {"results": {"message": "Missing API key"}}, 401
-
-        apiKey = request.headers["X-API-KEY"]
-        if not apiFunc.isValidAdminKey(apiKey):
-            return {"results": {"message": "Unauthorized access. Admin only."}}, 403
-
+        # When user ID is provided, check if the request is from an admin
         if user_id is not None:
-            # Filter channels by user ID
+            if "X-API-KEY" not in request.headers or not apiFunc.isValidAdminKey(request.headers["X-API-KEY"]):
+                return {"results": {"message": "Unauthorized access. Admin only."}}, 403
+            
+            # Filter channels by user ID if admin
             channels = Channel.Channel.query.filter_by(owningUser=user_id).all()
             return {"results": cachedDbCalls.serializeChannels(channels)}
-        else:
-            # Return all channels if no user ID is provided
-            return {"results": cachedDbCalls.serializeChannels()}    
 
+        # Return all channels if no user ID is provided
+        return {"results": cachedDbCalls.serializeChannels()}
 
 
     # Channel - Create Channel
