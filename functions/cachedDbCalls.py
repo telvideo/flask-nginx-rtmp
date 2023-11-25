@@ -312,6 +312,13 @@ def serializeChannelByLocationID(channelLoc):
     channel = getChannelByLoc(channelLoc)
     return serializeChannel(channel.id)
 
+@cache.memoize(timeout=30)
+def serializeChannelByUserID(userID):
+    channels = getChannelsByOwnerId(userID)
+    serialized_channels = [serializeChannel(channel.id) for channel in channels]
+    return serialized_channels
+
+
 
 @cache.memoize(timeout=30)
 def serializeChannel(channelID):
