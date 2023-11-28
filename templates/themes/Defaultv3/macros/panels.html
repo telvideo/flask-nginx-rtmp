@@ -46,15 +46,36 @@
 </script>
 {% endmacro %}
 
-{% macro topics_panel(topicList, title="Topics" ) %}
+{% macro topics_panel(topicList, title="Topics") %}
 <div class="topics-container insetBoxShadow">
   <h3 class="textShadow"><b>{{ title }}</b></h3>
-  <ul id="topicList" class="itemList d-flex flex-wrap justify-content-md-start justify-content-evenly" style="width:100%">
-  {% for topic in topicList %}
-    {{ cards.topic_card(topic) }}
-  {% endfor %}
-  </ul>
+  <div id="topicListContainer">
+    <ul id="topicList" class="itemList d-flex flex-wrap justify-content-md-start justify-content-evenly" style="width:100%">
+      <!-- Topics will be loaded here -->
+    </ul>
+  </div>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const topics = {{ topicList | tojson }};
+        const topicListContainer = document.getElementById("topicList");
+        topics.forEach(topic => {
+            const listItem = document.createElement("li");
+            listItem.innerHTML = `
+                <div class="topicCard item">
+                    <a href="/topic/{{ topic.id }}/">
+                        <div class="topicImg"><img class="lazy zoom" src="/images/{{ topic.iconClass }}" onerror="this.src='/static/img/video-placeholder.jpg';" alt="{{ topic.name }}"></div>
+                    </a>
+                    <div class="topicName mt-2">
+                        <a href="/topic/{{ topic.id }}/" data-toggle="tooltip" title="{{ topic.name }}">
+                            <b>{{ topic.name | limit_title20 }}</b>
+                        </a>
+                    </div>
+                </div>`;
+            topicListContainer.appendChild(listItem);
+        });
+    });
+</script>
 {% endmacro %}
 
 {% macro streamer_panel(streamerList, title="Streamers" ) %}
