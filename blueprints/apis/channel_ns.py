@@ -56,6 +56,8 @@ channelParserPost.add_argument("recordEnabled", type=bool, required=True)
 channelParserPost.add_argument("chatEnabled", type=bool, required=True)
 channelParserPost.add_argument("showHome", type=bool, required=True)
 channelParserPost.add_argument("commentsEnabled", type=bool, required=True)
+channelParserPost.add_argument("userID", type=int, required=True)
+
 
 channelInviteGetInvite = reqparse.RequestParser()
 channelInviteGetInvite.add_argument("userID", type=int)
@@ -151,7 +153,7 @@ class api_1_ListChannels(Resource):
                 if requestAPIKey.isValid():
                     args = channelParserPost.parse_args()
                     newChannel = Channel.Channel(
-                        int(args["userID"]),
+                        args["userID"],
                         str(uuid.uuid4()),
                         args["channelName"],
                         int(args["topicID"]),
@@ -163,7 +165,7 @@ class api_1_ListChannels(Resource):
                     )
 
                     userQuery = Sec.User.query.filter_by(
-                        id=int(args["userID"])
+                        id=args["userID"]
                     ).first()
 
                     # Establish XMPP Channel
