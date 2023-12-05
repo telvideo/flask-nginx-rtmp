@@ -151,7 +151,7 @@ class api_1_ListChannels(Resource):
                 if requestAPIKey.isValid():
                     args = channelParserPost.parse_args()
                     newChannel = Channel.Channel(
-                        int(requestAPIKey.userID),
+                        int(args["userID"]),
                         str(uuid.uuid4()),
                         args["channelName"],
                         int(args["topicID"]),
@@ -163,7 +163,7 @@ class api_1_ListChannels(Resource):
                     )
 
                     userQuery = Sec.User.query.filter_by(
-                        id=int(requestAPIKey.userID)
+                        id=int(args["userID"])
                     ).first()
 
                     # Establish XMPP Channel
