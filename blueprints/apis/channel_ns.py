@@ -432,7 +432,7 @@ class api_1_GetRestreams(Resource):
                     }
                 }, 400
 
-            channelData = cachedDbCalls.getChannelByLoc(channelEndpointID)
+        channelData = cachedDbCalls.getChannelByLoc(channelEndpointID)
 
         if channelData is not None:
             restreamDestinationQuery = (
