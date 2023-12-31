@@ -399,11 +399,13 @@ class api_1_Streams(Resource):
 
 
 # TODO Add Ability to Add/Delete/Change
-@api.route("/<string:channelEndpointID>/restreams")
+@api.route("/<string:channelEndpointID>/restreams/<string:userID>")
 @api.doc(security="apikey")
 @api.doc(params={"channelEndpointID": "GUID Channel Location"})
+@api.doc(params={"userID": "User ID"})
+
 class api_1_GetRestreams(Resource):
-    def get(self, channelEndpointID):
+    def get(self, channelEndpointID,userID):
         """
         Returns all restream destinations for a channel
         """
@@ -417,7 +419,7 @@ class api_1_GetRestreams(Resource):
                     channelData = (
                         Channel.Channel.query.filter_by(
                             channelLoc=channelEndpointID,
-                            owningUser=requestAPIKey.userID,
+                            owningUser=userID,
                         )
                         .with_entities(Channel.Channel.id)
                         .first()
