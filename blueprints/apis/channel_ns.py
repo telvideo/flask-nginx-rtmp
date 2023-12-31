@@ -30,6 +30,7 @@ channelRestreamPOST = reqparse.RequestParser()
 channelRestreamPOST.add_argument('name', type=str, required=True)
 channelRestreamPOST.add_argument('url', type=str, required=True)
 channelRestreamPOST.add_argument('enabled', type=str)
+channelRestreamPOST.add_argument('userID', type=str)
 
 channelGetParser = reqparse.RequestParser()
 channelGetParser.add_argument('userID', type=int, required=False, help='The unique identifier of the user. **Admin API Key is required**')
@@ -40,6 +41,7 @@ channelRestreamPUT.add_argument('id', type=str, required=True)
 channelRestreamPUT.add_argument('name', type=str, required=True)
 channelRestreamPUT.add_argument('url', type=str, required=True)
 channelRestreamPUT.add_argument('enabled', type=str)
+channelRestreamPUT.add_argument('userID', type=str)
 
 
 
@@ -471,11 +473,13 @@ class api_1_GetRestreams(Resource):
         # Check API Key
         if "X-API-KEY" in request.headers:
             requestAPIKey = apikey.apikey.query.filter_by(key=request.headers["X-API-KEY"]).first()
+            args = channelRestreamPOST.parse_args()
+
             if requestAPIKey is not None and requestAPIKey.isValid():
                 channelData = (
                     Channel.Channel.query.filter_by(
                         channelLoc=channelEndpointID,
-                        owningUser=requestAPIKey.userID,
+                        owningUser=args["userID"],
                     )
                     .with_entities(Channel.Channel.id)
                     .first()
@@ -487,7 +491,6 @@ class api_1_GetRestreams(Resource):
 
                 # Get request arguments
                 # args = request.json
-                args = channelRestreamPOST.parse_args()
 
                 # Create new restream destination
                 new_restreamDestination = Channel.restreamDestinations(
@@ -534,7 +537,7 @@ class api_1_GetRestreams(Resource):
                 channelData = (
                     Channel.Channel.query.filter_by(
                         channelLoc=channelEndpointID,
-                        owningUser=requestAPIKey.userID,
+                        owningUser=args["userID"],
                     )
                     .with_entities(Channel.Channel.id)
                     .first()
