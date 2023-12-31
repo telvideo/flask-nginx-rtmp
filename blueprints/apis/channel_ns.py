@@ -30,7 +30,6 @@ channelRestreamPOST = reqparse.RequestParser()
 channelRestreamPOST.add_argument('name', type=str, required=True)
 channelRestreamPOST.add_argument('url', type=str, required=True)
 channelRestreamPOST.add_argument('enabled', type=str)
-channelRestreamPOST.add_argument('userID', type=str)
 
 channelGetParser = reqparse.RequestParser()
 channelGetParser.add_argument('userID', type=int, required=False, help='The unique identifier of the user. **Admin API Key is required**')
@@ -41,7 +40,6 @@ channelRestreamPUT.add_argument('id', type=str, required=True)
 channelRestreamPUT.add_argument('name', type=str, required=True)
 channelRestreamPUT.add_argument('url', type=str, required=True)
 channelRestreamPUT.add_argument('enabled', type=str)
-channelRestreamPUT.add_argument('userID', type=str)
 
 
 
@@ -470,7 +468,7 @@ class api_1_GetRestreams(Resource):
 
     @api.expect(channelRestreamPOST)
     @api.doc(responses={200: "Success", 400: "Request Error"})
-    def post(self, channelEndpointID):
+    def post(self, channelEndpointID,userID):
         """Add a new restream destination for a channel"""
         # Check API Key
         if "X-API-KEY" in request.headers:
@@ -481,7 +479,7 @@ class api_1_GetRestreams(Resource):
                 channelData = (
                     Channel.Channel.query.filter_by(
                         channelLoc=channelEndpointID,
-                        owningUser=args["userID"],
+                        owningUser=userID,
                     )
                     .with_entities(Channel.Channel.id)
                     .first()
@@ -527,7 +525,7 @@ class api_1_GetRestreams(Resource):
 
     @api.expect(channelRestreamPUT)
     @api.doc(responses={200: "Success", 400: "Request Error"})
-    def put(self, channelEndpointID):
+    def put(self, channelEndpointID,userID):
         """Updates an existing restream destination for a channel"""
 
         args = channelRestreamPUT.parse_args()
@@ -539,7 +537,7 @@ class api_1_GetRestreams(Resource):
                 channelData = (
                     Channel.Channel.query.filter_by(
                         channelLoc=channelEndpointID,
-                        owningUser=args["userID"],
+                        owningUser=userID,
                     )
                     .with_entities(Channel.Channel.id)
                     .first()
