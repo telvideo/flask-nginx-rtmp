@@ -507,7 +507,9 @@ class api_1_GetRestreams(Resource):
 
                 db.session.add(new_restreamDestination)
                 db.session.commit()
-                return {"results": {"message": "Restream destination successfully added"}}, 200
+                restreamDestinationDetails = new_restreamDestination.serialize()
+                return {"results": {"message": "Restream destination successfully added", 
+                                    "details": restreamDestinationDetails}}, 200
             
             else:
             # API key is invalid or not found
@@ -560,7 +562,9 @@ class api_1_GetRestreams(Resource):
                         else:
                             restreamDestination.enabled = False
                         db.session.commit()
-                        return {"results": {"message": "Restream destination successfully updated"}}, 200
+                        restreamDestinationDetails = restreamDestination.serialize()
+                        return {"results": {"message": "Restream destination successfully added", 
+                                    "details": restreamDestinationDetails}}, 200
                     else:
                         db.session.commit()
                         return {"results": {"message": "Request Error - No Such Restream Destination"}}, 400
