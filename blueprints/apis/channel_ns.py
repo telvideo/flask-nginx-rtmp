@@ -587,7 +587,7 @@ class api_1_GetRestreams(Resource):
     def delete(self, channelEndpointID, userID):
         """Deletes an existing restream destination for a channel"""
         
-        args = channelRestreamPUT.parse_args()
+        args = channelRestreamDELETE.parse_args()
         # Check API Key
         if "X-API-KEY" in request.headers:
             requestAPIKey = apikey.apikey.query.filter_by(key=request.headers["X-API-KEY"]).first()
