@@ -579,6 +579,44 @@ class api_1_GetRestreams(Resource):
             return {"results": {"message": "Missing API key"}}, 401
        
 
+    @api.doc(responses={200: "Success", 400: "Request Error", 401: "Unauthorized"})
+    def delete(self, channelEndpointID, userID, restreamID):
+        """Deletes an existing restream destination for a channel"""
+
+        # Check API Key
+        if "X-API-KEY" in request.headers:
+            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers["X-API-KEY"]).first()
+            if requestAPIKey is not None and requestAPIKey.isValid():
+                channelData = (
+                    Channel.Channel.query.filter_by(
+                        channelLoc=channelEndpointID,
+                        owningUser=userID,
+                    )
+                    .with_entities(Channel.Channel.id)
+                    .first()
+                )
+
+                # Check if channel exists
+                if channelData is not None:
+                    # Get the restream destination to delete
+                    restreamDestination = Channel.restreamDestinations.query.filter_by(id=restreamID).first()
+
+                    if restreamDestination is not None:
+                        # Delete the restream destination
+                        db.session.delete(restreamDestination)
+                        db.session.commit()
+                        return {"results": {"message": "Restream destination successfully deleted"}}, 200
+                    else:
+                        return {"results": {"message": "Request Error - No Such Restream Destination"}}, 400
+                else:
+                    return {"results": {"message": "Request Error - No Such Channel"}}, 400
+            else:
+                # API key is invalid or not found
+                return {"results": {"message": "Invalid or expired API key"}}, 401
+        else:
+            # API key is missing in the request headers
+            return {"results": {"message": "Missing API key"}}, 401
+
 
 
 # Invites Endpoint for a Channel
