@@ -581,12 +581,13 @@ class api_1_GetRestreams(Resource):
             # API key is missing in the request headers
             return {"results": {"message": "Missing API key"}}, 401
        
-       
-    @api.expect(channelRestreamPUT)
-    @api.doc(responses={200: "Success", 400: "Request Error", 401: "Unauthorized"})
-    def delete(self, channelEndpointID, userID, restreamID):
-        """Deletes an existing restream destination for a channel"""
 
+    @api.expect(channelRestreamDELETE)
+    @api.doc(responses={200: "Success", 400: "Request Error", 401: "Unauthorized"})
+    def delete(self, channelEndpointID, userID):
+        """Deletes an existing restream destination for a channel"""
+        
+        args = channelRestreamPUT.parse_args()
         # Check API Key
         if "X-API-KEY" in request.headers:
             requestAPIKey = apikey.apikey.query.filter_by(key=request.headers["X-API-KEY"]).first()
@@ -603,7 +604,7 @@ class api_1_GetRestreams(Resource):
                 # Check if channel exists
                 if channelData is not None:
                     # Get the restream destination to delete
-                    restreamDestination = Channel.restreamDestinations.query.filter_by(id=restreamID).first()
+                    restreamDestination = Channel.restreamDestinations.query.filter_by(id=args["id"]).first()
 
                     if restreamDestination is not None:
                         # Delete the restream destination
