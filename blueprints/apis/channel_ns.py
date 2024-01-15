@@ -41,6 +41,9 @@ channelRestreamPUT.add_argument('name', type=str, required=True)
 channelRestreamPUT.add_argument('url', type=str, required=True)
 channelRestreamPUT.add_argument('enabled', type=str)
 
+channelRestreamDELETE = reqparse.RequestParser()
+channelRestreamDELETE.add_argument('id', type=str, required=True)
+
 
 
 channelParserPut = reqparse.RequestParser()
@@ -578,7 +581,8 @@ class api_1_GetRestreams(Resource):
             # API key is missing in the request headers
             return {"results": {"message": "Missing API key"}}, 401
        
-
+       
+    @api.expect(channelRestreamPUT)
     @api.doc(responses={200: "Success", 400: "Request Error", 401: "Unauthorized"})
     def delete(self, channelEndpointID, userID, restreamID):
         """Deletes an existing restream destination for a channel"""
