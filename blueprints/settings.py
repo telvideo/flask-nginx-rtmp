@@ -1565,7 +1565,7 @@ def settings_channels_page():
                         stickerName = request.form["stickerName"]
                         existingStickerNameQuery = stickers.stickers.query.filter_by(
                                                     name=stickerName,
-                                                    channelID=channelQuery.id)
+                                                    channelID=channelQuery.id
                                                     ).first()
                                                                                     
                                                   
