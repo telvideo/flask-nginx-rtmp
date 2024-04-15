@@ -19,10 +19,32 @@ from functions import system
 from functions import cachedDbCalls
 from functions import channelFunc
 from functions import templateFilters
+from functions import apiFunc
+
 
 from globals import globalvars
 
 api = Namespace("channel", description="Channels Related Queries and Functions")
+
+channelRestreamPOST = reqparse.RequestParser()
+channelRestreamPOST.add_argument('name', type=str, required=True)
+channelRestreamPOST.add_argument('url', type=str, required=True)
+channelRestreamPOST.add_argument('enabled', type=str)
+
+channelGetParser = reqparse.RequestParser()
+channelGetParser.add_argument('userID', type=int, required=False, help='The unique identifier of the user. **Admin API Key is required**')
+
+
+channelRestreamPUT = reqparse.RequestParser()
+channelRestreamPUT.add_argument('id', type=str, required=True)
+channelRestreamPUT.add_argument('name', type=str, required=True)
+channelRestreamPUT.add_argument('url', type=str, required=True)
+channelRestreamPUT.add_argument('enabled', type=str)
+
+channelRestreamDELETE = reqparse.RequestParser()
+channelRestreamDELETE.add_argument('id', type=str, required=True)
+
+
 
 channelParserPut = reqparse.RequestParser()
 channelParserPut.add_argument("channelName", type=str)
@@ -37,6 +59,8 @@ channelParserPost.add_argument("recordEnabled", type=bool, required=True)
 channelParserPost.add_argument("chatEnabled", type=bool, required=True)
 channelParserPost.add_argument("showHome", type=bool, required=True)
 channelParserPost.add_argument("commentsEnabled", type=bool, required=True)
+channelParserPost.add_argument("userID", type=int, required=True)
+
 
 channelInviteGetInvite = reqparse.RequestParser()
 channelInviteGetInvite.add_argument("userID", type=int)
@@ -91,11 +115,30 @@ def checkRTMPAuthIP(requestData):
 @api.route("/")
 class api_1_ListChannels(Resource):
     # Channel - Get all Channels
+    @api.expect(channelGetParser)
+    @api.doc(responses={200: "Success", 400: "Request Error"})
     def get(self):
         """
-        Gets a List of all Public Channels
+        Gets a List of all Public Channels or channels by a specific user if requested by an admin
         """
+        args = channelGetParser.parse_args()
+        user_id = args.get('userID')
+
+        # Check for an API key and if it's an admin key when a user ID is provided
+        if user_id is not None:
+            if "X-API-KEY" in request.headers and apiFunc.isValidAdminKey(request.headers["X-API-KEY"]):
+                # Serialize channels owned by the user
+                serialized_channels = cachedDbCalls.serializeChannelByUserID(user_id)
+                if serialized_channels:
+                    return {"results": serialized_channels}
+                else:
+                    return {"results": {"message": "No channels found for the given user ID"}}, 400
+            else:
+                return {"results": {"message": "Unauthorized access. Admin only."}}, 400
+
+        # Return all public channels if no user ID is provided or if not an admin
         return {"results": cachedDbCalls.serializeChannels()}
+
 
     # Channel - Create Channel
     @api.expect(channelParserPost)
@@ -113,7 +156,7 @@ class api_1_ListChannels(Resource):
                 if requestAPIKey.isValid():
                     args = channelParserPost.parse_args()
                     newChannel = Channel.Channel(
-                        int(requestAPIKey.userID),
+                        args["userID"],
                         str(uuid.uuid4()),
                         args["channelName"],
                         int(args["topicID"]),
@@ -125,7 +168,7 @@ class api_1_ListChannels(Resource):
                     )
 
                     userQuery = Sec.User.query.filter_by(
-                        id=int(requestAPIKey.userID)
+                        id=args["userID"]
                     ).first()
 
                     # Establish XMPP Channel
@@ -357,11 +400,13 @@ class api_1_Streams(Resource):
 
 
 # TODO Add Ability to Add/Delete/Change
-@api.route("/<string:channelEndpointID>/restreams")
+@api.route("/<string:channelEndpointID>/restreams/<string:userID>")
 @api.doc(security="apikey")
 @api.doc(params={"channelEndpointID": "GUID Channel Location"})
+@api.doc(params={"userID": "User ID"})
+
 class api_1_GetRestreams(Resource):
-    def get(self, channelEndpointID):
+    def get(self, channelEndpointID,userID):
         """
         Returns all restream destinations for a channel
         """
@@ -375,7 +420,7 @@ class api_1_GetRestreams(Resource):
                     channelData = (
                         Channel.Channel.query.filter_by(
                             channelLoc=channelEndpointID,
-                            owningUser=requestAPIKey.userID,
+                            owningUser=userID,
                         )
                         .with_entities(Channel.Channel.id)
                         .first()
@@ -392,7 +437,7 @@ class api_1_GetRestreams(Resource):
                     }
                 }, 400
 
-            channelData = cachedDbCalls.getChannelByLoc(channelEndpointID)
+        channelData = cachedDbCalls.getChannelByLoc(channelEndpointID)
 
         if channelData is not None:
             restreamDestinationQuery = (
@@ -422,6 +467,161 @@ class api_1_GetRestreams(Resource):
         else:
             db.session.commit()
             return {"results": {"message": "Request Error"}}, 400
+        
+
+    @api.expect(channelRestreamPOST)
+    @api.doc(responses={200: "Success", 400: "Request Error"})
+    def post(self, channelEndpointID,userID):
+        """Add a new restream destination for a channel"""
+        # Check API Key
+        if "X-API-KEY" in request.headers:
+            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers["X-API-KEY"]).first()
+            args = channelRestreamPOST.parse_args()
+
+            if requestAPIKey is not None and requestAPIKey.isValid():
+                channelData = (
+                    Channel.Channel.query.filter_by(
+                        channelLoc=channelEndpointID,
+                        owningUser=userID,
+                    )
+                    .with_entities(Channel.Channel.id)
+                    .first()
+                )
+
+                # Check if channel exists
+                if channelData is None:
+                    return {"results": "error", "reason": "channelNotFound"}
+
+                # Get request arguments
+                # args = request.json
+
+                # Create new restream destination
+                new_restreamDestination = Channel.restreamDestinations(
+                    channel=channelData.id,
+                    name=args["name"],
+                    url=args["url"]
+                )
+
+                enabled_str = args.get("enabled", "False")
+                if enabled_str.lower() == "true":
+                    new_restreamDestination.enabled = True
+                else:
+                    new_restreamDestination.enabled = False
+
+                db.session.add(new_restreamDestination)
+                db.session.commit()
+                restreamDestinationDetails = new_restreamDestination.serialize()
+                return {"results": {"message": "Restream destination successfully added", 
+                                    "details": restreamDestinationDetails}}, 200
+            
+            else:
+            # API key is invalid or not found
+                return {"results": {"message": "Invalid or expired API key"}}, 400
+            
+        else:
+            # API key is missing in the request headers
+            return {"results": {"message": "Missing API key"}}, 400
+
+            
+
+            
+
+
+
+    @api.expect(channelRestreamPUT)
+    @api.doc(responses={200: "Success", 400: "Request Error"})
+    def put(self, channelEndpointID,userID):
+        """Updates an existing restream destination for a channel"""
+
+        args = channelRestreamPUT.parse_args()
+
+        # Check API Key
+        if "X-API-KEY" in request.headers:
+            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers["X-API-KEY"]).first()
+            if requestAPIKey is not None and requestAPIKey.isValid():
+                channelData = (
+                    Channel.Channel.query.filter_by(
+                        channelLoc=channelEndpointID,
+                        owningUser=userID,
+                    )
+                    .with_entities(Channel.Channel.id)
+                    .first()
+                )
+
+
+                # Check if channel exists
+                if channelData is not None:
+                    # Get the restream destination to update
+                    restreamDestination = Channel.restreamDestinations.query.filter_by(id=args["id"]).first()
+
+                    if restreamDestination is not None:
+                        # Update the restream destination fields
+                        restreamDestination.name = args["name"]
+                        restreamDestination.url = args["url"]
+
+                        enabled_str = args.get("enabled", "False")
+                        if enabled_str.lower() == "true":
+                            restreamDestination.enabled = True
+                        else:
+                            restreamDestination.enabled = False
+                        db.session.commit()
+                        restreamDestinationDetails = restreamDestination.serialize()
+                        return {"results": {"message": "Restream destination successfully added", 
+                                    "details": restreamDestinationDetails}}, 200
+                    else:
+                        db.session.commit()
+                        return {"results": {"message": "Request Error - No Such Restream Destination"}}, 400
+                else:
+                    db.session.commit()
+                    return {"results": {"message": "Request Error - No Such Channel"}}, 400
+            else:
+                # API key is invalid or not found
+                return {"results": {"message": "Invalid or expired API key"}}, 400
+        else:
+            # API key is missing in the request headers
+            return {"results": {"message": "Missing API key"}}, 401
+       
+
+    @api.expect(channelRestreamDELETE)
+    @api.doc(responses={200: "Success", 400: "Request Error", 401: "Unauthorized"})
+    def delete(self, channelEndpointID, userID):
+        """Deletes an existing restream destination for a channel"""
+        
+        args = channelRestreamDELETE.parse_args()
+        # Check API Key
+        if "X-API-KEY" in request.headers:
+            requestAPIKey = apikey.apikey.query.filter_by(key=request.headers["X-API-KEY"]).first()
+            if requestAPIKey is not None and requestAPIKey.isValid():
+                channelData = (
+                    Channel.Channel.query.filter_by(
+                        channelLoc=channelEndpointID,
+                        owningUser=userID,
+                    )
+                    .with_entities(Channel.Channel.id)
+                    .first()
+                )
+
+                # Check if channel exists
+                if channelData is not None:
+                    # Get the restream destination to delete
+                    restreamDestination = Channel.restreamDestinations.query.filter_by(id=args["id"]).first()
+
+                    if restreamDestination is not None:
+                        # Delete the restream destination
+                        db.session.delete(restreamDestination)
+                        db.session.commit()
+                        return {"results": {"message": "Restream destination successfully deleted"}}, 200
+                    else:
+                        return {"results": {"message": "Request Error - No Such Restream Destination"}}, 400
+                else:
+                    return {"results": {"message": "Request Error - No Such Channel"}}, 400
+            else:
+                # API key is invalid or not found
+                return {"results": {"message": "Invalid or expired API key"}}, 401
+        else:
+            # API key is missing in the request headers
+            return {"results": {"message": "Missing API key"}}, 401
+
 
 
 # Invites Endpoint for a Channel
