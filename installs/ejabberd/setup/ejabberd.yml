@@ -277,7 +277,17 @@ modules:
   mod_vcard_xupdate: {}
   mod_version:
     show_os: false
-
+scheduler:
+  - type: threads
+    start_time: 23:55
+    end_time: 00:05
+    cores: 1
+    threads: 1
+  - type: busywait
+    start_time: 00:06
+    end_time: 23:54
+    cores: 1
+    threads: 1
 ### Local Variables:
 ### mode: yaml
 ### End:
